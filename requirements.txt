@@ -1,0 +1,2 @@
+# SmolPet Dependencies
+# Add your project dependencies here
