@@ -6,15 +6,15 @@ import math
 # Custom packages
 import physics
 from math_custom import Vector2D
-
+from bases import Entity
 # Import Setup constants
 from consts import SCREEN, SCREEN_W, SCREEN_H, FPS
 # Import Scene constants
-from consts import WALL_FRICTION, FLOOR_FRICTION
+from consts import WALL_FRICTION
 # Import Physic's constants
 from consts import GRAVITY, USER_PULL_DAMPING, USER_PULL_STRENGTH
 # Import colors
-from consts import CLR_WHITE 
+from consts import CLR_WHITE, CLR_GREEN
 
 pygame.init()
 done = False
@@ -38,34 +38,26 @@ clock = pygame.time.Clock()
 global delta_time
 delta_time = 0.01
 mouse_pos:Vector2D = Vector2D(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
-
-# TESTING =====================================================
-
-ball = physics.PhysicalBall(radius=20, air_resist=0.0005, mass=2)
 isPulling = False
 pos_diff:Vector2D = Vector2D(0,0)
 diff_mag:float = 0
 
+# TESTING =====================================================
+cuchu_character = pygame.image.load('ball.png').convert_alpha()
+ball = physics.PhysicalBall(radius=20, air_resist=0.0005, mass=2)
+
+cuchu = Entity(cuchu_character, ball)
 ## ============================================================
-while not done:
-    # Acceleration downwards by gravity 
-    ball.gravityEffect()
 
-    # Filling the background with the previously color setted to be transparent.
-    SCREEN.fill(TRANSPARENT_COLOR)  # Transparent background
+entities:list[Entity] = [cuchu]
 
-
-    # Close with the ESC button
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                done = True
-        
-    # Mouse drag
+## FUNCTIONS    ===============================================
+def mouse_drag():
+    global isPulling, pos_diff, diff_mag
     if pygame.mouse.get_pressed()[0]:
         mouse_pos.x  = pygame.mouse.get_pos()[0]
         mouse_pos.y  = pygame.mouse.get_pos()[1]
-        pos_diff:Vector2D = mouse_pos - ball.pos
+        pos_diff = mouse_pos - ball.pos
         diff_mag = pos_diff.magnitude()
         if diff_mag <= ball.radius:
             isPulling = True
@@ -73,11 +65,35 @@ while not done:
         isPulling = False
 
     if isPulling:
-        
         ball.applyForce((pos_diff*USER_PULL_STRENGTH) - ball.vel*USER_PULL_DAMPING)
 
+def physics_update():
+    pass
 
-    pygame.draw.circle(SCREEN, CLR_WHITE, (ball.pos.x, ball.pos.y), ball.radius)
+## ============================================================
+
+while not done:
+    # Mouse drag
+    mouse_drag()
+    # Filling the background with the previously color setted to be transparent.
+    SCREEN.fill(TRANSPARENT_COLOR)  # Transparent background
+
+    # Acceleration downwards by gravity 
+    ball.gravityEffect()
+
+    # Close with the ESC button
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                done = True
+
+    
+
+    # Draw entities
+    for entity in entities:
+        entity.draw()
+        # Temporal draw for debug
+        pygame.draw.circle(SCREEN, CLR_WHITE, (ball.pos.x, ball.pos.y), ball.radius)
     
     # Testing with physics =============================================
 

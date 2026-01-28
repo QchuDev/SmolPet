@@ -39,8 +39,6 @@ class PhysicalBall():
         #Update Acceleration
         self.acc.x += force.x/mass
         self.acc.y += force.y/mass
-        
-        
 
         # Show the applied force and the current acceleration
         if show_info:

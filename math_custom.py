@@ -40,5 +40,5 @@ class Vector2D():
     def __mul__(self, k:float) -> Vector2D:
         return Vector2D(self.x*k, self.y*k)
 
-    def __neg__(self):
+    def __neg__(self) -> Vector2D:
         return Vector2D(-self.x, -self.y)

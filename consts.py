@@ -15,6 +15,7 @@ FPS:int = 60
 
 # COLORS
 CLR_WHITE:tuple[int,int,int] = (255,255,255)
+CLR_GREEN:tuple[int,int,int] = (0,255,0)
 
 
 # PHYSICAL CONSTANTS
@@ -26,4 +27,3 @@ USER_PULL_DAMPING:float = 2.0
 
 # SCENE
 WALL_FRICTION:float = 0.3   # how much does the velocity get reduced
-FLOOR_FRICTION:float = 0.8  # how much does the velocity get reduced
