@@ -3,7 +3,6 @@ class Vector2D():
     def __init__(self, x,y) -> None:
         self.x:float = x
         self.y:float = y
-        
 
     # Dot product between this and other vector
     def dot(self, other:Vector2D) -> float:
