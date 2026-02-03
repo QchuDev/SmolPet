@@ -27,3 +27,6 @@ USER_PULL_DAMPING:float = 2.0
 
 # SCENE
 WALL_FRICTION:float = 0.3   # how much does the velocity get reduced
+
+# CHARACTER
+SPLAT_SPEED:float = 600   # the speed where it splats hitting the floor
