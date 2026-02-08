@@ -2,6 +2,7 @@ import pygame
 import win32api
 import win32con
 import win32gui
+import datetime
 
 # Custom packages
 from math_custom import Vector2D
@@ -10,12 +11,11 @@ from math_custom import Vector2D
 from basics import Entity, SpriteSheet, Animation
 
 # Components
-from basics import Animator, PhysicalBall, MouseDrag, AIController, StatesManager
+from basics import Animator, PhysicalBall, MouseDrag, AIController, StatesManager, TextBubble
 
 # Import Setup constants
-from consts import SCREEN, FPS
-
-
+from consts import SCREEN, FPS, SCREEN_CENTER
+from consts import CLR_GREEN, CLR_WHITE
 
 pygame.init()
 pygame.display.set_caption('Smol Pet')
@@ -44,33 +44,39 @@ delta_time = 0.01
 # Character creation ==============================================
 # Creating the components for the character
 
-idle: Animation = Animation('idle', [0, 1, 2], frame_duration=0.15)
-hit_floor: Animation = Animation('hit_floor', [3, 4, 5], frame_duration=0.10, loop=False)
-air: Animation = Animation('air', [6,7,8], frame_duration=0.15)
+def create_entities() -> list[Entity]:
+    entities = []
 
-ss = SpriteSheet('resources/images/placeholder_spritesheet.png', (64,64))
-character = ss.get_sprite(0)
+    # CREATE BOBBY =====================================================
+    # animations and character
+    ss = SpriteSheet('resources/images/bobby_16.png', (16,16), scale_factor=4)
+    idle:       Animation = Animation('idle', [0, 1, 2], frame_duration=0.15)
+    hit_floor:  Animation = Animation('hit_floor', [3, 4, 5], frame_duration=0.10, loop=False)
+    hit_wall:   Animation = Animation('hit_wall', [12, 13, 14], frame_duration=0.10, loop=False)
+    air:        Animation = Animation('air', [6, 7, 8], frame_duration=0.15)
+    talk:       Animation = Animation('talk', [9, 10, 11], frame_duration=0.15)
+    character = ss.get_sprite(0)
 
-population = 100
-entities: list[Entity] = []
-for i in range(population):
-    ent = Entity(character, 
+    # entity    
+    bobby = Entity(character, 
         [
-        PhysicalBall(pos = (SCREEN.get_width()*i/population, SCREEN.get_height()*0.5),radius=30, air_resist=0.0005, mass=1),
+        PhysicalBall(pos = SCREEN_CENTER, radius=30, air_resist=0.0005, mass=1),
         MouseDrag(),
-        Animator(ss, [idle, hit_floor, air]),
+        Animator(ss, [idle, hit_floor, hit_wall, air, talk]),
         AIController(timer_range=(0.5, 2)),
-        StatesManager()
+        StatesManager(),
+        TextBubble('resources/images/text_bubble.png')
         ]
     )
-    entities.append(ent)
+    entities.append(bobby)
+    # ==================================================================
 
+    return entities
 
 ## MAIN LOOP ======================================================
+entities: list[Entity] = create_entities()
 now = pygame.time.get_ticks()
-cont = 0
 running:bool = True
-
 while running:
     # Filling the background with the previously color setted to be transparent.
     SCREEN.fill(TRANSPARENT_COLOR)  # Transparent background
@@ -81,11 +87,11 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 running = False
 
-
+    # Update and draw entities
     for entity in entities:
         entity.update(delta_time)
         entity.draw()
-    
+
     # Update delta_time
     delta_time = clock.tick(FPS) / 1000
     delta_time = max(0.001, min(0.1, delta_time))

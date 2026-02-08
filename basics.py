@@ -3,12 +3,12 @@ import win32api
 from abc import ABC, abstractmethod
 import random
 from typing import TypeVar, Type, Optional
-import math
+
 # Custom
 from consts import SCREEN_W, SCREEN_H, SCREEN
 from consts import SCREEN_W, SCREEN_H
-from consts import GRAVITY, BOUNCE_STOP, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH
-from consts import SPLAT_SPEED
+from consts import GRAVITY, BOUNCE_STOP, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
+from consts import CUCHU_PHRASES, WAIT_TIME, JUMP_FORCE, TARGET_STOP
 from pygame import Surface
 from math_custom import Vector2D
 
@@ -20,13 +20,13 @@ class Entity():
     def __init__(self, image:pygame.Surface, components:list[Component] = []):
         self.components = components 
         self.pos = Vector2D(0,0)
-        self.rotation:float = 0 # counterclockwise angle
-        self.image = image
+        self.image: Surface = image
 
     # Draws the entity image 
     def draw(self):
-        SCREEN.blit(self.image, (self.pos.x - self.image.width*0.5 , self.pos.y - self.image.height*0.5))
-    
+        SCREEN.blit(self.image, (int(self.pos.x - self.image.width*0.5) , int(self.pos.y - self.image.height*0.5)))
+
+
     # Updates everycomponent
     def update(self, dt:float):
         for comp in self.components:
@@ -46,7 +46,7 @@ class Entity():
 # Spritesheet: extracts the images of a spritesheet and saves the parts
 class SpriteSheet():
     
-    def __init__(self, file_path:str, cell_size=(64,64)) -> None:
+    def __init__(self, file_path:str, cell_size=(64,64), scale_factor=1) -> None:
         sheet:Surface = pygame.image.load(file_path).convert_alpha()
         w, h = cell_size[0], cell_size[1]
         self.sprites: list[Surface] = []
@@ -58,6 +58,10 @@ class SpriteSheet():
 
             sprite:Surface = sheet.subsurface(rect).copy()
             
+            # Scale de sprites
+            new_size = (sprite.get_width()*scale_factor, sprite.get_height()*scale_factor)
+            sprite = pygame.transform.scale(sprite, new_size)
+
             self.sprites.append(sprite)
 
             if i + w >= sheet.get_width():
@@ -96,7 +100,7 @@ class Animator(Component):
         
         self.ss = ss
         self.anims: dict[str, Animation] = {a.name: a for a in anims}
-
+ 
         self.timer:float = 0
         
         self.current_anim: Animation | None = list(self.anims.values())[0] if self.anims else None        
@@ -115,6 +119,7 @@ class Animator(Component):
                 sprite_id = self.current_anim.seq[self.frame_idx]
 
             entity.image = self.ss.get_sprite(sprite_id)
+
 
     def play(self, name:str, entity:Entity):
         if self.current_anim and self.current_anim.name == name:
@@ -153,7 +158,14 @@ class PhysicalBall(Component):
         self.retention_x = retention_x
         self.retention_y = retention_y
 
-        self.is_hitting_floor: bool = False
+        # hits info
+        self.is_hitting_floor:      bool = False
+        self.is_hitting_wall:       bool = False
+        
+        # extra info
+        self.orientation:           int = -1      # starts facing left
+        self.og_image:              Surface | None = None
+        self.is_grounded:           bool = False
 
     # Applying gravity and normal floor force
     def gravityEffect(self) -> None:
@@ -161,7 +173,8 @@ class PhysicalBall(Component):
         self.acc.y += GRAVITY.y
 
         if self.pos.y >= SCREEN_H - self.radius:
-            if abs(self.vel.y) > SPLAT_SPEED:
+            self.is_grounded = True
+            if abs(self.vel.y) > SPLAT_VELOCITY.y:
                 self.is_hitting_floor = True
 
             self.pos.y = SCREEN_H - self.radius
@@ -176,9 +189,9 @@ class PhysicalBall(Component):
             else:
                 self.vel.y = 0
                 self.applyForce(-GRAVITY)
+        else:
+            self.is_grounded = False
 
-
-            
     # Apply a force to the entity
     def applyForce(self, force:Vector2D, show_info=False) -> None:
         mass = self.mass
@@ -189,14 +202,18 @@ class PhysicalBall(Component):
     # Checks for walls and pushes the entity
     def wallsPush(self):
         # Right wall
-        if self.pos.x >= SCREEN_W-self.radius and self.vel.x > 10:
+        if self.pos.x >= SCREEN_W-self.radius*0.5:
             self.pos.x = SCREEN_W - self.radius
             self.vel.x = -self.vel.x * self.retention_x
-                
+            
+            if abs(self.vel.x) > SPLAT_VELOCITY.x: self.is_hitting_wall = True      
         # Left wall
-        if self.pos.x <= self.radius and self.vel.x < -10:
+        elif self.pos.x <= self.radius*0.5:
             self.pos.x = self.radius
             self.vel.x = -self.vel.x * self.retention_x
+            self.is_hitting_wall = True
+
+            if abs(self.vel.x) > SPLAT_VELOCITY.x: self.is_hitting_wall = True      
     
     # Drag of the entity
     def airForce(self):
@@ -211,15 +228,17 @@ class PhysicalBall(Component):
         self.gravityEffect()
         self.wallsPush()
         self.airForce()
-        
+
         # Update physical state
         self.vel += self.acc*dt
         self.pos += self.vel*dt
         self.acc.x = 0
         self.acc.y = 0
 
+        self.orientation = -1 if (self.vel.x < 0) else 1
+
         entity.pos = self.pos
-        
+
 # MouseDrag lets the entity get dragged with physics by the mouse
 class MouseDrag(Component):
     def __init__(self) -> None:
@@ -258,87 +277,271 @@ class MouseDrag(Component):
         if self.is_pulling:
             self.phys_ball.applyForce((self.pos_diff*USER_PULL_STRENGTH) - self.phys_ball.vel*USER_PULL_DAMPING)
 
-
-# =====================================================================================
-#                                   W.I.P                                
-# =====================================================================================
-# Script to take the desicions of the NPC
-
-# ...
-class AIController(Component):
-    
-    def __init__(self, timer_range:tuple[float,float] = (1,3)) -> None:
-        self.phys_ball: PhysicalBall | None = None
-        self.timer_range:tuple[float, float] = timer_range
-
-        self.max_time: float = 1.0
-        self.timer: float = 0.0
-
-        self.desicions: list[str] = ['move', 'talk', 'wait'] 
-
-    def decide(self, entity:Entity):
-        # Update max_time
-        self.max_time = self.timer_range[0] + random.random()*(self.timer_range[1] - self.timer_range[0])
-        
-        if not self.phys_ball: self.phys_ball = entity.get_component(PhysicalBall)
-        if not self.phys_ball: return
-        
-        if entity.pos.y > SCREEN_H*0.95: 
-            self.phys_ball.applyForce(Vector2D(random.randint(-1,1)*4000, -10000))
-
-    def update(self, entity:Entity, delta_tine:float):
-        if self.phys_ball is None:
-            comp = entity.get_component(PhysicalBall)
-            if isinstance(comp, PhysicalBall):
-                self.phys_ball = comp
-        
-        self.timer += delta_tine
-
-        if self.timer > self.max_time:
-            self.timer = 0
-            self.decide(entity)
-
 # Component who decides the current animation to be played
 class StatesManager(Component):
     def __init__(self) -> None:
         self.current_state = 'idle'
         self.animator: Animator | None = None
         self.phys: PhysicalBall | None = None
+        self.ai_controller: AIController | None = None
 
+        self.og_image: Surface | None = None
 
+    # Calls the handle logic and picks the needed components
     def update(self, entity:Entity, dt:float):
         if not self.animator: self.animator = entity.get_component(Animator)
         if not self.phys: self.phys = entity.get_component(PhysicalBall)
-
+        if not self.ai_controller: self.ai_controller = entity.get_component(AIController)
+        
         self.handle_logic(entity)
 
-
+    # Switches to each state when the conditions are met
     def handle_logic(self, entity:Entity):
-        if not self.animator or not self.phys: return
-
+        if not (self.animator and self.phys and self.ai_controller): return
         match self.current_state:
 
             case 'idle':
-                if self.phys.pos.y < SCREEN_H - self.phys.radius:
+                if not self.phys.is_grounded:
                     self.change_state('air', entity)
                 elif self.phys.is_hitting_floor:
                     self.change_state('hit_floor', entity)
+                elif self.phys.is_hitting_wall:
+                    self.change_state('hit_wall', entity)
+                elif self.ai_controller.curr_action == 'talk':
+                        self.change_state('talk', entity)
             case 'air':
-                if self.phys.pos.y >= SCREEN_H - self.phys.radius:
+                if self.phys.is_grounded:
                     self.change_state('idle', entity)
                 elif self.phys.is_hitting_floor:
                     self.change_state('hit_floor', entity)
+                elif self.phys.is_hitting_wall:
+                    self.change_state('hit_wall', entity)
             case 'hit_floor':
                 if self.animator.is_finished():
                     self.phys.is_hitting_floor = False
-
-                    if self.phys.pos.y >= SCREEN_H - self.phys.radius:
+                    if self.phys.is_grounded:
                         self.change_state('idle', entity)
+
+                    elif self.ai_controller.curr_action == 'talk':
+                        self.change_state('talk', entity)
+
+                    elif self.phys.is_hitting_wall:
+                        self.change_state('hit_wall', entity)
+                    else:
+                        self.change_state('air', entity)
+            case 'hit_wall':
+                if self.animator.is_finished():
+                    self.phys.is_hitting_wall = False
+                    if self.phys.is_grounded:
+                        self.change_state('idle', entity)
+                    elif self.ai_controller.curr_action == 'talk':
+                        self.change_state('talk', entity)
                     elif self.phys.is_hitting_floor:
                         self.change_state('hit_floor', entity)
-
+                    else:
+                        self.change_state('air', entity)
+            case 'talk':
+                if self.ai_controller.curr_action != 'talk' or self.phys.is_hitting_floor or self.phys.is_hitting_wall:
+                    self.change_state('air', entity)
+                
+                
+    # Changes the state and plays the corresponding animation        
     def change_state(self, new_state:str, entity:Entity):
         if self.current_state != new_state:
             self.current_state = new_state
             if self.animator:
                 self.animator.play(new_state, entity)
+
+# =====================================================================================
+#                                   W.I.P                                
+# =====================================================================================
+
+# Component to decide the next action of the NPC
+# This class changes the state of the StateManager to play certain animations
+class AIController(Component):
+    
+    def __init__(self, timer_range:tuple[float,float] = (1,3)) -> None:
+        # Needed components
+        self.phys: PhysicalBall | None = None
+        self.bubb: TextBubble | None = None
+
+        # Timer for taking action
+        self.timer_range:tuple[float, float] = timer_range
+        self.max_time: float = 1.0
+        self.timer: float = 0.0
+
+        # All the possible actions and the current one 
+        self.actions: list[str] = ['move', 'talk', 'wait']
+        self.curr_action: str = 'move'
+
+        # Target zone (for 'intelligent' movement)
+        self.target_x:      float = 0
+        self.target_setted: bool = False
+
+        
+
+    def update(self, entity:Entity, delta_tine:float):
+        if self.phys is None:
+            comp = entity.get_component(PhysicalBall)
+            if isinstance(comp, PhysicalBall):
+                self.phys = comp
+
+        # Handle the timer     
+        self.timer += delta_tine
+        if self.timer > self.max_time:
+            self.timer = 0
+            self.decide(entity)
+
+    def decide(self, entity:Entity):
+        # Choose next action
+        # currently random
+
+        if not self.bubb: self.bubb = entity.get_component(TextBubble)
+        if not self.phys: self.phys = entity.get_component(PhysicalBall)
+        if not (self.phys and self.bubb): return
+                
+        # Dont show the text bubble
+        self.bubb.show = False
+        
+        if self.curr_action != 'move':
+            self.curr_action = self.actions[random.randrange(0, len(self.actions))]
+        
+        print(f'Now bobby will: {self.curr_action}')
+        match self.curr_action:
+
+            case 'move':
+                # Push the entity
+                if self.phys.is_grounded:
+                    dir = 1 if (self.target_x > entity.pos.x) else -1
+                    self.phys.applyForce(Vector2D(dir*JUMP_FORCE.x, JUMP_FORCE.y))
+
+                # Timer reset
+                dist_from_target = abs(self.target_x - entity.pos.x)
+                if not self.target_setted: 
+                    self.target_x = random.randrange(0, SCREEN_W)
+                    self.target_setted = True
+
+                # Change action if target reached
+                if dist_from_target < TARGET_STOP :
+                    self.curr_action = self.actions[random.randrange(0, len(self.actions))]
+                    self.target_setted = False
+
+                self.max_time = self.timer_range[0] + random.random()*(self.timer_range[1] - self.timer_range[0])
+                
+                print(f'Distance: {int(dist_from_target)}\tTargetted: {self.target_setted}')
+
+            case 'wait':
+                # Timer reset
+                if self.phys.is_grounded: self.max_time = WAIT_TIME + 2*random.random()*random.randrange(-1, 2)    # wait for (5 - 7) seconds
+                else: self.max_time = self.timer_range[0] + random.random()*(self.timer_range[1] - self.timer_range[0])
+
+            case 'talk':
+
+                # Change the phrase of the TextBubble and show it
+                rand_phrase = CUCHU_PHRASES[random.randrange(0, len(CUCHU_PHRASES))]
+                self.bubb.changephrase(rand_phrase)
+                self.bubb.show = True
+
+                # Timer reset
+                self.max_time = len(rand_phrase)*0.4 if len(rand_phrase) > 4 else 2.0
+        
+        print()
+
+# The component to show a TextBubble (with a certain phrase) above the entity 
+class TextBubble(Component):
+    def __init__(self, sheet_path: str, corner_size: int = 8):
+        self.raw_sheet = pygame.image.load(sheet_path).convert_alpha()
+        self.c = corner_size # Tamaño en píxeles de las esquinas
+        self.font = pygame.font.SysFont('Times New Roman', 20)
+        
+        self.phrase:str = ''
+        self.show:bool  = False
+    
+    def changephrase(self, new_phrase:str):
+        self.phrase = new_phrase
+
+    def generate_bubble(self, padding: int = 10) -> pygame.Surface:
+        # 1. Calcular tamaño del texto
+        text_surf = self.font.render(self.phrase, False, (0, 0, 0))
+        tw, th = text_surf.get_size()
+        
+        # Tamaño total de la burbuja
+        bw, bh = tw + (padding * 2), th + (padding * 2)
+        # Asegurar que no sea más pequeña que las esquinas
+        bw, bh = max(bw, self.c * 2), max(bh, self.c * 2)
+        
+        bubble_surf = pygame.Surface((bw, bh), pygame.SRCALPHA)
+        
+        # 2. Extraer las piezas del sprite original (9-slice)
+        # s = source, d = destination
+        s = self.c
+        
+        # Piezas (rectángulos fuente)
+        corners_s = [
+            pygame.Rect(0, 0, s, s), (s, 0, s, s), # Top-Left, Top-Mid (bordes se extraen igual)
+            # ... esto se puede automatizar con un loop o slices manuales
+        ]
+        
+        # --- DIBUJAR BORDES Y ESQUINAS ---
+        # Esquinas (Copy-paste)
+        bubble_surf.blit(self.raw_sheet, (0, 0), (0, 0, s, s)) # TL
+        bubble_surf.blit(self.raw_sheet, (bw-s, 0), (s*2, 0, s, s)) # TR
+        bubble_surf.blit(self.raw_sheet, (0, bh-s), (0, s*2, s, s)) # BL
+        bubble_surf.blit(self.raw_sheet, (bw-s, bh-s), (s*2, s*2, s, s)) # BR
+        
+        # Bordes escalados (Nearest Neighbor para Pixel Art)
+        # Arriba
+        top_edge = self.raw_sheet.subsurface((s, 0, s, s))
+        bubble_surf.blit(pygame.transform.scale(top_edge, (bw - s*2, s)), (s, 0))
+        # Abajo
+        bot_edge = self.raw_sheet.subsurface((s, s*2, s, s))
+        bubble_surf.blit(pygame.transform.scale(bot_edge, (bw - s*2, s)), (s, bh-s))
+        # Izquierda
+        left_edge = self.raw_sheet.subsurface((0, s, s, s))
+        bubble_surf.blit(pygame.transform.scale(left_edge, (s, bh - s*2)), (0, s))
+        # Derecha
+        right_edge = self.raw_sheet.subsurface((s*2, s, s, s))
+        bubble_surf.blit(pygame.transform.scale(right_edge, (s, bh - s*2)), (bw-s, s))
+        
+        # Centro (Escalado en ambos ejes)
+        center = self.raw_sheet.subsurface((s, s, s, s))
+        bubble_surf.blit(pygame.transform.scale(center, (bw - s*2, bh - s*2)), (s, s))
+        
+        # 3. Superponer el texto centrado
+        bubble_surf.blit(text_surf, (padding, padding))
+        
+        return bubble_surf
+
+    def update(self, entity: Entity, dt: float):
+        if self.show:
+            bubble = self.generate_bubble()
+            SCREEN.blit(bubble, (entity.pos.x + entity.image.get_width()*0.25, entity.pos.y - entity.image.get_height()*0.8))
+
+# Components which gets a set of CharactersData (Object)
+class CharactersHandler(Component):
+    def __init__(self, characters: list[CharacterData]) -> None:
+        self.curr_char: str = characters[0].name
+        self.characters: dict[str, CharacterData] = {c.name: c for c in characters}
+        
+        # For the CharacterHandler to work we need:
+        # - Animator (to change the sprite sheet thats being used)
+        # - AI_Controller to change the phrases for the talking
+        #  (...)
+
+        self.animator:  Animator | None = None 
+        self.ai_controller:  AIController | None = None 
+
+        pass
+
+    def update(self, entity: Entity, dt: float):
+        if not self.animator: self.animator = entity.get_component(Animator)
+        if not self.ai_controller: self.ai_controller = entity.get_component(AIController)
+
+    def switch_character(self, new_char: str):
+        pass
+
+class CharacterData():
+    def __init__(self, ss: SpriteSheet, name:str, phrases:list[str] = []):
+        self.name:      str = name
+        self.phrases:   list[str] = phrases
+
