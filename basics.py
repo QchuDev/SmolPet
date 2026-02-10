@@ -19,7 +19,7 @@ T = TypeVar('T', bound='Component')
 class Entity():
     def __init__(self, image:pygame.Surface, components:list[Component] = []):
         self.components = components 
-        self.pos = Vector2D(0,0)
+        self.pos:   Vector2D = Vector2D(0,0)
         self.image: Surface = image
 
     # Draws the entity image 
@@ -144,17 +144,22 @@ class Animator(Component):
         return False
     
 # PhysicalBall: the one in charge of following the rules of physics updating itself
+
+# Problem: sometimes the npc jumps too much, there is dependecy with the frames
 class PhysicalBall(Component):
 
     def __init__(self, pos=(SCREEN_W * 0.5, SCREEN_H * 0.5), vel = (0,0), mass=1, radius=1, air_resist=0.5, retention_x=0.8, retention_y=0.4):
-        self.update_priority: int = 10
-        
+        # State of the object
         self.pos:Vector2D = Vector2D(pos[0], pos[1])
         self.vel:Vector2D = Vector2D(vel[0], vel[1])
         self.acc:Vector2D = Vector2D(0,0)
+        
+        # Properties of body
         self.mass:float = max(0.001, mass)
         self.radius:float = max(0.001, radius)
         self.air_resist:float = air_resist
+        
+        # How much of the speed is retained on collision
         self.retention_x = retention_x
         self.retention_y = retention_y
 
@@ -163,7 +168,6 @@ class PhysicalBall(Component):
         self.is_hitting_wall:       bool = False
         
         # extra info
-        self.orientation:           int = -1      # starts facing left
         self.og_image:              Surface | None = None
         self.is_grounded:           bool = False
 
@@ -234,8 +238,6 @@ class PhysicalBall(Component):
         self.pos += self.vel*dt
         self.acc.x = 0
         self.acc.y = 0
-
-        self.orientation = -1 if (self.vel.x < 0) else 1
 
         entity.pos = self.pos
 
@@ -310,7 +312,8 @@ class StatesManager(Component):
                 elif self.ai_controller.curr_action == 'talk':
                         self.change_state('talk', entity)
             case 'air':
-                if self.phys.is_grounded:
+                # IDLE IF THE CHARACTER STOPPED
+                if self.phys.is_grounded and abs(self.phys.vel.x) < SLIDE_STOP:
                     self.change_state('idle', entity)
                 elif self.phys.is_hitting_floor:
                     self.change_state('hit_floor', entity)
@@ -329,6 +332,7 @@ class StatesManager(Component):
                         self.change_state('hit_wall', entity)
                     else:
                         self.change_state('air', entity)
+                        
             case 'hit_wall':
                 if self.animator.is_finished():
                     self.phys.is_hitting_wall = False
@@ -341,9 +345,8 @@ class StatesManager(Component):
                     else:
                         self.change_state('air', entity)
             case 'talk':
-                if self.ai_controller.curr_action != 'talk' or self.phys.is_hitting_floor or self.phys.is_hitting_wall:
+                if self.ai_controller.curr_action != 'talk' or not self.phys.is_grounded:
                     self.change_state('air', entity)
-                
                 
     # Changes the state and plays the corresponding animation        
     def change_state(self, new_state:str, entity:Entity):
@@ -450,67 +453,55 @@ class AIController(Component):
 # The component to show a TextBubble (with a certain phrase) above the entity 
 class TextBubble(Component):
     def __init__(self, sheet_path: str, corner_size: int = 8):
-        self.raw_sheet = pygame.image.load(sheet_path).convert_alpha()
+        self.raw_sheet: SpriteSheet = SpriteSheet(sheet_path, (4,4), 4)
         self.c = corner_size # Tamaño en píxeles de las esquinas
-        self.font = pygame.font.SysFont('Times New Roman', 20)
+        self.font = pygame.font.SysFont('Pixeloid', 20)
         
         self.phrase:str = ''
-        self.show:bool  = False
+        self.show:bool  = True
     
     def changephrase(self, new_phrase:str):
         self.phrase = new_phrase
 
-    def generate_bubble(self, padding: int = 10) -> pygame.Surface:
-        # 1. Calcular tamaño del texto
-        text_surf = self.font.render(self.phrase, False, (0, 0, 0))
+    def generate_bubble(self, padding: int = 10) -> Surface:
+        # 1. Preparar el texto
+        text_surf = self.font.render(self.phrase, True, (0, 0, 0))
         tw, th = text_surf.get_size()
         
-        # Tamaño total de la burbuja
-        bw, bh = tw + (padding * 2), th + (padding * 2)
-        # Asegurar que no sea más pequeña que las esquinas
-        bw, bh = max(bw, self.c * 2), max(bh, self.c * 2)
+        # 2. Dimensiones finales    
+        s = self.c # Tamaño de la celda del sprite (esquina)
+        bw = max(tw + (padding * 2), s * 2)
+        bh = max(th + (padding * 2), s * 2)
         
         bubble_surf = pygame.Surface((bw, bh), pygame.SRCALPHA)
         
-        # 2. Extraer las piezas del sprite original (9-slice)
-        # s = source, d = destination
-        s = self.c
+        # --- DIBUJAR ESQUINAS ---
+        bubble_surf.blit(self.raw_sheet.get_sprite(0), (0, 0))              # TL
+        bubble_surf.blit(self.raw_sheet.get_sprite(2), (bw - s, 0))         # TR
+        bubble_surf.blit(self.raw_sheet.get_sprite(6), (0, bh - s))         # BL
+        bubble_surf.blit(self.raw_sheet.get_sprite(8), (bw - s, bh - s))    # BR
         
-        # Piezas (rectángulos fuente)
-        corners_s = [
-            pygame.Rect(0, 0, s, s), (s, 0, s, s), # Top-Left, Top-Mid (bordes se extraen igual)
-            # ... esto se puede automatizar con un loop o slices manuales
-        ]
+        # --- DIBUJAR BORDES (Escalados) ---
+        # Horizontal (Arriba y Abajo)
+        horiz_size = (bw - s * 2, s)
+        bubble_surf.blit(pygame.transform.scale(self.raw_sheet.get_sprite(1), horiz_size), (s, 0))
+        bubble_surf.blit(pygame.transform.scale(self.raw_sheet.get_sprite(7), horiz_size), (s, bh - s))
+        # Vertical (Izquierda y Derecha)
+        vert_size = (s, bh - s * 2)
+        bubble_surf.blit(pygame.transform.scale(self.raw_sheet.get_sprite(3), vert_size), (0, s))
+        bubble_surf.blit(pygame.transform.scale(self.raw_sheet.get_sprite(5), vert_size), (bw - s, s))
         
-        # --- DIBUJAR BORDES Y ESQUINAS ---
-        # Esquinas (Copy-paste)
-        bubble_surf.blit(self.raw_sheet, (0, 0), (0, 0, s, s)) # TL
-        bubble_surf.blit(self.raw_sheet, (bw-s, 0), (s*2, 0, s, s)) # TR
-        bubble_surf.blit(self.raw_sheet, (0, bh-s), (0, s*2, s, s)) # BL
-        bubble_surf.blit(self.raw_sheet, (bw-s, bh-s), (s*2, s*2, s, s)) # BR
+        # --- CENTRO ---
+        bubble_surf.blit(pygame.transform.scale(self.raw_sheet.get_sprite(4), (bw - s*2, bh - s*2)), (s, s))
         
-        # Bordes escalados (Nearest Neighbor para Pixel Art)
-        # Arriba
-        top_edge = self.raw_sheet.subsurface((s, 0, s, s))
-        bubble_surf.blit(pygame.transform.scale(top_edge, (bw - s*2, s)), (s, 0))
-        # Abajo
-        bot_edge = self.raw_sheet.subsurface((s, s*2, s, s))
-        bubble_surf.blit(pygame.transform.scale(bot_edge, (bw - s*2, s)), (s, bh-s))
-        # Izquierda
-        left_edge = self.raw_sheet.subsurface((0, s, s, s))
-        bubble_surf.blit(pygame.transform.scale(left_edge, (s, bh - s*2)), (0, s))
-        # Derecha
-        right_edge = self.raw_sheet.subsurface((s*2, s, s, s))
-        bubble_surf.blit(pygame.transform.scale(right_edge, (s, bh - s*2)), (bw-s, s))
-        
-        # Centro (Escalado en ambos ejes)
-        center = self.raw_sheet.subsurface((s, s, s, s))
-        bubble_surf.blit(pygame.transform.scale(center, (bw - s*2, bh - s*2)), (s, s))
-        
-        # 3. Superponer el texto centrado
-        bubble_surf.blit(text_surf, (padding, padding))
+        # 3. Superponer el texto (Centrado matemáticamente en la burbuja)
+        # Esto asegura que si la burbuja es más grande que el texto, quede en el medio
+        text_x = (bw - tw) // 2
+        text_y = (bh - th) // 2
+        bubble_surf.blit(text_surf, (text_x, text_y))
         
         return bubble_surf
+
 
     def update(self, entity: Entity, dt: float):
         if self.show:

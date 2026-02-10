@@ -65,12 +65,22 @@ def create_entities() -> list[Entity]:
         Animator(ss, [idle, hit_floor, hit_wall, air, talk]),
         AIController(timer_range=(0.5, 2)),
         StatesManager(),
-        TextBubble('resources/images/text_bubble.png')
+        TextBubble('resources/images/text_bubble.png', corner_size=4)
         ]
     )
     entities.append(bobby)
     # ==================================================================
+    sst = SpriteSheet('resources/images/text_bubble.png', (4,4), 4)
+    
+    bubble_surf: pygame.Surface = pygame.Surface((64,64), pygame.SRCALPHA)
+    bubble_surf.blit(sst.get_sprite(0), (0,0))
+    bubble_surf.blit(sst.get_sprite(3), (0, 16))
 
+
+    text_test = Entity(bubble_surf)
+    text_test.pos = Vector2D(SCREEN_CENTER[0], SCREEN_CENTER[1])
+    entities.append(text_test)
+    
     return entities
 
 ## MAIN LOOP ======================================================

@@ -36,9 +36,9 @@ SPLAT_VELOCITY:Vector2D = Vector2D(200, 400)   # the speed where it splats hitti
 
 
 # CHARACTER CONSTS
-JUMP_FORCE: Vector2D = Vector2D(4000, -10000)
+JUMP_FORCE: Vector2D = Vector2D(4000, -15000)
 WAIT_TIME:  float = 5
-TARGET_STOP:float = 50
+TARGET_STOP:float = 100
 
 # Phrases for Pachu
 pachus_bd = datetime.date(datetime.datetime.now().year, 3, 6)
@@ -50,7 +50,6 @@ CUCHU_PHRASES = [
         'Te puedo ayudar?',
         'Soy tu principe jeje',
         f'Faltan {(pachus_bd - datetime.date.today()).days} dias para tu cumple!',
-        f'En {2} cumplimos otro mes juntos jsjsjs'
         'aiiiiiiiiiii',
         ':V',
         'OMG',
