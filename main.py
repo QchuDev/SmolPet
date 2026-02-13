@@ -8,17 +8,19 @@ import datetime
 from math_custom import Vector2D
 
 # Essentials
-from basics import Entity, SpriteSheet, Animation
+from basics import Entity, SpriteSheet, Animation, CharacterData
 
 # Components
-from basics import Animator, PhysicalBall, MouseDrag, AIController, StatesManager, TextBubble
+from basics import Animator, PhysicalBall, MouseDrag, AIController, StatesManager, TextBubble, CharactersHandler
 
 # Import Setup constants
 from consts import SCREEN, FPS, SCREEN_CENTER
 from consts import CLR_GREEN, CLR_WHITE
 
+from consts import CUCHU_PHRASES
+
 pygame.init()
-pygame.display.set_caption('Smol Pet')
+pygame.display.set_caption('For my love')
 
 ## TRANSPARENT WINDOW =================================================================================== 
 TRANSPARENT_COLOR = (255, 0, 128)  # Transparency color
@@ -35,76 +37,79 @@ win32gui.SetWindowPos(hwnd, win32con.HWND_TOPMOST, 0, 0, 0, 0, win32con.SWP_NOMO
 
 ## ==========================================================================================================
 
-# Time Variables
-clock = pygame.time.Clock()
-global delta_time
-delta_time = 0.01
-
-
-# Character creation ==============================================
-# Creating the components for the character
-
+# Function to create all wanted entities at start
 def create_entities() -> list[Entity]:
-    entities = []
+    ents = []
 
     # CREATE BOBBY =====================================================
     # animations and character
-    ss = SpriteSheet('resources/images/bobby_16.png', (16,16), scale_factor=4)
+    bobby_ss = SpriteSheet('resources/images/bobby_16.png', (16,16), scale_factor=4)
+    cuchu_ss = SpriteSheet('resources/images/cuchu_16.png', (16,16), scale_factor=4)
+
+
     idle:       Animation = Animation('idle', [0, 1, 2], frame_duration=0.15)
     hit_floor:  Animation = Animation('hit_floor', [3, 4, 5], frame_duration=0.10, loop=False)
     hit_wall:   Animation = Animation('hit_wall', [12, 13, 14], frame_duration=0.10, loop=False)
     air:        Animation = Animation('air', [6, 7, 8], frame_duration=0.15)
     talk:       Animation = Animation('talk', [9, 10, 11], frame_duration=0.15)
-    character = ss.get_sprite(0)
 
-    # entity    
-    bobby = Entity(character, 
-        [
-        PhysicalBall(pos = SCREEN_CENTER, radius=30, air_resist=0.0005, mass=1),
-        MouseDrag(),
-        Animator(ss, [idle, hit_floor, hit_wall, air, talk]),
-        AIController(timer_range=(0.5, 2)),
-        StatesManager(),
-        TextBubble('resources/images/text_bubble.png', corner_size=4)
-        ]
-    )
-    entities.append(bobby)
-    # ==================================================================
-    sst = SpriteSheet('resources/images/text_bubble.png', (4,4), 4)
-    
-    bubble_surf: pygame.Surface = pygame.Surface((64,64), pygame.SRCALPHA)
-    bubble_surf.blit(sst.get_sprite(0), (0,0))
-    bubble_surf.blit(sst.get_sprite(3), (0, 16))
+    # entity and components
+    for i in range(1):
+        bobby = Entity(bobby_ss.get_sprite(0), 'Entity00',
+            [
+            PhysicalBall(pos = SCREEN_CENTER, radius=30, air_resist=0.0005, mass=1),
+            MouseDrag(),
+            Animator(bobby_ss, [idle, hit_floor, hit_wall, air, talk]),
+            AIController(timer_range=(0.5, 2)),
+            StatesManager(),
+            TextBubble('resources/images/text_bubble.png', corner_size=4),
+            CharactersHandler([
+                CharacterData(bobby_ss, 'Bobby', ['Im a little piece of art', 'I cant feel a thing', 'My flesh is pixels']),
+                CharacterData(cuchu_ss, 'Cuchu', CUCHU_PHRASES)
+            ])
+            ]
+        )
+        ents.append(bobby)
 
+    return ents
 
-    text_test = Entity(bubble_surf)
-    text_test.pos = Vector2D(SCREEN_CENTER[0], SCREEN_CENTER[1])
-    entities.append(text_test)
-    
-    return entities
+# Calls the start funcion on the entity so it can setup all its components
+def setup_entities(ents: list[Entity]):
+    for e in ents:
+        e.start()
+
+# Time Variables
+clock = pygame.time.Clock()
+dt = 0.01
+dt_phys = 1/60  # once per 60FPS
+accumulator = 0.0
+
+entities: list[Entity] = create_entities()
+setup_entities(entities)
 
 ## MAIN LOOP ======================================================
-entities: list[Entity] = create_entities()
-now = pygame.time.get_ticks()
 running:bool = True
 while running:
-    # Filling the background with the previously color setted to be transparent.
+    # Update delta_time
+    dt = clock.tick(FPS) / 1000
+    accumulator += dt
+    dt = max(0.001, min(0.1, dt))
+    
     SCREEN.fill(TRANSPARENT_COLOR)  # Transparent background
 
-    # Close with the ESC button
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                running = False
-
-    # Update and draw entities
-    for entity in entities:
-        entity.update(delta_time)
-        entity.draw()
-
-    # Update delta_time
-    delta_time = clock.tick(FPS) / 1000
-    delta_time = max(0.001, min(0.1, delta_time))
+    # Update the entities on a constant way, when the accumulator exceeds the dt_phys (delta time for physics)
+    while accumulator >= dt_phys:
+        # Update entities
+        for entity in entities:
+           entity.update(dt_phys)
+        accumulator -= dt_phys
     
-    pygame.display.flip()
-    now = pygame.time.get_ticks()
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:        # Check for key events
+            if event.key == pygame.K_ESCAPE:    
+                running = False                 # Close with the ESC button
+            
+    # DRAWS.
+    for entity in entities:
+        entity.draw()       # Draw entities
+    pygame.display.flip()   # Update draws

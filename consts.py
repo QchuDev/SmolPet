@@ -23,8 +23,10 @@ CLR_GREEN:tuple[int,int,int] = (0,255,0)
 
 # PHYSICAL CONSTANTS
 GRAVITY:Vector2D = Vector2D(0, 980)
+
 BOUNCE_STOP:float = 60
 SLIDE_STOP:float = 10
+
 USER_PULL_STRENGTH:float = 1000.0
 USER_PULL_DAMPING:float = 2.0
 
@@ -32,7 +34,7 @@ USER_PULL_DAMPING:float = 2.0
 WALL_FRICTION:float = 0.3   # how much does the velocity get reduced
 
 # CHARACTER
-SPLAT_VELOCITY:Vector2D = Vector2D(200, 400)   # the speed where it splats hitting the floor
+SPLAT_VELOCITY:Vector2D = Vector2D(200, 200)   # the speed where it splats hitting the floor
 
 
 # CHARACTER CONSTS

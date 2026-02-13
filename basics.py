@@ -5,7 +5,7 @@ import random
 from typing import TypeVar, Type, Optional
 
 # Custom
-from consts import SCREEN_W, SCREEN_H, SCREEN
+from consts import SCREEN_W, SCREEN_H, SCREEN, SCREEN_CENTER
 from consts import SCREEN_W, SCREEN_H
 from consts import GRAVITY, BOUNCE_STOP, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
 from consts import CUCHU_PHRASES, WAIT_TIME, JUMP_FORCE, TARGET_STOP
@@ -17,15 +17,20 @@ from math_custom import Vector2D
 # =====================================================================================
 T = TypeVar('T', bound='Component')
 class Entity():
-    def __init__(self, image:pygame.Surface, components:list[Component] = []):
+    def __init__(self, image:pygame.Surface, name:str = 'no_name', components:list[Component] = []):
         self.components = components 
         self.pos:   Vector2D = Vector2D(0,0)
         self.image: Surface = image
+        self.name:  str = name
+
+    # Called once at the very beggining
+    def start(self):
+        for comp in self.components:
+            comp.start(self)
 
     # Draws the entity image 
     def draw(self):
         SCREEN.blit(self.image, (int(self.pos.x - self.image.width*0.5) , int(self.pos.y - self.image.height*0.5)))
-
 
     # Updates everycomponent
     def update(self, dt:float):
@@ -43,10 +48,23 @@ class Entity():
         
         return None
 
+
+# Interface of the Components ("what should they have")
+class Component(ABC):
+    
+    @abstractmethod
+    def start(self, entity:Entity):
+        pass
+
+    @abstractmethod
+    def update(self, entity:Entity, dt:float):
+        pass
+
 # Spritesheet: extracts the images of a spritesheet and saves the parts
 class SpriteSheet():
     
     def __init__(self, file_path:str, cell_size=(64,64), scale_factor=1) -> None:
+        if file_path == '': return
         sheet:Surface = pygame.image.load(file_path).convert_alpha()
         w, h = cell_size[0], cell_size[1]
         self.sprites: list[Surface] = []
@@ -74,19 +92,20 @@ class SpriteSheet():
     def get_sprite(self, index:int) -> Surface:
         return self.sprites[index]
 
-# Interface of the Components ("what should they have")
-class Component(ABC):
-    
-    @abstractmethod
-    def update(self, entity:Entity, dt:float):
-        pass
-    
+# Animation: has name, a sequence of indexes, frame duration and if its a loop
 class Animation():
     def __init__(self, name:str, seq:list[int], loop:bool = True, frame_duration:float = 0.1) -> None:
         self.name = name
         self.seq = seq
         self.loop = loop
         self.frame_duration = frame_duration
+
+# CharacterData: has name, phrases and a SpriteSheet
+class CharacterData():
+    def __init__(self, ss: SpriteSheet, name:str, phrases:list[str] = []):
+        self.name:      str = name
+        self.phrases:   list[str] = phrases
+        self.ss:        SpriteSheet = ss
 
 # =====================================================================================
 #                               COMPONENTS
@@ -104,6 +123,10 @@ class Animator(Component):
         self.timer:float = 0
         
         self.current_anim: Animation | None = list(self.anims.values())[0] if self.anims else None        
+
+    # Nothin to setup at start
+    def start(self, entity:Entity):
+        pass
 
     def update(self, entity:Entity, dt:float):
         if not self.current_anim:
@@ -180,7 +203,6 @@ class PhysicalBall(Component):
             self.is_grounded = True
             if abs(self.vel.y) > SPLAT_VELOCITY.y:
                 self.is_hitting_floor = True
-
             self.pos.y = SCREEN_H - self.radius
             
             if abs(self.vel.x) > SLIDE_STOP:
@@ -224,14 +246,18 @@ class PhysicalBall(Component):
         # Air resistance
         drag_dir = -self.vel.normalized()
         self.applyForce(drag_dir*self.air_resist*(self.vel.dot(self.vel)))
-        
+    
+    # Nothing to setup at start
+    def start(self, entity:Entity):
+        pass
+
     # Update call from the entity
     def update(self, entity:Entity, dt:float):
 
         # Acceleration downwards by gravity 
         self.gravityEffect()
-        self.wallsPush()
         self.airForce()
+        self.wallsPush()
 
         # Update physical state
         self.vel += self.acc*dt
@@ -247,19 +273,25 @@ class MouseDrag(Component):
         # Mouse variables
         self.mouse_pos:Vector2D = Vector2D(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
         self.is_pulling = False
-        self.phys_ball:PhysicalBall | None = None
+        self.phys:PhysicalBall = PhysicalBall()
         self.animator: Animator | None = None
-
+    
+    # The entity needs a PhysicalBall to work.
+    def start(self, entity:Entity):
+        comp = entity.get_component(PhysicalBall)
+        if comp: 
+            self.phys = comp
+        else:
+            raise Exception(f"{entity.name}: Has not a PhysicsBall Component. It's required if using {self.__class__.__name__}")
+            
+            
 
     def update(self, entity: Entity, dt: float):
-        if self.phys_ball is None:
+        if self.phys is None:
             comp = entity.get_component(PhysicalBall)
             if isinstance(comp, PhysicalBall):
-                self.phys_ball = comp 
+                self.phys = comp 
             
-            if not self.phys_ball:
-                print(f"{entity}: Has not a PhysicsBall Component. It's required if using MouseDrag")
-                return
         
         left_click_state = win32api.GetAsyncKeyState(0x01)
 
@@ -268,40 +300,55 @@ class MouseDrag(Component):
             self.mouse_pos.x  = m_x
             self.mouse_pos.y  = m_y
             
-            self.pos_diff = self.mouse_pos - self.phys_ball.pos
+            self.pos_diff = self.mouse_pos - self.phys.pos
             self.diff_mag = self.pos_diff.magnitude()
             
-            if self.diff_mag <= self.phys_ball.radius + 5:
+            if self.diff_mag <= self.phys.radius + 5:
                 self.is_pulling = True
         else:
             self.is_pulling = False
 
         if self.is_pulling:
-            self.phys_ball.applyForce((self.pos_diff*USER_PULL_STRENGTH) - self.phys_ball.vel*USER_PULL_DAMPING)
+            self.phys.applyForce((self.pos_diff*USER_PULL_STRENGTH) - self.phys.vel*USER_PULL_DAMPING)
 
 # Component who decides the current animation to be played
 class StatesManager(Component):
     def __init__(self) -> None:
         self.current_state = 'idle'
-        self.animator: Animator | None = None
-        self.phys: PhysicalBall | None = None
-        self.ai_controller: AIController | None = None
+
+        # Creating the defult version of each component for them to be setted on start()
+        self.animator: Animator = Animator(SpriteSheet(''), [])
+        self.phys: PhysicalBall = PhysicalBall()
+        self.ai_controller: AIController = AIController()
 
         self.og_image: Surface | None = None
 
+    # Needs an animator, physicalball and aicontroller to work. (yeah thats not good)
+    def start(self, entity:Entity):
+        e_phys = entity.get_component(PhysicalBall)
+        e_aic = entity.get_component(AIController)
+        e_anim = entity.get_component(Animator)
+        missing_comps: list[Type] = []
+
+        if e_phys: self.phys = e_phys
+        else: missing_comps.append(PhysicalBall)
+
+        if e_aic: self.ai_controller = e_aic
+        else: missing_comps.append(AIController)
+
+        if e_anim: self.animator = e_anim
+        else: missing_comps.append(Animator)
+
+        if len(missing_comps) > 0:
+            raise Exception(f"{entity.name}: Has not a {[c.__name__ for c in missing_comps]} Component. It's required if using {self.__class__.__name__}")
+        
     # Calls the handle logic and picks the needed components
     def update(self, entity:Entity, dt:float):
-        if not self.animator: self.animator = entity.get_component(Animator)
-        if not self.phys: self.phys = entity.get_component(PhysicalBall)
-        if not self.ai_controller: self.ai_controller = entity.get_component(AIController)
-        
         self.handle_logic(entity)
 
     # Switches to each state when the conditions are met
     def handle_logic(self, entity:Entity):
-        if not (self.animator and self.phys and self.ai_controller): return
         match self.current_state:
-
             case 'idle':
                 if not self.phys.is_grounded:
                     self.change_state('air', entity)
@@ -319,6 +366,8 @@ class StatesManager(Component):
                     self.change_state('hit_floor', entity)
                 elif self.phys.is_hitting_wall:
                     self.change_state('hit_wall', entity)
+
+
             case 'hit_floor':
                 if self.animator.is_finished():
                     self.phys.is_hitting_floor = False
@@ -355,6 +404,52 @@ class StatesManager(Component):
             if self.animator:
                 self.animator.play(new_state, entity)
 
+# Components which gets a set of CharactersData (Object)
+class CharactersHandler(Component):
+    def __init__(self, characters: list[CharacterData]) -> None:
+        self.curr_char: str = characters[0].name
+        self.characters: dict[str, CharacterData] = {c.name: c for c in characters}
+        
+        # For the CharacterHandler to work we need:
+        # - Animator (to change the sprite sheet thats being used)
+        # - AI_Controller to change the phrases for the talking
+        #  (...)
+
+        self.animator:  Animator = Animator(SpriteSheet(''), []) 
+        self.ai_controller:  AIController = AIController() 
+    
+    def start(self, entity:Entity):
+        e_anim = entity.get_component(Animator)
+        e_aic = entity.get_component(AIController)
+        missing_comps: list[Type] = []
+
+        if e_anim: self.anim_ball = e_anim
+        else: missing_comps.append(Animator)
+
+        if e_aic: self.ai_controller = e_aic
+        else: missing_comps.append(AIController)
+
+        if len(missing_comps) > 0:
+            raise Exception(f"{entity.name}: Has not a {[c.__name__ for c in missing_comps]} Component. It's required if using {self.__class__.__name__}")
+
+        # Setting the dafaults for Animator and AI Controller
+        self.update_character()
+
+    def update(self, entity: Entity, dt: float):
+        pass
+
+    def switch_character(self, new_char: str):
+        if new_char in self.characters:
+            self.curr_char = new_char
+            self.update_character()
+
+    def update_character(self):
+        if self.animator and self.ai_controller:
+            character = self.characters.get(self.curr_char)
+            if character:
+                self.animator.ss = character.ss
+                self.ai_controller.phrases = character.phrases           
+
 # =====================================================================================
 #                                   W.I.P                                
 # =====================================================================================
@@ -365,8 +460,8 @@ class AIController(Component):
     
     def __init__(self, timer_range:tuple[float,float] = (1,3)) -> None:
         # Needed components
-        self.phys: PhysicalBall | None = None
-        self.bubb: TextBubble | None = None
+        self.phys: PhysicalBall = PhysicalBall()
+        self.bubb: TextBubble = TextBubble('')
 
         # Timer for taking action
         self.timer_range:tuple[float, float] = timer_range
@@ -381,14 +476,25 @@ class AIController(Component):
         self.target_x:      float = 0
         self.target_setted: bool = False
 
-        
+        self.phrases:   list[str] = [' ']
+    
+    # Getting all needed componets
+    def start(self, entity:Entity):
+        e_phys = entity.get_component(PhysicalBall)
+        e_textb = entity.get_component(AIController)
+        missing_comps: list[Type] = []
 
+        if e_phys: self.phys = e_phys
+        else: missing_comps.append(PhysicalBall)
+
+        if e_textb: self.ai_controller = e_textb
+        else: missing_comps.append(TextBubble)
+
+        if len(missing_comps) > 0:
+            raise Exception(f"{entity.name}: Has not a {[c.__name__ for c in missing_comps]} Component. It's required if using {self.__class__.__name__}")
+    
+    # Timer to handle the decision making
     def update(self, entity:Entity, delta_tine:float):
-        if self.phys is None:
-            comp = entity.get_component(PhysicalBall)
-            if isinstance(comp, PhysicalBall):
-                self.phys = comp
-
         # Handle the timer     
         self.timer += delta_tine
         if self.timer > self.max_time:
@@ -396,23 +502,19 @@ class AIController(Component):
             self.decide(entity)
 
     def decide(self, entity:Entity):
-        # Choose next action
-        # currently random
 
-        if not self.bubb: self.bubb = entity.get_component(TextBubble)
-        if not self.phys: self.phys = entity.get_component(PhysicalBall)
-        if not (self.phys and self.bubb): return
-                
         # Dont show the text bubble
         self.bubb.show = False
-        
+
         if self.curr_action != 'move':
             self.curr_action = self.actions[random.randrange(0, len(self.actions))]
         
-        print(f'Now bobby will: {self.curr_action}')
+        #print(f'Now bobby will: {self.curr_action}')
         match self.curr_action:
 
             case 'move':
+                if not self.phys: return
+
                 # Push the entity
                 if self.phys.is_grounded:
                     dir = 1 if (self.target_x > entity.pos.x) else -1
@@ -431,61 +533,77 @@ class AIController(Component):
 
                 self.max_time = self.timer_range[0] + random.random()*(self.timer_range[1] - self.timer_range[0])
                 
-                print(f'Distance: {int(dist_from_target)}\tTargetted: {self.target_setted}')
+                #print(f'Distance: {int(dist_from_target)}\tTargetted: {self.target_setted}')
 
             case 'wait':
+                if not self.phys: return
                 # Timer reset
                 if self.phys.is_grounded: self.max_time = WAIT_TIME + 2*random.random()*random.randrange(-1, 2)    # wait for (5 - 7) seconds
                 else: self.max_time = self.timer_range[0] + random.random()*(self.timer_range[1] - self.timer_range[0])
 
             case 'talk':
-
+                if not self.bubb: return
                 # Change the phrase of the TextBubble and show it
-                rand_phrase = CUCHU_PHRASES[random.randrange(0, len(CUCHU_PHRASES))]
+                rand_phrase = self.phrases[random.randrange(0, len(self.phrases))]
                 self.bubb.changephrase(rand_phrase)
                 self.bubb.show = True
+                print(f'Saying: {rand_phrase}')
 
                 # Timer reset
                 self.max_time = len(rand_phrase)*0.4 if len(rand_phrase) > 4 else 2.0
         
-        print()
 
 # The component to show a TextBubble (with a certain phrase) above the entity 
 class TextBubble(Component):
     def __init__(self, sheet_path: str, corner_size: int = 8):
         self.raw_sheet: SpriteSheet = SpriteSheet(sheet_path, (4,4), 4)
         self.c = corner_size # Tamaño en píxeles de las esquinas
-        self.font = pygame.font.SysFont('Pixeloid', 20)
+        self.font = pygame.font.SysFont('Arial', 20)
         
-        self.phrase:str = ''
-        self.show:bool  = True
+        self.phrase:str = '(I need some phrases mate...)'
+        self.show:bool  = False
     
     def changephrase(self, new_phrase:str):
         self.phrase = new_phrase
 
-    def generate_bubble(self, padding: int = 10) -> Surface:
-        # 1. Preparar el texto
-        text_surf = self.font.render(self.phrase, True, (0, 0, 0))
+    def start(self, entity:Entity):
+        pass
+
+    def update(self, entity: Entity, dt: float):
+        print(f'Show text bubble: {self.show}')
+        if self.show:
+            bubble = self.generate_bubble()
+            SCREEN.blit(bubble, (entity.pos.x + entity.image.get_width()*0.25, entity.pos.y - entity.image.get_height()*0.8))
+    
+    def generate_bubble(self, padding: int = 2) -> Surface:
+        # We get the lines and the largest one
+        lines, largest_verse = self.text_info(self.phrase)
+
+        text_surf = self.font.render(largest_verse, True, (0, 0, 0))
         tw, th = text_surf.get_size()
-        
+        th *= len(lines)
+
+
         # 2. Dimensiones finales    
-        s = self.c # Tamaño de la celda del sprite (esquina)
+        s = self.c                          # Tamaño de la celda del sprite (esquina)
         bw = max(tw + (padding * 2), s * 2)
         bh = max(th + (padding * 2), s * 2)
-        
+
         bubble_surf = pygame.Surface((bw, bh), pygame.SRCALPHA)
         
         # --- DIBUJAR ESQUINAS ---
-        bubble_surf.blit(self.raw_sheet.get_sprite(0), (0, 0))              # TL
-        bubble_surf.blit(self.raw_sheet.get_sprite(2), (bw - s, 0))         # TR
-        bubble_surf.blit(self.raw_sheet.get_sprite(6), (0, bh - s))         # BL
-        bubble_surf.blit(self.raw_sheet.get_sprite(8), (bw - s, bh - s))    # BR
+        bubble_surf.blit(self.raw_sheet.get_sprite(0), (0, 0))                      # TL
+        bubble_surf.blit(self.raw_sheet.get_sprite(2), (bw - s, 0))                 # TR
+        bubble_surf.blit(self.raw_sheet.get_sprite(6), (0, bh - s))                 # BL
+        bubble_surf.blit(self.raw_sheet.get_sprite(8), (bw - s, bh - s))            # BR
         
         # --- DIBUJAR BORDES (Escalados) ---
+
         # Horizontal (Arriba y Abajo)
         horiz_size = (bw - s * 2, s)
         bubble_surf.blit(pygame.transform.scale(self.raw_sheet.get_sprite(1), horiz_size), (s, 0))
         bubble_surf.blit(pygame.transform.scale(self.raw_sheet.get_sprite(7), horiz_size), (s, bh - s))
+
         # Vertical (Izquierda y Derecha)
         vert_size = (s, bh - s * 2)
         bubble_surf.blit(pygame.transform.scale(self.raw_sheet.get_sprite(3), vert_size), (0, s))
@@ -499,40 +617,37 @@ class TextBubble(Component):
         text_x = (bw - tw) // 2
         text_y = (bh - th) // 2
         bubble_surf.blit(text_surf, (text_x, text_y))
-        
+
         return bubble_surf
 
+    # Function to get the largest amount of characters on a line and the divided lines
+    def text_info(self, text:str) -> tuple[list[str], str]:
+        n = len(text)
+        max_chars: int = 16
+        words   :list[str] = text.split(' ')
+        lines   :list[str] = []
+        verse = ''
+        largest_verse = ''
+        count = 0
+        max_count = 0
+        for i,w in enumerate(words):
+            if count == 0: verse += f'{w}'
+            else: verse += f' {w}'
+            count += len(w)
 
-    def update(self, entity: Entity, dt: float):
-        if self.show:
-            bubble = self.generate_bubble()
-            SCREEN.blit(bubble, (entity.pos.x + entity.image.get_width()*0.25, entity.pos.y - entity.image.get_height()*0.8))
+            if i+1 == len(words): 
+                max_count = max(count, max_count)
+                if count > max_count: largest_verse = verse
+                count = 0
+                lines.append(verse)
+                verse = ''
+                continue
 
-# Components which gets a set of CharactersData (Object)
-class CharactersHandler(Component):
-    def __init__(self, characters: list[CharacterData]) -> None:
-        self.curr_char: str = characters[0].name
-        self.characters: dict[str, CharacterData] = {c.name: c for c in characters}
+            if len(words[i+1])+count > max_chars:
+                max_count = max(count, max_count)
+                count = 0
+                lines.append(verse)
+                verse = ''
         
-        # For the CharacterHandler to work we need:
-        # - Animator (to change the sprite sheet thats being used)
-        # - AI_Controller to change the phrases for the talking
-        #  (...)
-
-        self.animator:  Animator | None = None 
-        self.ai_controller:  AIController | None = None 
-
-        pass
-
-    def update(self, entity: Entity, dt: float):
-        if not self.animator: self.animator = entity.get_component(Animator)
-        if not self.ai_controller: self.ai_controller = entity.get_component(AIController)
-
-    def switch_character(self, new_char: str):
-        pass
-
-class CharacterData():
-    def __init__(self, ss: SpriteSheet, name:str, phrases:list[str] = []):
-        self.name:      str = name
-        self.phrases:   list[str] = phrases
+        return (lines, largest_verse)
 
