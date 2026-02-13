@@ -30,6 +30,8 @@ class Entity():
 
     # Draws the entity image 
     def draw(self):
+        for c in self.components:
+            c.draw(self)
         SCREEN.blit(self.image, (int(self.pos.x - self.image.width*0.5) , int(self.pos.y - self.image.height*0.5)))
 
     # Updates everycomponent
@@ -48,16 +50,16 @@ class Entity():
         
         return None
 
-
 # Interface of the Components ("what should they have")
 class Component(ABC):
     
-    @abstractmethod
     def start(self, entity:Entity):
         pass
 
-    @abstractmethod
     def update(self, entity:Entity, dt:float):
+        pass
+
+    def draw(self, entity:Entity):
         pass
 
 # Spritesheet: extracts the images of a spritesheet and saves the parts
@@ -124,10 +126,6 @@ class Animator(Component):
         
         self.current_anim: Animation | None = list(self.anims.values())[0] if self.anims else None        
 
-    # Nothin to setup at start
-    def start(self, entity:Entity):
-        pass
-
     def update(self, entity:Entity, dt:float):
         if not self.current_anim:
             return
@@ -167,7 +165,6 @@ class Animator(Component):
         return False
     
 # PhysicalBall: the one in charge of following the rules of physics updating itself
-
 # Problem: sometimes the npc jumps too much, there is dependecy with the frames
 class PhysicalBall(Component):
 
@@ -247,9 +244,6 @@ class PhysicalBall(Component):
         drag_dir = -self.vel.normalized()
         self.applyForce(drag_dir*self.air_resist*(self.vel.dot(self.vel)))
     
-    # Nothing to setup at start
-    def start(self, entity:Entity):
-        pass
 
     # Update call from the entity
     def update(self, entity:Entity, dt:float):
@@ -423,7 +417,7 @@ class CharactersHandler(Component):
         e_aic = entity.get_component(AIController)
         missing_comps: list[Type] = []
 
-        if e_anim: self.anim_ball = e_anim
+        if e_anim: self.animator = e_anim
         else: missing_comps.append(Animator)
 
         if e_aic: self.ai_controller = e_aic
@@ -435,24 +429,135 @@ class CharactersHandler(Component):
         # Setting the dafaults for Animator and AI Controller
         self.update_character()
 
-    def update(self, entity: Entity, dt: float):
-        pass
-
     def switch_character(self, new_char: str):
         if new_char in self.characters:
             self.curr_char = new_char
             self.update_character()
 
     def update_character(self):
-        if self.animator and self.ai_controller:
-            character = self.characters.get(self.curr_char)
-            if character:
-                self.animator.ss = character.ss
-                self.ai_controller.phrases = character.phrases           
+        character = self.characters.get(self.curr_char)
+        if character:
+            self.animator.ss = character.ss
+            self.ai_controller.phrases = character.phrases           
 
-# =====================================================================================
-#                                   W.I.P                                
-# =====================================================================================
+# Spawns a Bubble text with the current phrase setted
+class TextBubble(Component):
+    def __init__(self, sheet_path: str, corner_size: int = 8):
+        self.raw_sheet: SpriteSheet = SpriteSheet(sheet_path, (4,4), 4)
+        self.c = corner_size # Tamaño en píxeles de las esquinas
+        self.font = pygame.font.SysFont('Pixeloid', 24)
+        
+        self.phrase:str = '(I need some phrases mate...)'
+        self.show:bool  = False
+    def changephrase(self, new_phrase:str):
+        self.phrase = new_phrase
+
+    def draw(self, entity:Entity):
+        if self.show:
+            bubble = self.generate_bubble()
+            SCREEN.blit(bubble, (entity.pos.x + entity.image.get_width()*0.25, entity.pos.y - entity.image.get_height()*1.2))
+    
+    # Returns a Surface with the current phrase
+    def generate_bubble(self, padding: int = 5) -> pygame.Surface:
+        lines, _ = self.text_info(self.phrase)
+        if not lines: return pygame.Surface((0, 0), pygame.SRCALPHA)
+
+        # 1. Medidas del texto
+        line_surfs = [self.font.render(l, True, (0, 0, 0)) for l in lines]
+        max_w = max(s.get_width() for s in line_surfs)
+        line_h = self.font.get_linesize()
+        total_h = line_h * len(lines)
+
+        # 2. Dimensiones de la superficie (bw, bh)
+        s = self.c  # Tamaño fijo de la esquina (ej: 8px)
+        
+        # El ancho total DEBE ser: esquina izq (s) + padding + texto + padding + esquina der (s)
+        bw = max_w + (padding * 2) + (s * 2)
+        bh = total_h + (padding * 2) + (s * 2)
+        
+        # Tamaño mínimo para que no colapsen las esquinas
+        bw, bh = max(bw, s * 2), max(bh, s * 2)
+        bubble_surf = pygame.Surface((bw, bh), pygame.SRCALPHA)
+
+        # 3. Cálculo de los tramos medios (Donde se escala)
+        # IMPORTANTE: El tramo medio es el total menos las dos esquinas
+        mid_w = bw - (s * 2)
+        mid_h = bh - (s * 2)
+
+        # --- DIBUJAR ESQUINAS (Sin Escalar) ---
+        bubble_surf.blit(self.raw_sheet.get_sprite(0), (0, 0))              # Superior Izquierda
+        bubble_surf.blit(self.raw_sheet.get_sprite(2), (bw - s, 0))        # Superior Derecha
+        bubble_surf.blit(self.raw_sheet.get_sprite(6), (0, bh - s))        # Inferior Izquierda
+        bubble_surf.blit(self.raw_sheet.get_sprite(8), (bw - s, bh - s))   # Inferior Derecha
+
+        # --- DIBUJAR LADOS (Escalados solo en su eje) ---
+        if mid_w > 0:
+            # Lado Superior (Índice 1): Se estira a lo ancho, mantiene alto s
+            top = pygame.transform.scale(self.raw_sheet.get_sprite(1), (mid_w, s))
+            # Lado Inferior (Índice 7): Se estira a lo ancho, mantiene alto s
+            bottom = pygame.transform.scale(self.raw_sheet.get_sprite(7), (mid_w, s))
+            
+            bubble_surf.blit(top, (s, 0))
+            bubble_surf.blit(bottom, (s, bh - s))
+
+        if mid_h > 0:
+            # Lado Izquierdo (Índice 3): Se estira a lo alto, mantiene ancho s
+            left = pygame.transform.scale(self.raw_sheet.get_sprite(3), (s, mid_h))
+            # Lado Derecho (Índice 5): Se estira a lo alto, mantiene ancho s
+            right = pygame.transform.scale(self.raw_sheet.get_sprite(5), (s, mid_h))
+            
+            bubble_surf.blit(left, (0, s))
+            bubble_surf.blit(right, (bw - s, s))
+
+        # --- DIBUJAR CENTRO (Escalado en ambos ejes) ---
+        if mid_w > 0 and mid_h > 0:
+            center = pygame.transform.scale(self.raw_sheet.get_sprite(4), (mid_w, mid_h))
+            bubble_surf.blit(center, (s, s))
+
+        # 4. Dibujar texto (Centrado en el área total)
+        current_y = (bh - total_h) // 2
+        for surf in line_surfs:
+            text_x = (bw - surf.get_width()) // 2
+            bubble_surf.blit(surf, (text_x, current_y))
+            current_y += line_h
+
+        return bubble_surf
+    # Function to get the largest amount of characters on a line and the divided lines
+    def text_info(self, text: str) -> tuple[list[str], str]:
+        max_chars = 16
+        words = text.split(' ')
+        lines = []
+        current_line_words = []
+        current_count = 0
+        largest_verse = ""
+
+        for word in words:
+            # +1 por el espacio si ya hay palabras en la línea
+            word_len = len(word)
+            space = 1 if current_line_words else 0
+            
+            if current_count + space + word_len <= max_chars:
+                current_line_words.append(word)
+                current_count += space + word_len
+            else:
+                # Guardamos la línea actual
+                full_line = " ".join(current_line_words)
+                lines.append(full_line)
+                if len(full_line) > len(largest_verse):
+                    largest_verse = full_line
+                
+                # Empezamos nueva línea con la palabra que no cupo
+                current_line_words = [word]
+                current_count = word_len
+
+        # No olvidar la última línea procesada
+        if current_line_words:
+            full_line = " ".join(current_line_words)
+            lines.append(full_line)
+            if len(full_line) > len(largest_verse):
+                largest_verse = full_line
+
+        return lines, largest_verse
 
 # Component to decide the next action of the NPC
 # This class changes the state of the StateManager to play certain animations
@@ -481,13 +586,13 @@ class AIController(Component):
     # Getting all needed componets
     def start(self, entity:Entity):
         e_phys = entity.get_component(PhysicalBall)
-        e_textb = entity.get_component(AIController)
+        e_textb = entity.get_component(TextBubble)
         missing_comps: list[Type] = []
 
         if e_phys: self.phys = e_phys
         else: missing_comps.append(PhysicalBall)
 
-        if e_textb: self.ai_controller = e_textb
+        if e_textb: self.bubb = e_textb
         else: missing_comps.append(TextBubble)
 
         if len(missing_comps) > 0:
@@ -503,9 +608,9 @@ class AIController(Component):
 
     def decide(self, entity:Entity):
 
-        # Dont show the text bubble
-        self.bubb.show = False
-
+        # Dont show
+        if self.curr_action != 'talk': self.bubb.show = False
+        
         if self.curr_action != 'move':
             self.curr_action = self.actions[random.randrange(0, len(self.actions))]
         
@@ -513,8 +618,6 @@ class AIController(Component):
         match self.curr_action:
 
             case 'move':
-                if not self.phys: return
-
                 # Push the entity
                 if self.phys.is_grounded:
                     dir = 1 if (self.target_x > entity.pos.x) else -1
@@ -536,118 +639,21 @@ class AIController(Component):
                 #print(f'Distance: {int(dist_from_target)}\tTargetted: {self.target_setted}')
 
             case 'wait':
-                if not self.phys: return
                 # Timer reset
                 if self.phys.is_grounded: self.max_time = WAIT_TIME + 2*random.random()*random.randrange(-1, 2)    # wait for (5 - 7) seconds
                 else: self.max_time = self.timer_range[0] + random.random()*(self.timer_range[1] - self.timer_range[0])
 
             case 'talk':
-                if not self.bubb: return
                 # Change the phrase of the TextBubble and show it
                 rand_phrase = self.phrases[random.randrange(0, len(self.phrases))]
                 self.bubb.changephrase(rand_phrase)
                 self.bubb.show = True
-                print(f'Saying: {rand_phrase}')
+                #print(f'{'Saying' if self.bubb.show else 'Not Saying'}: {rand_phrase}')
 
                 # Timer reset
                 self.max_time = len(rand_phrase)*0.4 if len(rand_phrase) > 4 else 2.0
-        
 
-# The component to show a TextBubble (with a certain phrase) above the entity 
-class TextBubble(Component):
-    def __init__(self, sheet_path: str, corner_size: int = 8):
-        self.raw_sheet: SpriteSheet = SpriteSheet(sheet_path, (4,4), 4)
-        self.c = corner_size # Tamaño en píxeles de las esquinas
-        self.font = pygame.font.SysFont('Arial', 20)
-        
-        self.phrase:str = '(I need some phrases mate...)'
-        self.show:bool  = False
-    
-    def changephrase(self, new_phrase:str):
-        self.phrase = new_phrase
-
-    def start(self, entity:Entity):
-        pass
-
-    def update(self, entity: Entity, dt: float):
-        print(f'Show text bubble: {self.show}')
-        if self.show:
-            bubble = self.generate_bubble()
-            SCREEN.blit(bubble, (entity.pos.x + entity.image.get_width()*0.25, entity.pos.y - entity.image.get_height()*0.8))
-    
-    def generate_bubble(self, padding: int = 2) -> Surface:
-        # We get the lines and the largest one
-        lines, largest_verse = self.text_info(self.phrase)
-
-        text_surf = self.font.render(largest_verse, True, (0, 0, 0))
-        tw, th = text_surf.get_size()
-        th *= len(lines)
-
-
-        # 2. Dimensiones finales    
-        s = self.c                          # Tamaño de la celda del sprite (esquina)
-        bw = max(tw + (padding * 2), s * 2)
-        bh = max(th + (padding * 2), s * 2)
-
-        bubble_surf = pygame.Surface((bw, bh), pygame.SRCALPHA)
-        
-        # --- DIBUJAR ESQUINAS ---
-        bubble_surf.blit(self.raw_sheet.get_sprite(0), (0, 0))                      # TL
-        bubble_surf.blit(self.raw_sheet.get_sprite(2), (bw - s, 0))                 # TR
-        bubble_surf.blit(self.raw_sheet.get_sprite(6), (0, bh - s))                 # BL
-        bubble_surf.blit(self.raw_sheet.get_sprite(8), (bw - s, bh - s))            # BR
-        
-        # --- DIBUJAR BORDES (Escalados) ---
-
-        # Horizontal (Arriba y Abajo)
-        horiz_size = (bw - s * 2, s)
-        bubble_surf.blit(pygame.transform.scale(self.raw_sheet.get_sprite(1), horiz_size), (s, 0))
-        bubble_surf.blit(pygame.transform.scale(self.raw_sheet.get_sprite(7), horiz_size), (s, bh - s))
-
-        # Vertical (Izquierda y Derecha)
-        vert_size = (s, bh - s * 2)
-        bubble_surf.blit(pygame.transform.scale(self.raw_sheet.get_sprite(3), vert_size), (0, s))
-        bubble_surf.blit(pygame.transform.scale(self.raw_sheet.get_sprite(5), vert_size), (bw - s, s))
-        
-        # --- CENTRO ---
-        bubble_surf.blit(pygame.transform.scale(self.raw_sheet.get_sprite(4), (bw - s*2, bh - s*2)), (s, s))
-        
-        # 3. Superponer el texto (Centrado matemáticamente en la burbuja)
-        # Esto asegura que si la burbuja es más grande que el texto, quede en el medio
-        text_x = (bw - tw) // 2
-        text_y = (bh - th) // 2
-        bubble_surf.blit(text_surf, (text_x, text_y))
-
-        return bubble_surf
-
-    # Function to get the largest amount of characters on a line and the divided lines
-    def text_info(self, text:str) -> tuple[list[str], str]:
-        n = len(text)
-        max_chars: int = 16
-        words   :list[str] = text.split(' ')
-        lines   :list[str] = []
-        verse = ''
-        largest_verse = ''
-        count = 0
-        max_count = 0
-        for i,w in enumerate(words):
-            if count == 0: verse += f'{w}'
-            else: verse += f' {w}'
-            count += len(w)
-
-            if i+1 == len(words): 
-                max_count = max(count, max_count)
-                if count > max_count: largest_verse = verse
-                count = 0
-                lines.append(verse)
-                verse = ''
-                continue
-
-            if len(words[i+1])+count > max_chars:
-                max_count = max(count, max_count)
-                count = 0
-                lines.append(verse)
-                verse = ''
-        
-        return (lines, largest_verse)
+# =====================================================================================
+#                                   W.I.P                                
+# =====================================================================================
 

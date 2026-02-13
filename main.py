@@ -6,17 +6,13 @@ import datetime
 
 # Custom packages
 from math_custom import Vector2D
-
 # Essentials
 from basics import Entity, SpriteSheet, Animation, CharacterData
-
 # Components
 from basics import Animator, PhysicalBall, MouseDrag, AIController, StatesManager, TextBubble, CharactersHandler
-
 # Import Setup constants
 from consts import SCREEN, FPS, SCREEN_CENTER
 from consts import CLR_GREEN, CLR_WHITE
-
 from consts import CUCHU_PHRASES
 
 pygame.init()
@@ -62,7 +58,7 @@ def create_entities() -> list[Entity]:
             Animator(bobby_ss, [idle, hit_floor, hit_wall, air, talk]),
             AIController(timer_range=(0.5, 2)),
             StatesManager(),
-            TextBubble('resources/images/text_bubble.png', corner_size=4),
+            TextBubble('resources/images/text_bubble.png', corner_size=16),
             CharactersHandler([
                 CharacterData(bobby_ss, 'Bobby', ['Im a little piece of art', 'I cant feel a thing', 'My flesh is pixels']),
                 CharacterData(cuchu_ss, 'Cuchu', CUCHU_PHRASES)
@@ -86,7 +82,7 @@ accumulator = 0.0
 
 entities: list[Entity] = create_entities()
 setup_entities(entities)
-
+charHandler = entities[0].get_component(CharactersHandler)
 ## MAIN LOOP ======================================================
 running:bool = True
 while running:
@@ -94,7 +90,7 @@ while running:
     dt = clock.tick(FPS) / 1000
     accumulator += dt
     dt = max(0.001, min(0.1, dt))
-    
+
     SCREEN.fill(TRANSPARENT_COLOR)  # Transparent background
 
     # Update the entities on a constant way, when the accumulator exceeds the dt_phys (delta time for physics)
@@ -108,8 +104,12 @@ while running:
         if event.type == pygame.KEYDOWN:        # Check for key events
             if event.key == pygame.K_ESCAPE:    
                 running = False                 # Close with the ESC button
-            
+            elif event.key == pygame.K_SPACE:
+                if charHandler: 
+                    charHandler.switch_character('Cuchu' if charHandler.curr_char == 'Bobby' else 'Bobby')
+    
     # DRAWS.
     for entity in entities:
         entity.draw()       # Draw entities
+
     pygame.display.flip()   # Update draws
