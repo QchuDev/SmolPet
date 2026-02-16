@@ -70,7 +70,7 @@ class Animator(Component):
 # Problem: sometimes the npc jumps too much, there is dependecy with the frames
 class PhysicalBall(Component):
 
-    def __init__(self, pos=(SCREEN_W * 0.5, SCREEN_H * 0.5), vel = (0,0), mass=1, radius=1, air_resist=0.5, retention_x=0.8, retention_y=0.4):
+    def __init__(self, pos=(SCREEN_W * 0.5, SCREEN_H * 0.5), vel = (0,0), mass:float=1, radius:float=1, air_resist:float=0.5, retention_x:float=0.8, retention_y:float=0.4):
         # State of the object
         self.pos:Vector2D = Vector2D(pos[0], pos[1])
         self.vel:Vector2D = Vector2D(vel[0], vel[1])
@@ -526,6 +526,7 @@ class AIController(Component):
     def update(self, entity:Entity, delta_tine:float):
         # Handle the timer     
         self.interruptAction()
+
         self.timer += delta_tine
         if self.timer > self.max_time:
             self.timer = 0
@@ -534,7 +535,6 @@ class AIController(Component):
     # A function to interrupt actions when meeting certain conditions
     def interruptAction(self):
         if self.curr_action == 'sleep' and not self.phys.is_grounded: 
-            print(f'Interruption: Sleeping and now in air, switchin to wait')
             self.curr_action = 'wait'
 
     def decide(self, entity:Entity):
@@ -598,7 +598,7 @@ class AIController(Component):
 
                 if self.target_x < entity.pos.x:
                     # Logic to open the image at the corner of the screen 
-                    # 1. Open the image
+                    # 1. Choose an image from the prev list, load it and show it on screen as an Entity
                     # 2. Activate animation
                     # 3. Apply a knockback force to the entity
                     pass
