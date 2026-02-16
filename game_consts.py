@@ -5,7 +5,7 @@ from basics import CharacterData, SpriteSheet
 from math_custom import Vector2D
 
 # PHYSICAL CONSTANTS
-GRAVITY:Vector2D = Vector2D(0, 100)
+GRAVITY:Vector2D = Vector2D(0, 980)
 BOUNCE_STOP:float = 60
 SLIDE_STOP:float = 10
 WALL_FRICTION:float = 0.3   # how much does the velocity get reduced

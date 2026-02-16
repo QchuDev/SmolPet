@@ -78,7 +78,8 @@ accumulator = 0.0
 
 entities: list[Entity] = create_entities()
 setup_entities(entities)
-charHandler = entities[0].get_component(CharactersHandler)
+
+
 ## MAIN LOOP ======================================================
 running:bool = True
 while running:
@@ -88,7 +89,6 @@ while running:
     dt = max(0.001, min(0.1, dt))
 
     SCREEN.fill(TRANSPARENT_COLOR)  # Transparent background
-
     # Update the entities on a constant way, when the accumulator exceeds the dt_phys (delta time for physics)
     while accumulator >= dt_phys:
         # Update entities
@@ -100,10 +100,7 @@ while running:
         if event.type == pygame.KEYDOWN:        # Check for key events
             if event.key == pygame.K_ESCAPE:    
                 running = False                 # Close with the ESC button
-            elif event.key == pygame.K_SPACE:
-                if charHandler: 
-                    charHandler.switch_character('Cuchu' if charHandler.curr_char == 'Bobby' else 'Bobby')
-    
+                
     # DRAWS.
     for entity in entities:
         entity.draw()       # Draw entities
