@@ -154,13 +154,18 @@ class PhysicalBall(Component):
         self.gravityEffect()
         self.airForce()
         self.wallsPush()
-
+        
         # Update physical state
         self.vel += self.acc*dt
         self.pos += self.vel*dt
         self.acc.x = 0
         self.acc.y = 0
 
+        if self.vel.x < 0:
+            entity.facing = -1
+        elif self.vel.x > 0:
+            entity.facing = 1
+        
         entity.pos = self.pos
 
 # MouseDrag lets the entity get dragged with physics by the mouse
@@ -312,7 +317,7 @@ class StatesManager(Component):
 # Components which gets a set of CharactersData (Object)
 class CharactersHandler(Component):
     def __init__(self, characters: list[CharacterData]) -> None:
-        self.curr_char: str = characters[0].name
+        self.curr_char: str = characters[random.randrange(0,len(characters))].name
         self.characters: dict[str, CharacterData] = {c.name: c for c in characters}
         
         # For the CharacterHandler to work we need:
@@ -539,7 +544,7 @@ class AIController(Component):
 
         if self.curr_action != 'move': self.randomize_action()
         
-        print(f'Now bobby will: {self.curr_action}')
+        #print(f'Now bobby will: {self.curr_action}')
         match self.curr_action:
 
             case 'move':
@@ -579,8 +584,11 @@ class AIController(Component):
                 self.max_time = len(rand_phrase)*0.4 if len(rand_phrase) > 4 else 2.0
 
             case 'sleep':
-                if self.phys.is_grounded: self.max_time = SLEEP_TIME # wait SLEEP_TIME ammount
-                else: self.max_time = self.timer_range[0] + random.random()*(self.timer_range[1] - self.timer_range[0])
+                if self.phys.is_grounded: 
+                    self.max_time = SLEEP_TIME # wait SLEEP_TIME ammount
+                    entity.facing = 1
+                else: 
+                    self.max_time = self.timer_range[0] + random.random()*(self.timer_range[1] - self.timer_range[0])
 
             case 'open_img':
                 if not self.target_setted:
@@ -599,7 +607,7 @@ class AIController(Component):
 
     def randomize_action(self):
         rand = random.randrange(0, self.total_weight+1)
-        print(f'Random number: {rand}/{self.total_weight}')
+        #print(f'Random number: {rand}/{self.total_weight}')
         action = ''
         accum = 0
         for w in self.weights:

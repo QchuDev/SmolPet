@@ -17,6 +17,7 @@ class Entity():
         self.pos:   Vector2D = Vector2D(0,0)
         self.image: Surface = image
         self.name:  str = name
+        self.facing:int = 1
 
     # Called once at the very beggining
     def start(self):
@@ -27,7 +28,14 @@ class Entity():
     def draw(self):
         for c in self.components:
             c.draw(self)
-        SCREEN.blit(self.image, (int(self.pos.x - self.image.width*0.5) , int(self.pos.y - self.image.height*0.5)))
+
+        # Flip if necessary
+        if self.facing == -1:
+            image_to_draw = pygame.transform.flip(self.image, True, False)
+        else:
+            image_to_draw = self.image
+
+        SCREEN.blit(image_to_draw, (int(self.pos.x - self.image.width*0.5) , int(self.pos.y - self.image.height*0.5)))
 
     # Updates everycomponent
     def update(self, dt:float):

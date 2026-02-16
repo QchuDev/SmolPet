@@ -49,7 +49,7 @@ def create_entities() -> list[Entity]:
     sleeping:   Animation = Animation('sleeping', [18, 19, 20], frame_duration=0.2)
 
     # entity and components
-    for i in range(100):
+    for i in range(111):
         bobby = Entity(name='Entity00',
             components= [
             PhysicalBall(pos = SCREEN_CENTER, radius=30, air_resist=0.0005, mass=1),
