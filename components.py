@@ -4,10 +4,12 @@ import random
 from typing import TypeVar, Type, Optional
 
 # Custom
-from basics import Component, SpriteSheet, CharacterData, Animation, Entity
+from basics import Component, SpriteSheet, CharacterData, Animation, Entity, State
 from window_consts import SCREEN_W, SCREEN_H, SCREEN, SCREEN_CENTER
+
 from game_consts import GRAVITY, BOUNCE_STOP, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
-from game_consts import CUCHU_PHRASES, WAIT_TIME, SLEEP_TIME, JUMP_FORCE, TARGET_STOP, ACTION_WEIGHTS
+from game_consts import WAIT_TIME, SLEEP_TIME, JUMP_FORCE, TARGET_STOP, ACTION_WEIGHTS
+
 from pygame import Surface
 from math_custom import Vector2D
 
@@ -26,9 +28,9 @@ class Animator(Component):
  
         self.timer:float = 0
         
-        self.current_anim: Animation | None = list(self.anims.values())[0] if self.anims else None        
+        self.current_anim: Animation = list(self.anims.values())[0] if self.anims else Animation('',[])        
 
-    def update(self, entity:Entity, dt:float):
+    def update(self, dt:float):
         if not self.current_anim:
             return
         
@@ -41,10 +43,11 @@ class Animator(Component):
                 self.frame_idx = (self.frame_idx + 1) % len(self.current_anim.seq)
                 sprite_id = self.current_anim.seq[self.frame_idx]
 
-            entity.image = self.ss.get_sprite(sprite_id)
+            self.parent.image = self.ss.get_sprite(sprite_id)
 
 
-    def play(self, name:str, entity:Entity):
+    def play(self, name:str):
+        
         if self.current_anim and self.current_anim.name == name:
             return
         
@@ -54,7 +57,8 @@ class Animator(Component):
             self.timer = 0
 
             sprite_id = self.current_anim.seq[self.frame_idx]
-            entity.image = self.ss.get_sprite(sprite_id)
+            self.parent.image = self.ss.get_sprite(sprite_id)
+
 
     def is_finished(self) -> bool:
         if self.current_anim: 
@@ -88,10 +92,11 @@ class PhysicalBall(Component):
         # hits info
         self.is_hitting_floor:      bool = False
         self.is_hitting_wall:       bool = False
-        
+        self.timer:                 float = 0.05
         # extra info
-        self.og_image:              Surface | None = None
         self.is_grounded:           bool = False
+
+        
 
     # Applying gravity and normal floor force
     def gravityEffect(self) -> None:
@@ -100,6 +105,7 @@ class PhysicalBall(Component):
 
         if self.pos.y >= SCREEN_H - self.radius:
             self.is_grounded = True
+            
             if abs(self.vel.y) > SPLAT_VELOCITY.y:
                 self.is_hitting_floor = True
             self.pos.y = SCREEN_H - self.radius
@@ -148,7 +154,11 @@ class PhysicalBall(Component):
     
 
     # Update call from the entity
-    def update(self, entity:Entity, dt:float):
+    def update(self, dt:float):
+
+        # Reset hitting variables
+        self.is_hitting_floor = False
+        self.is_hitting_wall = False
 
         # Acceleration downwards by gravity 
         self.gravityEffect()
@@ -161,12 +171,13 @@ class PhysicalBall(Component):
         self.acc.x = 0
         self.acc.y = 0
 
-        if self.vel.x < 0:
-            entity.facing = -1
-        elif self.vel.x > 0:
-            entity.facing = 1
+        if abs(self.vel.x) > 50:
+            if self.vel.x < 0:
+                self.parent.facing = -1
+            elif self.vel.x > 0:
+                self.parent.facing = 1
         
-        entity.pos = self.pos
+        self.parent.pos = self.pos
 
 # MouseDrag lets the entity get dragged with physics by the mouse
 class MouseDrag(Component):
@@ -179,17 +190,17 @@ class MouseDrag(Component):
     
     # The entity needs a PhysicalBall to work.
     def start(self, entity:Entity):
-        comp = entity.get_component(PhysicalBall)
+        super().start(entity)
+        comp = self.parent.get_component(PhysicalBall)
         if comp: 
             self.phys = comp
         else:
-            raise Exception(f"{entity.name}: Has not a PhysicsBall Component. It's required if using {self.__class__.__name__}")
-            
+            raise Exception(f"{self.parent.name}: Has not a PhysicsBall Component. It's required if using {self.__class__.__name__}")
             
 
-    def update(self, entity: Entity, dt: float):
+    def update(self, dt: float):
         if self.phys is None:
-            comp = entity.get_component(PhysicalBall)
+            comp = self.parent.get_component(PhysicalBall)
             if isinstance(comp, PhysicalBall):
                 self.phys = comp 
             
@@ -214,105 +225,39 @@ class MouseDrag(Component):
 
 # Component who decides the current animation to be played
 class StatesManager(Component):
-    def __init__(self) -> None:
-        self.current_state = 'idle'
+    def __init__(self, states:list[State]) :
+        self.current_state:     State = states[0]
+        self.states:            dict[str,State] = {s.name : s for s in states}
 
-        # Creating the defult version of each component for them to be setted on start()
+        # Animator to change animations
         self.animator: Animator = Animator(SpriteSheet(''), [])
-        self.phys: PhysicalBall = PhysicalBall()
-        self.ai_controller: AIController = AIController()
-
-        self.og_image: Surface | None = None
 
     # Needs an animator, physicalball and aicontroller to work. (yeah thats not good)
     def start(self, entity:Entity):
-        e_phys = entity.get_component(PhysicalBall)
-        e_aic = entity.get_component(AIController)
-        e_anim = entity.get_component(Animator)
+        super().start(entity)
+        e_anim = self.parent.get_component(Animator)
         missing_comps: list[Type] = []
-
-        if e_phys: self.phys = e_phys
-        else: missing_comps.append(PhysicalBall)
-
-        if e_aic: self.ai_controller = e_aic
-        else: missing_comps.append(AIController)
 
         if e_anim: self.animator = e_anim
         else: missing_comps.append(Animator)
 
         if len(missing_comps) > 0:
-            raise Exception(f"{entity.name}: Has not a {[c.__name__ for c in missing_comps]} Component. It's required if using {self.__class__.__name__}")
-        
-    # Calls the handle logic and picks the needed components
-    def update(self, entity:Entity, dt:float):
-        self.handle_logic(entity)
+            raise Exception(f"{self.parent.name}: Has not a {[c.__name__ for c in missing_comps]} Component. It's required if using {self.__class__.__name__}")
+    
+    # Updating to the next state (can also stay the same)
+    def update(self, dt:float):
+        self.change_state(self.current_state.transition(self.parent))
 
-    # Switches to each state when the conditions are met
-    def handle_logic(self, entity:Entity):
-        match self.current_state:
-            case 'idle':
-                if not self.phys.is_grounded:
-                    self.change_state('air', entity)
-                elif self.phys.is_hitting_floor:
-                    self.change_state('hit_floor', entity)
-                elif self.phys.is_hitting_wall:
-                    self.change_state('hit_wall', entity)
-                elif self.ai_controller.curr_action == 'talk':
-                        self.change_state('talk', entity)
-                elif self.ai_controller.curr_action == 'sleep':
-                        self.change_state('go_sleep', entity)
-            case 'air':
-                # IDLE IF THE CHARACTER STOPPED
-                if self.phys.is_grounded and abs(self.phys.vel.x) < SLIDE_STOP:
-                    self.change_state('idle', entity)
-                elif self.phys.is_hitting_floor:
-                    self.change_state('hit_floor', entity)
-                elif self.phys.is_hitting_wall:
-                    self.change_state('hit_wall', entity)
-            case 'hit_floor':
-                if self.animator.is_finished():
-                    self.phys.is_hitting_floor = False
-                    if self.phys.is_grounded:
-                        self.change_state('idle', entity)
-
-                    elif self.ai_controller.curr_action == 'talk':
-                        self.change_state('talk', entity)
-
-                    elif self.phys.is_hitting_wall:
-                        self.change_state('hit_wall', entity)
-                    else:
-                        self.change_state('air', entity)
-            case 'hit_wall':
-                if self.animator.is_finished():
-                    self.phys.is_hitting_wall = False
-                    if self.phys.is_grounded:
-                        self.change_state('idle', entity)
-                    elif self.ai_controller.curr_action == 'talk':
-                        self.change_state('talk', entity)
-                    elif self.phys.is_hitting_floor:
-                        self.change_state('hit_floor', entity)
-                    else:
-                        self.change_state('air', entity)
-            case 'talk':
-                if  not self.phys.is_grounded:
-                    self.change_state('air', entity)
-                elif self.ai_controller.curr_action != 'talk':
-                    self.change_state('idle', entity)
-            case 'go_sleep':
-                if self.animator.is_finished():
-                    self.change_state('sleeping', entity)
-            case 'sleeping':
-                if not self.phys.is_grounded:
-                    self.change_state('air', entity)
-                elif self.ai_controller.curr_action != 'sleep':
-                    self.change_state('idle', entity)
-            
     # Changes the state and plays the corresponding animation        
-    def change_state(self, new_state:str, entity:Entity):
+    def change_state(self, new_state:str):
         if self.current_state != new_state:
-            self.current_state = new_state
-            if self.animator:
-                self.animator.play(new_state, entity)
+            s = self.states.get(new_state)
+            if s:
+                self.current_state = s
+                if self.animator:
+                    self.animator.play(new_state)
+                #print(f'Playing: {new_state}')
+
 
 # Components which gets a set of CharactersData (Object)
 class CharactersHandler(Component):
@@ -329,8 +274,10 @@ class CharactersHandler(Component):
         self.ai_controller:  AIController = AIController() 
     
     def start(self, entity:Entity):
-        e_anim = entity.get_component(Animator)
-        e_aic = entity.get_component(AIController)
+        super().start(entity)
+
+        e_anim = self.parent.get_component(Animator)
+        e_aic = self.parent.get_component(AIController)
         missing_comps: list[Type] = []
 
         if e_anim: self.animator = e_anim
@@ -340,7 +287,7 @@ class CharactersHandler(Component):
         else: missing_comps.append(AIController)
 
         if len(missing_comps) > 0:
-            raise Exception(f"{entity.name}: Has not a {[c.__name__ for c in missing_comps]} Component. It's required if using {self.__class__.__name__}")
+            raise Exception(f"{self.parent.name}: Has not a {[c.__name__ for c in missing_comps]} Component. It's required if using {self.__class__.__name__}")
 
         # Setting the dafaults for Animator and AI Controller
         self.update_character()
@@ -368,10 +315,10 @@ class TextBubble(Component):
     def changephrase(self, new_phrase:str):
         self.phrase = new_phrase
 
-    def draw(self, entity:Entity):
+    def draw(self):
         if self.show:
             bubble = self.generate_bubble()
-            SCREEN.blit(bubble, (entity.pos.x + entity.image.get_width()*0.25, entity.pos.y - entity.image.get_height()*1.2))
+            SCREEN.blit(bubble, (self.parent.pos.x + self.parent.image.get_width()*0.25, self.parent.pos.y - self.parent.image.get_height()*1.2))
     
     # Returns a Surface with the current phrase
     def generate_bubble(self, padding: int = 5) -> pygame.Surface:
@@ -509,8 +456,9 @@ class AIController(Component):
         
     # Getting all needed componets
     def start(self, entity:Entity):
-        e_phys = entity.get_component(PhysicalBall)
-        e_textb = entity.get_component(TextBubble)
+        super().start(entity)
+        e_phys = self.parent.get_component(PhysicalBall)
+        e_textb = self.parent.get_component(TextBubble)
         missing_comps: list[Type] = []
 
         if e_phys: self.phys = e_phys
@@ -520,24 +468,24 @@ class AIController(Component):
         else: missing_comps.append(TextBubble)
 
         if len(missing_comps) > 0:
-            raise Exception(f"{entity.name}: Has not a {[c.__name__ for c in missing_comps]} Component. It's required if using {self.__class__.__name__}")
+            raise Exception(f"{self.parent.name}: Has not a {[c.__name__ for c in missing_comps]} Component. It's required if using {self.__class__.__name__}")
     
     # Timer to handle the decision making
-    def update(self, entity:Entity, delta_tine:float):
+    def update(self, delta_tine:float):
         # Handle the timer     
         self.interruptAction()
 
         self.timer += delta_tine
         if self.timer > self.max_time:
             self.timer = 0
-            self.decide(entity)
+            self.decide()
         
     # A function to interrupt actions when meeting certain conditions
     def interruptAction(self):
         if self.curr_action == 'sleep' and not self.phys.is_grounded: 
             self.curr_action = 'wait'
 
-    def decide(self, entity:Entity):
+    def decide(self):
 
         # Dont show
         if self.curr_action != 'talk': self.bubb.show = False
@@ -550,11 +498,11 @@ class AIController(Component):
             case 'move':
                 # Push the entity
                 if self.phys.is_grounded:
-                    dir = 1 if (self.target_x > entity.pos.x) else -1
+                    dir = 1 if (self.target_x > self.parent.pos.x) else -1
                     self.phys.applyForce(Vector2D(dir*JUMP_FORCE.x, JUMP_FORCE.y))
 
                 # Timer reset
-                dist_from_target = abs(self.target_x - entity.pos.x)
+                dist_from_target = abs(self.target_x - self.parent.pos.x)
                 if not self.target_setted: 
                     self.target_x = random.randrange(0, SCREEN_W)
                     self.target_setted = True
@@ -586,7 +534,7 @@ class AIController(Component):
             case 'sleep':
                 if self.phys.is_grounded: 
                     self.max_time = SLEEP_TIME # wait SLEEP_TIME ammount
-                    entity.facing = 1
+                    self.parent.facing = 1
                 else: 
                     self.max_time = self.timer_range[0] + random.random()*(self.timer_range[1] - self.timer_range[0])
 
@@ -596,7 +544,7 @@ class AIController(Component):
                     self.target_setted = True
                     self.going_to_open = True
 
-                if self.target_x < entity.pos.x:
+                if self.target_x < self.parent.pos.x:
                     # Logic to open the image at the corner of the screen 
                     # 1. Choose an image from the prev list, load it and show it on screen as an Entity
                     # 2. Activate animation
@@ -621,5 +569,4 @@ class AIController(Component):
 # =====================================================================================
 #                                   W.I.P                                
 # =====================================================================================
-
-# ...
+    

@@ -27,7 +27,7 @@ class Entity():
     # Draws the entity image 
     def draw(self):
         for c in self.components:
-            c.draw(self)
+            c.draw()
 
         # Flip if necessary
         if self.facing == -1:
@@ -40,7 +40,7 @@ class Entity():
     # Updates everycomponent
     def update(self, dt:float):
         for comp in self.components:
-            comp.update(self, dt)
+            comp.update(dt)
 
     # Adds a new component
     def add_component(self, new_comp):
@@ -55,14 +55,21 @@ class Entity():
 
 # Interface of the Components ("what should they have")
 class Component(ABC):
+
+    # A component only has to know its parent
+    def __init__(self) -> None:
+        self.parent: Entity = Entity()
     
+    # Ref the parent of the component
     def start(self, entity:Entity):
+        self.parent = entity
+        if not self.parent: 
+            raise Exception(f"No parent detected for {self.__class__.__name__}")
+
+    def update(self, dt:float):
         pass
 
-    def update(self, entity:Entity, dt:float):
-        pass
-
-    def draw(self, entity:Entity):
+    def draw(self):
         pass
 
 # Spritesheet: extracts the images of a spritesheet and saves the parts
@@ -112,3 +119,29 @@ class CharacterData():
         self.phrases:   list[str] = phrases
         self.ss:        SpriteSheet = ss
 
+
+# WIP
+
+# State:
+class State():
+    def __init__(self, name:str = '', trans: list[Transition] = []):
+        self.name:  str = name
+        self.transitions:  list[Transition] = trans
+    
+    # Returns the next states name
+    def transition(self, entity:Entity) -> str:
+        next_state: str = self.name
+        for t in self.transitions:
+            if t.check(entity):
+                next_state = t.to_state
+                break
+        return next_state
+
+# Transition: 
+class Transition():
+    def __init__(self, to_state: str, condition):
+        self.to_state = to_state
+        self.condition = condition
+    
+    def check(self, entity:Entity) -> bool:
+        return self.condition(entity)

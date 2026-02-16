@@ -38,7 +38,7 @@ def buscar_en_multiples_fuentes(lista_carpetas, max_fotos=10):
 
 # --- CONFIGURACIÓN ---
 fuentes = [
-    "~/Desktop",        # Escritorio
+    "~/Descargas",        # Escritorio
     "~/Downloads",      # Descargas (Usar ~ es más seguro que C:/)
     "~/Pictures"        # Carpeta de imágenes
 ]

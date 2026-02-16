@@ -12,10 +12,11 @@ from basics import Entity, Animation
 from components import Animator, PhysicalBall, MouseDrag, AIController, StatesManager, TextBubble, CharactersHandler
 # Import Setup constants
 from window_consts import SCREEN, FPS, SCREEN_CENTER, CLR_GREEN, CLR_WHITE
-from game_consts import CHARACTERS
+from characters_setup import CHARACTERS
+from states_graph import STATES
 
 pygame.init()
-pygame.display.set_caption('For my love')
+pygame.display.set_caption('A small detail')
 
 ## TRANSPARENT WINDOW =================================================================================== 
 TRANSPARENT_COLOR = (255, 0, 128)  # Transparency color
@@ -49,19 +50,20 @@ def create_entities() -> list[Entity]:
     sleeping:   Animation = Animation('sleeping', [18, 19, 20], frame_duration=0.2)
 
     # entity and components
-    for i in range(250):
-        bobby = Entity(name='Entity00',
+    for i in range(500):
+        npc = Entity(name=f'Entity{i}',
             components= [
-            PhysicalBall(pos = SCREEN_CENTER, radius=30, air_resist=0.0005, mass=1, retention_y=0.3),
+            PhysicalBall(pos = SCREEN_CENTER, radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
             MouseDrag(),
             Animator(anims = [idle, hit_floor, hit_wall, air, talk, go_sleep, sleeping]),  # sleeping WIP
             AIController(timer_range=(0.5, 2)),
-            StatesManager(),
+            StatesManager(STATES),
             TextBubble('resources/images/text_bubble.png', corner_size=16),
             CharactersHandler(CHARACTERS)
             ]
         )
-        ents.append(bobby)
+        
+        ents.append(npc)
 
     return ents
 
@@ -83,6 +85,7 @@ setup_entities(entities)
 ## MAIN LOOP ======================================================
 running:bool = True
 while running:
+
     # Update delta_time
     dt = clock.tick(FPS) / 1000
     accumulator += dt
@@ -96,6 +99,7 @@ while running:
            entity.update(dt_phys)
         accumulator -= dt_phys
     
+
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:        # Check for key events
             if event.key == pygame.K_ESCAPE:    
