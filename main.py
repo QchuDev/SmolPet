@@ -7,13 +7,12 @@ import datetime
 # Custom packages
 from math_custom import Vector2D
 # Essentials
-from basics import Entity, SpriteSheet, Animation, CharacterData
+from basics import Entity, Animation
 # Components
-from basics import Animator, PhysicalBall, MouseDrag, AIController, StatesManager, TextBubble, CharactersHandler
+from components import Animator, PhysicalBall, MouseDrag, AIController, StatesManager, TextBubble, CharactersHandler
 # Import Setup constants
-from consts import SCREEN, FPS, SCREEN_CENTER
-from consts import CLR_GREEN, CLR_WHITE
-from consts import CUCHU_PHRASES
+from window_consts import SCREEN, FPS, SCREEN_CENTER, CLR_GREEN, CLR_WHITE
+from game_consts import CHARACTERS
 
 pygame.init()
 pygame.display.set_caption('For my love')
@@ -39,30 +38,27 @@ def create_entities() -> list[Entity]:
 
     # CREATE BOBBY =====================================================
     # animations and character
-    bobby_ss = SpriteSheet('resources/images/bobby_16.png', (16,16), scale_factor=4)
-    cuchu_ss = SpriteSheet('resources/images/cuchu_16.png', (16,16), scale_factor=4)
+    
 
-
-    idle:       Animation = Animation('idle', [0, 1, 2], frame_duration=0.15)
-    hit_floor:  Animation = Animation('hit_floor', [3, 4, 5], frame_duration=0.10, loop=False)
-    hit_wall:   Animation = Animation('hit_wall', [12, 13, 14], frame_duration=0.10, loop=False)
-    air:        Animation = Animation('air', [6, 7, 8], frame_duration=0.15)
-    talk:       Animation = Animation('talk', [9, 10, 11], frame_duration=0.15)
+    idle:       Animation = Animation('idle', [0, 1, 2], frame_duration=0.2)
+    hit_floor:  Animation = Animation('hit_floor', [3, 4, 5], frame_duration=0.08, loop=False)
+    hit_wall:   Animation = Animation('hit_wall', [12, 13, 14], frame_duration=0.08, loop=False)
+    air:        Animation = Animation('air', [6, 7, 8], frame_duration=0.2)
+    talk:       Animation = Animation('talk', [9, 10, 11], frame_duration=0.2)
+    go_sleep:   Animation = Animation('go_sleep', [15, 16, 17], frame_duration=0.2, loop=False)
+    sleeping:   Animation = Animation('sleeping', [18, 19, 20], frame_duration=0.2)
 
     # entity and components
-    for i in range(1):
-        bobby = Entity(bobby_ss.get_sprite(0), 'Entity00',
-            [
+    for i in range(100):
+        bobby = Entity(name='Entity00',
+            components= [
             PhysicalBall(pos = SCREEN_CENTER, radius=30, air_resist=0.0005, mass=1),
             MouseDrag(),
-            Animator(bobby_ss, [idle, hit_floor, hit_wall, air, talk]),
+            Animator(anims = [idle, hit_floor, hit_wall, air, talk, go_sleep, sleeping]),  # sleeping WIP
             AIController(timer_range=(0.5, 2)),
             StatesManager(),
             TextBubble('resources/images/text_bubble.png', corner_size=16),
-            CharactersHandler([
-                CharacterData(bobby_ss, 'Bobby', ['Im a little piece of art', 'I cant feel a thing', 'My flesh is pixels']),
-                CharacterData(cuchu_ss, 'Cuchu', CUCHU_PHRASES)
-            ])
+            CharactersHandler(CHARACTERS)
             ]
         )
         ents.append(bobby)
