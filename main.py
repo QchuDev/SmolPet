@@ -2,18 +2,13 @@ import pygame
 import win32api
 import win32con
 import win32gui
-import datetime
 
-# Custom packages
-from math_custom import Vector2D
-# Essentials
-from basics import Entity, Animation
-# Components
-from components import Animator, PhysicalBall, MouseDrag, AIController, StatesManager, TextBubble, CharactersHandler
 # Import Setup constants
-from window_consts import SCREEN, FPS, SCREEN_CENTER, CLR_GREEN, CLR_WHITE
-from characters_setup import CHARACTERS
-from states_graph import STATES
+from window_consts import SCREEN, FPS
+
+# Execute the entities_setup before reading World
+import entites_setup
+from basics import World
 
 pygame.init()
 pygame.display.set_caption('A small detail')
@@ -33,54 +28,11 @@ win32gui.SetWindowPos(hwnd, win32con.HWND_TOPMOST, 0, 0, 0, 0, win32con.SWP_NOMO
 
 ## ==========================================================================================================
 
-# Function to create all wanted entities at start
-def create_entities() -> list[Entity]:
-    ents = []
-
-    # CREATE BOBBY =====================================================
-    # animations and character
-    
-
-    idle:       Animation = Animation('idle', [0, 1, 2], frame_duration=0.2)
-    hit_floor:  Animation = Animation('hit_floor', [3, 4, 5], frame_duration=0.08, loop=False)
-    hit_wall:   Animation = Animation('hit_wall', [12, 13, 14], frame_duration=0.08, loop=False)
-    air:        Animation = Animation('air', [6, 7, 8], frame_duration=0.2)
-    talk:       Animation = Animation('talk', [9, 10, 11], frame_duration=0.2)
-    go_sleep:   Animation = Animation('go_sleep', [15, 16, 17], frame_duration=0.2, loop=False)
-    sleeping:   Animation = Animation('sleeping', [18, 19, 20], frame_duration=0.2)
-
-    # entity and components
-    for i in range(500):
-        npc = Entity(name=f'Entity{i}',
-            components= [
-            PhysicalBall(pos = SCREEN_CENTER, radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
-            MouseDrag(),
-            Animator(anims = [idle, hit_floor, hit_wall, air, talk, go_sleep, sleeping]),  # sleeping WIP
-            AIController(timer_range=(0.5, 2)),
-            StatesManager(STATES),
-            TextBubble('resources/images/text_bubble.png', corner_size=16),
-            CharactersHandler(CHARACTERS)
-            ]
-        )
-        
-        ents.append(npc)
-
-    return ents
-
-# Calls the start funcion on the entity so it can setup all its components
-def setup_entities(ents: list[Entity]):
-    for e in ents:
-        e.start()
-
 # Time Variables
 clock = pygame.time.Clock()
 dt = 0.01
 dt_phys = 1/60  # once per 60FPS
 accumulator = 0.0
-
-entities: list[Entity] = create_entities()
-setup_entities(entities)
-
 
 ## MAIN LOOP ======================================================
 running:bool = True
@@ -95,10 +47,9 @@ while running:
     # Update the entities on a constant way, when the accumulator exceeds the dt_phys (delta time for physics)
     while accumulator >= dt_phys:
         # Update entities
-        for entity in entities:
+        for entity in World.entities:
            entity.update(dt_phys)
-        accumulator -= dt_phys
-    
+        accumulator -= dt_phys    
 
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:        # Check for key events
@@ -106,7 +57,7 @@ while running:
                 running = False                 # Close with the ESC button
                 
     # DRAWS.
-    for entity in entities:
+    for entity in World.entities:
         entity.draw()       # Draw entities
 
     pygame.display.flip()   # Update draws

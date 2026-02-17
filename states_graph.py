@@ -25,15 +25,13 @@ AIR_STATE = State('air',
 )
 HIT_FLOOR_STATE = State('hit_floor',
     [
-        Transition('idle', lambda e: anim(e).is_finished() and phys(e).is_grounded),
         Transition('talk', lambda e: anim(e).is_finished() and aic(e).curr_action == 'talk'),
-        Transition('hit_wall', lambda e: anim(e).is_finished() and phys(e).is_hitting_wall),
-        Transition('air', lambda e: anim(e).is_finished()) 
+        Transition('hit_wall', lambda e: anim(e).is_finished() and phys(e).is_hitting_wall), 
+        Transition('idle', lambda e: anim(e).is_finished())
     ]
 )
 HIT_WALL_STATE = State('hit_wall',
     [
-        Transition('idle', lambda e: anim(e).is_finished() and phys(e).is_grounded),
         Transition('talk', lambda e: anim(e).is_finished() and aic(e).curr_action == 'talk'),
         Transition('hit_floor', lambda e: anim(e).is_finished() and phys(e).is_hitting_floor),
         Transition('air', lambda e: anim(e).is_finished()) 

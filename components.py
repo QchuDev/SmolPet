@@ -4,7 +4,7 @@ import random
 from typing import TypeVar, Type, Optional
 
 # Custom
-from basics import Component, SpriteSheet, CharacterData, Animation, Entity, State
+from basics import Component, SpriteSheet, CharacterData, Animation, Entity, State, World
 from window_consts import SCREEN_W, SCREEN_H, SCREEN, SCREEN_CENTER
 
 from game_consts import GRAVITY, BOUNCE_STOP, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
@@ -74,7 +74,7 @@ class Animator(Component):
 # Problem: sometimes the npc jumps too much, there is dependecy with the frames
 class PhysicalBall(Component):
 
-    def __init__(self, pos=(SCREEN_W * 0.5, SCREEN_H * 0.5), vel = (0,0), mass:float=1, radius:float=1, air_resist:float=0.5, retention_x:float=0.8, retention_y:float=0.4):
+    def __init__(self, pos=(SCREEN_CENTER[0], SCREEN_CENTER[1]), vel = (0,0), mass:float=1, radius:float=1, air_resist:float=0.5, retention_x:float=0.8, retention_y:float=0.4):
         # State of the object
         self.pos:Vector2D = Vector2D(pos[0], pos[1])
         self.vel:Vector2D = Vector2D(vel[0], vel[1])
@@ -308,10 +308,11 @@ class TextBubble(Component):
     def __init__(self, sheet_path: str, corner_size: int = 8):
         self.raw_sheet: SpriteSheet = SpriteSheet(sheet_path, (4,4), 4)
         self.c = corner_size # Tamaño en píxeles de las esquinas
-        self.font = pygame.font.SysFont('Pixeloid', 24)
+        self.font = pygame.font.SysFont('ocraextended', 16)
         
         self.phrase:str = '(I need some phrases mate...)'
         self.show:bool  = False
+    
     def changephrase(self, new_phrase:str):
         self.phrase = new_phrase
 
@@ -471,11 +472,11 @@ class AIController(Component):
             raise Exception(f"{self.parent.name}: Has not a {[c.__name__ for c in missing_comps]} Component. It's required if using {self.__class__.__name__}")
     
     # Timer to handle the decision making
-    def update(self, delta_tine:float):
+    def update(self, dt:float):
         # Handle the timer     
         self.interruptAction()
 
-        self.timer += delta_tine
+        self.timer += dt
         if self.timer > self.max_time:
             self.timer = 0
             self.decide()
@@ -569,4 +570,26 @@ class AIController(Component):
 # =====================================================================================
 #                                   W.I.P                                
 # =====================================================================================
+
+class EntityEraser(Component):
+    def __init__(self) -> None:
+        self.phys: PhysicalBall = PhysicalBall()        
+
+    def start(self, entity: Entity):
+        super().start(entity)
+        e_phys = self.parent.get_component(PhysicalBall)
+        missing_comps: list[Type] = []
+
+        if e_phys: self.phys = e_phys
+        else: missing_comps.append(PhysicalBall)
+
+        if len(missing_comps) > 0:
+            raise Exception(f"{self.parent.name}: Has not a {[c.__name__ for c in missing_comps]} Component. It's required if using {self.__class__.__name__}")
     
+    def update(self, dt: float):
+        for e in World.entities:
+            if e == self.parent: continue
+            d = self.parent.pos.distance(e.pos)
+            if d < self.phys.radius:
+                World.entities.remove(e)
+        

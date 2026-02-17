@@ -7,9 +7,17 @@ from pygame import Surface
 from math_custom import Vector2D
 from window_consts import SCREEN
 
+
+
+
 # =====================================================================================
 #                               ESSENTIALS
 # =====================================================================================
+
+# All Entities in the scene
+class World:
+    entities: list[Entity] = []
+
 T = TypeVar('T', bound='Component')
 class Entity():
     def __init__(self, image:pygame.Surface = Surface((0,0)), name:str = 'no_name', components:list[Component] = []):

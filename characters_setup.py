@@ -55,6 +55,3 @@ CHARACTERS: list[CharacterData] = [
     CharacterData(cuchu_ss, 'Cuchu', CUCHU_PHRASES),
     CharacterData(pol_ss, 'Pol', POL_PHRASES)
 ]
-
-
-
