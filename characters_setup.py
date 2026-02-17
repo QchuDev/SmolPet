@@ -11,7 +11,14 @@ cuchu_ss = SpriteSheet('resources/images/cuchu_16.png', (16,16), scale_factor=4)
 pol_ss = SpriteSheet('resources/images/pol_16.png', (16,16), scale_factor=4)
 
 # Phrases 
+today = datetime.date.today()
 pachus_bd = datetime.date(datetime.datetime.now().year, 3, 6)
+if pachus_bd < datetime.date.today(): pachus_bd = datetime.date(datetime.datetime.now().year+1, 3, 6)
+days_left = (pachus_bd - today).days
+
+print(f"Faltan {days_left} días para el cumple de Pachu.")
+print(f"bd {pachus_bd} | today {today}")
+
 CUCHU_PHRASES = [
         'Te amo <3',
         'Estas ocupada amor?',
@@ -19,7 +26,7 @@ CUCHU_PHRASES = [
         'Mandame un mensaje a whatsapp',
         'Te puedo ayudar?',
         'Soy tu principe jeje',
-        f'Faltan {(pachus_bd - datetime.date.today()).days} dias para tu cumple!',
+        f'Faltan {days_left} dias para tu cumple!' if days_left > 0 else 'FELIZ CUMPLE AMOR!',
         'aiiiiiiiiiii',
         ':V',
         'OMG',
