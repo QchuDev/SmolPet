@@ -1,7 +1,7 @@
 import pygame
 import win32api
 import random
-from typing import TypeVar, Type, Optional
+from typing import Type
 
 # Custom
 from basics import Component, SpriteSheet, CharacterData, Animation, Entity, State, World
@@ -10,7 +10,6 @@ from window_consts import SCREEN_W, SCREEN_H, SCREEN, SCREEN_CENTER
 from game_consts import GRAVITY, BOUNCE_STOP, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
 from game_consts import WAIT_TIME, SLEEP_TIME, JUMP_FORCE, TARGET_STOP, ACTION_WEIGHTS
 
-from pygame import Surface
 from math_custom import Vector2D
 
 

@@ -41,7 +41,7 @@ def initial_entities():
     ball_img = pygame.transform.scale(pygame.image.load('resources/images/ball.png').convert_alpha(), (64,64))
     killer_ball = Entity(image= ball_img, name='Killer Ball',
         components= [
-            PhysicalBall(pos=(random.randrange(0, 1920),0), vel=(500, 100), mass=5, radius=30, retention_y=1.0, retention_x=1.0, air_resist=0.0),
+            PhysicalBall(pos=(random.randrange(0, 1920),0), vel=(500, 100), mass=5, radius=40, retention_y=1.0, retention_x=1.0, air_resist=0.0),
             EntityEraser(), 
             MouseDrag()
         ]

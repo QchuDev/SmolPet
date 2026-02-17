@@ -55,6 +55,20 @@ SLEEPING_STATE = State('sleeping',
     ]
 )
 
+# WIP: giving ability to hitting nearby entities
+START_PUNCH_STATE = State('start_punch',
+    [
+        Transition('punch', lambda e: anim(e).is_finished())
+    ]
+)
+
+PUNCH_STATE = State('punch',
+    [
+        Transition('idle', lambda e: True)
+    ]
+)
+
+
 STATES: list[State] = [
     IDLE_STATE, 
     AIR_STATE, 
