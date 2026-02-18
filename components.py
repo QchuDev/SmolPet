@@ -4,7 +4,7 @@ import random
 from typing import Type
 
 # Custom
-from basics import Component, SpriteSheet, CharacterData, Animation, Entity, State, World
+from basics import Component, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
 from window_consts import SCREEN_W, SCREEN_H, SCREEN, SCREEN_CENTER
 
 from game_consts import GRAVITY, BOUNCE_STOP, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
@@ -256,7 +256,6 @@ class StatesManager(Component):
                 if self.animator:
                     self.animator.play(new_state)
                 #print(f'Playing: {new_state}')
-
 
 # Components which gets a set of CharactersData (Object)
 class CharactersHandler(Component):
@@ -595,4 +594,12 @@ class EntityEraser(Component):
             d = self.parent.pos.distance(e.pos)
             if d < self.phys.radius:
                 World.entities.remove(e)
-        
+
+class ParticlesEmitter(Component):
+    __slots__ = ['frequency', 'timer', 'manager']
+    def __init__(self, manager, frequency=0.1):
+        self.manager: ParticlesManager = manager
+        self.frequency = frequency
+        self.timer = 0
+
+    

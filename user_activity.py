@@ -2,6 +2,11 @@ import threading
 import time 
 import pygetwindow as gw
 
+# Checking for the activity of the user
+# if watching a video
+# if its afk
+# the last search they made 
+
 def monitor_system(state):
     while True:
         try:

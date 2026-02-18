@@ -19,9 +19,18 @@ from window_consts import SCREEN
 class World:
     entities: list[Entity] = []
 
+# The one in charge of all Particles
+class ParticlesManager:
+    def __init__(self):
+        self.particles = []
+
+    def emit(self, x,y, vx,vy, life, color):
+        pass
+
+
 T = TypeVar('T', bound='Component')
 class Entity():
-    __slots__ = ['components', 'pos', 'image', 'name', 'facing']
+    __slots__ = ['components', 'pos', 'image', 'name', 'facing', 'active']
 
     def __init__(self, image:pygame.Surface = Surface((0,0)), name:str = 'no_name', components:list[Component] = []):
         self.components = components 
@@ -29,6 +38,7 @@ class Entity():
         self.image: Surface = image
         self.name:  str = name
         self.facing:int = 1
+        self.active:bool = True
 
     # Called once at the very beggining
     def start(self):
@@ -37,6 +47,9 @@ class Entity():
 
     # Draws the entity image 
     def draw(self):
+        # Dont do a thing if inactive
+        if not self.active: return
+
         # Dont draw if not visible
         if self.pos.y < -20: return
 
@@ -53,6 +66,8 @@ class Entity():
 
     # Updates everycomponent
     def update(self, dt:float):
+        # Dont do a thing if inactive
+        if not self.active: return
         for comp in self.components:
             comp.update(dt)
 
