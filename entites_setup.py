@@ -19,10 +19,10 @@ def initial_entities():
     air:        Animation = Animation('air',        [6, 7, 8],      frame_duration=0.2)
     talk:       Animation = Animation('talk',       [9, 10, 11],    frame_duration=0.2)
     go_sleep:   Animation = Animation('go_sleep',   [15, 16, 17],   frame_duration=0.2,     loop=False)
-    sleeping:   Animation = Animation('sleeping',   [18, 19, 20],   frame_duration=0.2)
+    sleeping:   Animation = Animation('sleeping',   [18, 19, 20],   frame_duration=0.3)
 
     # entity and components
-    for i in range(100):
+    for i in range(5):
         npc = Entity(name=f'Entity{i}',
             components= [
             PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),

@@ -1,5 +1,6 @@
 import math
 class Vector2D():
+    __slots__ = ['x', 'y']
     def __init__(self, x,y) -> None:
         self.x:float = x
         self.y:float = y

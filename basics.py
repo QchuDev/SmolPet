@@ -20,6 +20,8 @@ class World:
 
 T = TypeVar('T', bound='Component')
 class Entity():
+    __slots__ = ['components', 'pos', 'image', 'name', 'facing']
+
     def __init__(self, image:pygame.Surface = Surface((0,0)), name:str = 'no_name', components:list[Component] = []):
         self.components = components 
         self.pos:   Vector2D = Vector2D(0,0)
@@ -34,6 +36,9 @@ class Entity():
 
     # Draws the entity image 
     def draw(self):
+        # Dont draw if not visible
+        if self.pos.y < -20: return
+
         for c in self.components:
             c.draw()
 
@@ -63,6 +68,7 @@ class Entity():
 
 # Interface of the Components ("what should they have")
 class Component(ABC):
+    __slots__ = ['parent']
 
     # A component only has to know its parent
     def __init__(self) -> None:
@@ -82,12 +88,14 @@ class Component(ABC):
 
 # Spritesheet: extracts the images of a spritesheet and saves the parts
 class SpriteSheet():
-    
+    __slots__ = ['sprites', 'size']
     def __init__(self, file_path:str, cell_size=(64,64), scale_factor=1) -> None:
         if file_path == '': return
         sheet:Surface = pygame.image.load(file_path).convert_alpha()
         w, h = cell_size[0], cell_size[1]
+        
         self.sprites: list[Surface] = []
+
         i,j = 0,0
         self.size = 0
         while(j < sheet.get_height()):
@@ -114,6 +122,7 @@ class SpriteSheet():
 
 # Animation: has name, a sequence of indexes, frame duration and if its a loop
 class Animation():
+    __slots__ = ['name', 'seq', 'loop', 'frame_duration']
     def __init__(self, name:str, seq:list[int], loop:bool = True, frame_duration:float = 0.1) -> None:
         self.name = name
         self.seq = seq
@@ -122,16 +131,17 @@ class Animation():
 
 # CharacterData: has name, phrases and a SpriteSheet
 class CharacterData():
+    __slots__ = ['name', 'phrases', 'ss']
     def __init__(self, ss: SpriteSheet, name:str, phrases:list[str] = []):
         self.name:      str = name
         self.phrases:   list[str] = phrases
         self.ss:        SpriteSheet = ss
 
-
 # WIP
 
 # State:
 class State():
+    __slots__ = ['name', 'transitions']
     def __init__(self, name:str = '', trans: list[Transition] = []):
         self.name:  str = name
         self.transitions:  list[Transition] = trans
@@ -147,6 +157,7 @@ class State():
 
 # Transition: 
 class Transition():
+    __slots__ = ['to_state', 'condition']
     def __init__(self, to_state: str, condition):
         self.to_state = to_state
         self.condition = condition

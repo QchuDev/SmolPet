@@ -9,6 +9,9 @@ from basics import SpriteSheet, CharacterData
 bobby_ss = SpriteSheet('resources/images/bobby_16.png', (16,16), scale_factor=4)
 cuchu_ss = SpriteSheet('resources/images/cuchu_16.png', (16,16), scale_factor=4)
 pol_ss = SpriteSheet('resources/images/pol_16.png', (16,16), scale_factor=4)
+squalo_ss = SpriteSheet('resources/images/squalo_16.png', (16,16), scale_factor=4)
+dino_ss = SpriteSheet('resources/images/dino_16.png', (16,16), scale_factor=4)
+pachu_ss = SpriteSheet('resources/images/pachu_16.png', (16,16), scale_factor=4)
 
 # Phrases 
 today = datetime.date.today()
@@ -44,11 +47,13 @@ CUCHU_PHRASES = [
         'Tirameee',
         'Quiero tiramisu'
 ]
+
 BOBBY_PHRASES = [
     'Im a little piece of art', 
     'I cant feel a thing', 
     'My flesh is pixels'
 ]
+
 POL_PHRASES = [
     'Guau', 
     'Guau Guau', 
@@ -56,9 +61,35 @@ POL_PHRASES = [
     'grr'
 ]
 
+SQUALO_PHRASES = [
+    'glu glu glu', 
+    'ñam ñam ñam', 
+    'mamiii', 
+    '?'
+]
+
+DINO_PHRASES = [
+    'rawr', 
+    'ñam ñam ñam', 
+    'grrr', 
+    'y papi?'
+]
+
+PACHU_PHRASES = [
+    'Siempre tengo la razón', 
+    'Mmmm... faltan tildes', 
+    'Tengo que trabajar', 
+    'Mi piojito jsjs',
+    'BOOM',
+    ''
+]
+
 # Character DATA
 CHARACTERS: list[CharacterData] = [
     CharacterData(bobby_ss, 'Bobby', BOBBY_PHRASES),
     CharacterData(cuchu_ss, 'Cuchu', CUCHU_PHRASES),
-    CharacterData(pol_ss, 'Pol', POL_PHRASES)
+    CharacterData(pol_ss, 'Pol', POL_PHRASES),
+    CharacterData(squalo_ss, 'Squalo', SQUALO_PHRASES),
+    CharacterData(dino_ss, 'Dino', DINO_PHRASES),
+    CharacterData(pachu_ss, 'Pachu', PACHU_PHRASES)
 ]

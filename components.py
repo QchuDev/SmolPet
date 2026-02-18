@@ -19,6 +19,7 @@ from math_custom import Vector2D
 
 # Animator: decides which is the next frame from a group of animations
 class Animator(Component):
+    __slots__ = ['frame_idx', 'ss', 'anims', 'timer', 'current_anim']
     def __init__(self, ss:SpriteSheet=SpriteSheet(''), anims:list[Animation] = []) -> None:
         self.frame_idx:int = 0
         
@@ -44,7 +45,6 @@ class Animator(Component):
 
             self.parent.image = self.ss.get_sprite(sprite_id)
 
-
     def play(self, name:str):
         
         if self.current_anim and self.current_anim.name == name:
@@ -57,7 +57,6 @@ class Animator(Component):
 
             sprite_id = self.current_anim.seq[self.frame_idx]
             self.parent.image = self.ss.get_sprite(sprite_id)
-
 
     def is_finished(self) -> bool:
         if self.current_anim: 
@@ -72,7 +71,7 @@ class Animator(Component):
 # PhysicalBall: the one in charge of following the rules of physics updating itself
 # Problem: sometimes the npc jumps too much, there is dependecy with the frames
 class PhysicalBall(Component):
-
+    __slots__ = ['pos', 'vel', 'acc', 'mass', 'radius', 'air_resist', 'retention_x', 'retention_y', 'is_hitting_floor', 'is_hitting_wall', 'is_grounded']
     def __init__(self, pos=(SCREEN_CENTER[0], SCREEN_CENTER[1]), vel = (0,0), mass:float=1, radius:float=1, air_resist:float=0.5, retention_x:float=0.8, retention_y:float=0.4):
         # State of the object
         self.pos:Vector2D = Vector2D(pos[0], pos[1])
@@ -91,11 +90,8 @@ class PhysicalBall(Component):
         # hits info
         self.is_hitting_floor:      bool = False
         self.is_hitting_wall:       bool = False
-        self.timer:                 float = 0.05
         # extra info
         self.is_grounded:           bool = False
-
-        
 
     # Applying gravity and normal floor force
     def gravityEffect(self) -> None:
@@ -180,12 +176,15 @@ class PhysicalBall(Component):
 
 # MouseDrag lets the entity get dragged with physics by the mouse
 class MouseDrag(Component):
+    __slots__ = ['mouse_pos', 'is_pulling', 'phys', 'animator', 'pos_diff', 'diff_mag']
     def __init__(self) -> None:
         # Mouse variables
         self.mouse_pos:Vector2D = Vector2D(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
         self.is_pulling = False
         self.phys:PhysicalBall = PhysicalBall()
         self.animator: Animator | None = None
+        self.pos_diff: Vector2D = Vector2D(0,0)
+        self.diff_mag: float = 0
     
     # The entity needs a PhysicalBall to work.
     def start(self, entity:Entity):
@@ -224,6 +223,7 @@ class MouseDrag(Component):
 
 # Component who decides the current animation to be played
 class StatesManager(Component):
+    __slots__ = ['current_state', 'states', 'animator']
     def __init__(self, states:list[State]) :
         self.current_state:     State = states[0]
         self.states:            dict[str,State] = {s.name : s for s in states}
@@ -260,6 +260,8 @@ class StatesManager(Component):
 
 # Components which gets a set of CharactersData (Object)
 class CharactersHandler(Component):
+    __slots__ =['curr_char', 'characters', 'animator', 'ai_controller']
+
     def __init__(self, characters: list[CharacterData]) -> None:
         self.curr_char: str = characters[random.randrange(0,len(characters))].name
         self.characters: dict[str, CharacterData] = {c.name: c for c in characters}
@@ -304,6 +306,7 @@ class CharactersHandler(Component):
 
 # Spawns a Bubble text with the current phrase setted
 class TextBubble(Component):
+    __slots__ = ['raw_sheet', 'c', 'font', 'phrase', 'show']
     def __init__(self, sheet_path: str, corner_size: int = 8):
         self.raw_sheet: SpriteSheet = SpriteSheet(sheet_path, (4,4), 4)
         self.c = corner_size # Tamaño en píxeles de las esquinas
@@ -385,6 +388,7 @@ class TextBubble(Component):
             current_y += line_h
 
         return bubble_surf
+    
     # Function to get the largest amount of characters on a line and the divided lines
     def text_info(self, text: str) -> tuple[list[str], str]:
         max_chars = 16
@@ -425,7 +429,7 @@ class TextBubble(Component):
 # Component to decide the next action of the NPC
 # This class changes the state of the StateManager to play certain animations
 class AIController(Component):
-    
+    __slots__ = ['phys', 'bubb', 'timer_range', 'max_time', 'timer', 'actions', 'curr_action', 'target_x', 'target_setted', 'going_to_open', 'phrases', 'weights', 'total_weight']
     def __init__(self, timer_range:tuple[float,float] = (1,3)) -> None:
         # Needed components
         self.phys: PhysicalBall = PhysicalBall()
@@ -449,11 +453,12 @@ class AIController(Component):
         # Random action and weights system
         self.weights = ACTION_WEIGHTS
 
-        self.total_weight: int = 0
+        temp: int = 0
         for w in self.weights:
-            self.total_weight += w[1]
-
+            temp += w[1]
         
+        self.total_weight: int = temp
+
     # Getting all needed componets
     def start(self, entity:Entity):
         super().start(entity)
@@ -551,8 +556,6 @@ class AIController(Component):
                     # 3. Apply a knockback force to the entity
                     pass
 
-
-
     def randomize_action(self):
         rand = random.randrange(0, self.total_weight+1)
         #print(f'Random number: {rand}/{self.total_weight}')
@@ -571,6 +574,7 @@ class AIController(Component):
 # =====================================================================================
 
 class EntityEraser(Component):
+    __slots__ = ['phys']
     def __init__(self) -> None:
         self.phys: PhysicalBall = PhysicalBall()        
 
