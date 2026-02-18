@@ -23,17 +23,32 @@ def initial_entities():
 
     # entity and components
     for i in range(250):
-        npc = Entity(name=f'Entity{i}',
-            components= [
-            PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
-            MouseDrag(),
-            Animator(anims = [idle, hit_floor, hit_wall, air, talk, go_sleep, sleeping]),  # sleeping WIP
-            AIController(timer_range=(0.5, 2)),
-            StatesManager(STATES),
-            TextBubble('resources/images/text_bubble.png', corner_size=16),
-            CharactersHandler(CHARACTERS)
-            ]
-        )
+        # First entity kill the others on touch (testing)
+        if i == 0:
+            npc = Entity(name=f'Killer',
+                components= [
+                PhysicalBall(pos=(0,0), radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
+                MouseDrag(),
+                Animator(anims = [idle, hit_floor, hit_wall, air, talk, go_sleep, sleeping]),  # sleeping WIP
+                AIController(timer_range=(0.5, 2)),
+                StatesManager(STATES),
+                TextBubble('resources/images/text_bubble.png', corner_size=16),
+                CharactersHandler(CHARACTERS),
+                EntityEraser()
+                ]
+            )
+        else:
+            npc = Entity(name=f'Bystander{i}',
+                components= [
+                PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
+                MouseDrag(),
+                Animator(anims = [idle, hit_floor, hit_wall, air, talk, go_sleep, sleeping]),  # sleeping WIP
+                AIController(timer_range=(0.5, 2)),
+                StatesManager(STATES),
+                TextBubble('resources/images/text_bubble.png', corner_size=16),
+                CharactersHandler(CHARACTERS),
+                ]
+            )
         
         ents.append(npc)
 

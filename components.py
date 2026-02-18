@@ -593,7 +593,7 @@ class EntityEraser(Component):
             if e == self.parent: continue
             d = self.parent.pos.distance(e.pos)
             if d < self.phys.radius:
-                World.entities.remove(e)
+                e.active = False        # Inactives the entity it touches
 
 class ParticlesEmitter(Component):
     __slots__ = ['frequency', 'timer', 'manager']

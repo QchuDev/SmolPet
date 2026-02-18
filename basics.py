@@ -24,9 +24,17 @@ class ParticlesManager:
     def __init__(self):
         self.particles = []
 
+    # add to the particles array the new particles to be rendered by the draw()
     def emit(self, x,y, vx,vy, life, color):
         pass
 
+    # update the state of each particle
+    def update(self, dt):
+        pass
+    
+    # draws all the particles at once 
+    def draw(self):
+        pass
 
 T = TypeVar('T', bound='Component')
 class Entity():
