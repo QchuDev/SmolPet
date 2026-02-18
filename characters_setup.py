@@ -81,7 +81,7 @@ PACHU_PHRASES = [
     'Tengo que trabajar', 
     'Mi piojito jsjs',
     'BOOM',
-    ''
+    'Quiero sushi'
 ]
 
 # Character DATA

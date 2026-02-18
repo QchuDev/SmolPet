@@ -25,7 +25,6 @@ SLEEP_WEIGHT    :tuple[str,int] = ('sleep', 2)
 MOVE_WEIGHT     :tuple[str,int] = ('move', 40)
 WAIT_WEIGHT     :tuple[str,int] = ('wait', 60)
 TALK_WEIGHT     :tuple[str,int] = ('talk', 10)
-
-OPEN_IMG_WEIGHT :tuple[str,int] = ('open_image', 8)
+OPEN_IMG_WEIGHT :tuple[str,int] = ('open_image', 1)
 
 ACTION_WEIGHTS  :list[tuple[str,int]] = [SLEEP_WEIGHT, MOVE_WEIGHT, WAIT_WEIGHT, TALK_WEIGHT, OPEN_IMG_WEIGHT]  # Randomize weights for actions

@@ -14,6 +14,7 @@ from window_consts import SCREEN
 #                               ESSENTIALS
 # =====================================================================================
 
+
 # All Entities in the scene
 class World:
     entities: list[Entity] = []
