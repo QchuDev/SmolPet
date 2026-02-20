@@ -23,7 +23,7 @@ def initial_entities():
     sleeping:   Animation = Animation('sleeping',   [18, 19, 20],   frame_duration=0.3)
 
     # entity and components
-    for i in range(250):
+    for i in range(1):
         npc = Entity(name=f'Entity{i}',
                 components= [
                 PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
@@ -32,7 +32,7 @@ def initial_entities():
                 AIController(timer_range=(0.5, 2)),
                 StatesManager(STATES),
                 TextBubble('resources/images/text_bubble.png', corner_size=16),
-                CharactersHandler(CHARACTERS[0:1]),
+                CharactersHandler(CHARACTERS),
                 ]
             )
         
