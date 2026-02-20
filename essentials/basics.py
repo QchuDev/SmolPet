@@ -1,40 +1,74 @@
 import pygame
+import random
 from abc import ABC, abstractmethod
 from typing import TypeVar, Type, Optional
 
 # Custom
 from pygame import Surface
-from math_custom import Vector2D
-from window_consts import SCREEN
+from .math_custom import Vector2D
+from .window_consts import SCREEN
 
 
 
 
 # =====================================================================================
-#                               ESSENTIALS
+#                               BASIC MANAGERS AND CLASSES
 # =====================================================================================
 
 
-# All Entities in the scene
+# This objects is in charged of presenting all entities needed as fast as possible
 class World:
     entities: list[Entity] = []
 
 # The one in charge of all Particles
 class ParticlesManager:
     def __init__(self):
+        # The states of each particle is represented by: [x,y, vx,vy, lifetime, id, state, accy]
         self.particles = []
 
+        temp_sprites = SpriteSheet('resources/images/particles_8.png', cell_size=(8,8), scale_factor=4).sprites
+        self.textures = {
+            'spark': temp_sprites[0:4],
+            'popcorn': temp_sprites[4:8],
+            'heart': temp_sprites[8:12],
+        }
+
     # add to the particles array the new particles to be rendered by the draw()
-    def emit(self, x,y, vx,vy, life, color):
-        pass
+    def emit(self, x,y, particle_type:str, mid_lifetime=1.0, ammount:int=1, force=2.0, accy=0):
+        for _ in range(ammount):
+            vx=random.uniform(-force, force)
+            vy=random.uniform(-force, force)
+
+            # Some randomness for variation
+            lifetime = mid_lifetime*random.uniform(0.8, 1.2)
+
+            self.particles.append([x,y ,vx,vy, lifetime, particle_type, 0, mid_lifetime, accy])
 
     # update the state of each particle
     def update(self, dt):
-        pass
+        for i in range(len(self.particles)-1, -1, -1):
+            p = self.particles[i]
+            p[0]+= p[2] # x += vx
+            p[1]+= p[3] # y += vy
+
+            # Acceleration in y axis
+            p[3] += p[8]
+            
+            p[4] -= dt  # lifetime -= dt
+            if p[4]<0:
+                self.particles.pop(i)   # remove particle if its time is over
+
+            # Update state 
+            if      p[4]>0.8*p[7]:   p[6] = 0
+            elif    p[4]>0.6*p[7]:   p[6] = 1
+            elif    p[4]>0.4*p[7]:   p[6] = 2
+            else:                    p[6] = 3
     
     # draws all the particles at once 
     def draw(self):
-        pass
+        for p in self.particles:
+            img = self.textures[p[5]]
+            SCREEN.blit(img[p[6]], (int(p[0]), int(p[1])))
 
 T = TypeVar('T', bound='Component')
 class Entity():
@@ -160,8 +194,6 @@ class CharacterData():
         self.name:      str = name
         self.phrases:   list[str] = phrases
         self.ss:        SpriteSheet = ss
-
-# WIP
 
 # State:
 class State():

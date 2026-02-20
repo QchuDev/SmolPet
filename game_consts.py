@@ -1,8 +1,8 @@
 import pygame
 import datetime
 
-from basics import CharacterData, SpriteSheet, State, Transition
-from math_custom import Vector2D
+from essentials.basics import CharacterData, SpriteSheet, State, Transition
+from essentials.math_custom import Vector2D
 
 # PHYSICAL CONSTANTS
 GRAVITY:Vector2D = Vector2D(0, 980)
@@ -28,3 +28,4 @@ TALK_WEIGHT     :tuple[str,int] = ('talk', 10)
 OPEN_IMG_WEIGHT :tuple[str,int] = ('open_image', 1)
 
 ACTION_WEIGHTS  :list[tuple[str,int]] = [SLEEP_WEIGHT, MOVE_WEIGHT, WAIT_WEIGHT, TALK_WEIGHT, OPEN_IMG_WEIGHT]  # Randomize weights for actions
+

@@ -1,7 +1,8 @@
 import random
 import pygame
-from basics import Entity, Animation, World
-from components import PhysicalBall, MouseDrag, Animator, AIController, StatesManager, TextBubble, CharactersHandler, EntityEraser
+from essentials.basics import Entity, Animation, World
+from essentials.math_custom import Vector2D
+from essentials.components import PhysicalBall, MouseDrag, Animator, AIController, StatesManager, TextBubble, CharactersHandler, EntityEraser
 from characters_setup import CHARACTERS
 from states_graph import STATES
 
@@ -23,22 +24,7 @@ def initial_entities():
 
     # entity and components
     for i in range(250):
-        # First entity kill the others on touch (testing)
-        if i == 0:
-            npc = Entity(name=f'Killer',
-                components= [
-                PhysicalBall(pos=(0,0), radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
-                MouseDrag(),
-                Animator(anims = [idle, hit_floor, hit_wall, air, talk, go_sleep, sleeping]),  # sleeping WIP
-                AIController(timer_range=(0.5, 2)),
-                StatesManager(STATES),
-                TextBubble('resources/images/text_bubble.png', corner_size=16),
-                CharactersHandler(CHARACTERS),
-                EntityEraser()
-                ]
-            )
-        else:
-            npc = Entity(name=f'Bystander{i}',
+        npc = Entity(name=f'Entity{i}',
                 components= [
                 PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
                 MouseDrag(),
@@ -46,9 +32,13 @@ def initial_entities():
                 AIController(timer_range=(0.5, 2)),
                 StatesManager(STATES),
                 TextBubble('resources/images/text_bubble.png', corner_size=16),
-                CharactersHandler(CHARACTERS),
+                CharactersHandler(CHARACTERS[0:1]),
                 ]
             )
+        
+        phys = npc.get_component(PhysicalBall)
+        rand_push = Vector2D(random.random()*2-1, random.random()*2-1)*50000
+        if phys: phys.applyForce(rand_push)
         
         ents.append(npc)
 

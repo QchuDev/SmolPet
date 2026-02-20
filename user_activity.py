@@ -15,7 +15,7 @@ def monitor_system(state):
 
             if active_window:
                 title = active_window.title.lower()
-                video_kw = ['youtube', 'netflix', 'vlc', 'disney', 'prime']
+                video_kw = ['youtube', 'netflix', 'vlc', 'disney', 'prime', 'twitch']
                 state['is_watching_video'] = any(k in title for k in video_kw)
 
                 if 'google search' in title or 'buscar con google' in title:

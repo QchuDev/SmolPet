@@ -1,5 +1,5 @@
-from basics import Transition, State
-from components import AIController, PhysicalBall, Animator
+from essentials.basics import Transition, State
+from essentials.components import AIController, PhysicalBall, Animator
 from game_consts import SLIDE_STOP, BOUNCE_STOP
 
 anim = lambda e: e.get_component(Animator)

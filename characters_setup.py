@@ -1,5 +1,5 @@
 import datetime
-from basics import SpriteSheet, CharacterData
+from essentials.basics import SpriteSheet, CharacterData
 
 # ===================================================================================================================================
 #                                ALL CHARACTER DATAS

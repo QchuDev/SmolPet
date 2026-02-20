@@ -4,13 +4,13 @@ import random
 from typing import Type
 
 # Custom
-from basics import Component, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
-from window_consts import SCREEN_W, SCREEN_H, SCREEN, SCREEN_CENTER
+from .basics import Component, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
+from .window_consts import SCREEN_W, SCREEN_H, SCREEN, SCREEN_CENTER
 
 from game_consts import GRAVITY, BOUNCE_STOP, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
 from game_consts import WAIT_TIME, SLEEP_TIME, JUMP_FORCE, TARGET_STOP, ACTION_WEIGHTS
 
-from math_custom import Vector2D
+from .math_custom import Vector2D
 
 
 # =====================================================================================
@@ -601,5 +601,4 @@ class ParticlesEmitter(Component):
         self.manager: ParticlesManager = manager
         self.frequency = frequency
         self.timer = 0
-
     
