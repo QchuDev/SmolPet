@@ -6,12 +6,12 @@ from essentials.basics import SpriteSheet, CharacterData
 # ===================================================================================================================================
 
 # Spritesheets
-bobby_ss = SpriteSheet('resources/images/bobby_16.png', (16,16), scale_factor=4)
-cuchu_ss = SpriteSheet('resources/images/cuchu_16.png', (16,16), scale_factor=4)
-pol_ss = SpriteSheet('resources/images/pol_16.png', (16,16), scale_factor=4)
-squalo_ss = SpriteSheet('resources/images/squalo_16.png', (16,16), scale_factor=4)
-dino_ss = SpriteSheet('resources/images/dino_16.png', (16,16), scale_factor=4)
-pachu_ss = SpriteSheet('resources/images/pachu_16.png', (16,16), scale_factor=4)
+bobby_ss = SpriteSheet('resources/images/characters/bobby_16.png', (16,16), scale_factor=4)
+cuchu_ss = SpriteSheet('resources/images/characters/cuchu_16.png', (16,16), scale_factor=4)
+pol_ss = SpriteSheet('resources/images/characters/pol_16.png', (16,16), scale_factor=4)
+squalo_ss = SpriteSheet('resources/images/characters/squalo_16.png', (16,16), scale_factor=4)
+dino_ss = SpriteSheet('resources/images/characters/dino_16.png', (16,16), scale_factor=4)
+pachu_ss = SpriteSheet('resources/images/characters/pachu_16.png', (16,16), scale_factor=4)
 
 # Phrases 
 today = datetime.date.today()
