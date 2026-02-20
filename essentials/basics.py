@@ -1,12 +1,13 @@
 import pygame
+from pygame import Rect, Surface
 import random
 from abc import ABC, abstractmethod
 from typing import TypeVar, Type, Optional
+from pygame._sdl2 import Window, Renderer, Texture, Image
 
 # Custom
-from pygame import Surface
 from .math_custom import Vector2D
-from .window_consts import SCREEN
+from .window_setup import RENDERER, WINDOW
 
 
 
@@ -25,9 +26,10 @@ class ParticlesManager:
     def __init__(self):
         # The states of each particle is represented by: [x,y, vx,vy, lifetime, id, state, accy]
         self.particles = []
-
+        self.textures = Texture.from_surface(RENDERER, pygame.image.load('resources/images/particles_8.png'))
+        
         temp_sprites = SpriteSheet('resources/images/particles_8.png', cell_size=(8,8), scale_factor=4).sprites
-        self.textures = {
+        self.uvs = {
             'spark': temp_sprites[0:4],
             'popcorn': temp_sprites[4:8],
             'heart': temp_sprites[8:12],
@@ -67,21 +69,22 @@ class ParticlesManager:
     # draws all the particles at once 
     def draw(self):
         for p in self.particles:
-            img = self.textures[p[5]]
-            SCREEN.blit(img[p[6]], (int(p[0]), int(p[1])))
+            img_rect = self.uvs[p[5]][p[6]]
+            RENDERER.blit(self.textures, img_rect, img_rect)
+
 
 T = TypeVar('T', bound='Component')
 class Entity():
-    __slots__ = ['components', 'pos', 'image', 'name', 'facing', 'active']
+    __slots__ = ['components', 'pos', 'texture', 'name', 'facing', 'active']
 
-    def __init__(self, image:pygame.Surface = Surface((0,0)), name:str = 'no_name', components:list[Component] = []):
+    def __init__(self, texture:Texture | None = None, name:str = 'no_name', components:list[Component] = []):
         self.components = components 
         self.pos:   Vector2D = Vector2D(0,0)
-        self.image: Surface = image
+        self.texture: Texture | None  = texture
         self.name:  str = name
         self.facing:int = 1
         self.active:bool = True
-
+        
     # Called once at the very beggining
     def start(self):
         for comp in self.components:
@@ -90,7 +93,7 @@ class Entity():
     # Draws the entity image 
     def draw(self):
         # Dont do a thing if inactive
-        if not self.active: return
+        if not self.active or not self.texture: return
 
         # Dont draw if not visible
         if self.pos.y < -20: return
@@ -98,14 +101,18 @@ class Entity():
         for c in self.components:
             c.draw()
 
-        # Flip if necessary
-        if self.facing == -1:
-            image_to_draw = pygame.transform.flip(self.image, True, False)
-        else:
-            image_to_draw = self.image
 
-        SCREEN.blit(image_to_draw, (int(self.pos.x - self.image.width*0.5) , int(self.pos.y - self.image.height*0.5)))
+        draw_x = self.pos.x - self.texture.width * 0.5
+        draw_y = self.pos.y - self.texture.height * 0.5
+        dest_rect = Rect(draw_x, draw_y, self.texture.width, self.texture.height)
 
+        # WIP CHANGING THE WAY OF DRAWING ON SCREEN
+        RENDERER.blit(
+            self.texture, 
+            dest_rect
+        )
+
+        
     # Updates everycomponent
     def update(self, dt:float):
         # Dont do a thing if inactive
@@ -146,36 +153,36 @@ class Component(ABC):
 
 # Spritesheet: extracts the images of a spritesheet and saves the parts
 class SpriteSheet():
-    __slots__ = ['sprites', 'size']
+    __slots__ = ['sprites', 'size', 'texture', 'sprite_w','sprite_h']
     def __init__(self, file_path:str, cell_size=(64,64), scale_factor=1) -> None:
         if file_path == '': return
-        sheet:Surface = pygame.image.load(file_path).convert_alpha()
-        w, h = cell_size[0], cell_size[1]
+        sheet:Surface = pygame.image.load(file_path)
+
+        # Scaling sheet and also width and height
+        if scale_factor != 1:
+            new_size = (sheet.get_width() * scale_factor, sheet.get_height() * scale_factor)
+            sheet = pygame.transform.scale(sheet, new_size)
+            w, h = cell_size[0] * scale_factor, cell_size[1] * scale_factor
+        else:
+            w, h = cell_size[0], cell_size[1]
+
+        # CREATING THE TEXTURE AT VRAM
+        self.texture = Texture.from_surface(RENDERER, sheet)
+
+        self.sprites: list[Rect] = []
+        sheet_w, sheet_h = sheet.get_size()
         
-        self.sprites: list[Surface] = []
+        # Cutting the sheet to sprites
+        for j in range(0, sheet_h, int(h)):
+            for i in range(0, sheet_w, int(w)):
+                rect = pygame.Rect(i, j, w, h)
+                self.sprites.append(rect)
 
-        i,j = 0,0
-        self.size = 0
-        while(j < sheet.get_height()):
-
-            rect = pygame.Rect(i, j, w, h)
-
-            sprite:Surface = sheet.subsurface(rect).copy()
-            
-            # Scale de sprites
-            new_size = (sprite.get_width()*scale_factor, sprite.get_height()*scale_factor)
-            sprite = pygame.transform.scale(sprite, new_size)
-
-            self.sprites.append(sprite)
-
-            if i + w >= sheet.get_width():
-                i = 0
-                j += h
-            else:
-                i += w
         self.size = len(self.sprites)
 
-    def get_sprite(self, index:int) -> Surface:
+        self.sprite_w, self.sprite_h = w, h
+        
+    def get_sprite(self, index:int) -> Rect: # (x,y) coords of the sprite in the sheet
         return self.sprites[index]
 
 # Animation: has name, a sequence of indexes, frame duration and if its a loop

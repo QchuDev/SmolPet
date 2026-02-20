@@ -5,13 +5,19 @@ from typing import Type
 
 # Custom
 from .basics import Component, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
-from .window_consts import SCREEN_W, SCREEN_H, SCREEN, SCREEN_CENTER
+from .window_setup import SCREEN_W, SCREEN_H, WINDOW, SCREEN_CENTER
 
 from game_consts import GRAVITY, BOUNCE_STOP, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
 from game_consts import WAIT_TIME, SLEEP_TIME, JUMP_FORCE, TARGET_STOP, ACTION_WEIGHTS
+from prefabs import POPCORN_PRTS
 
 from .math_custom import Vector2D
 
+# BROKEN VERSION: WIP CHANGING THE WAY OF DRAWING
+# BROKEN VERSION: WIP CHANGING THE WAY OF DRAWING
+# BROKEN VERSION: WIP CHANGING THE WAY OF DRAWING
+# BROKEN VERSION: WIP CHANGING THE WAY OF DRAWING
+# BROKEN VERSION: WIP CHANGING THE WAY OF DRAWING
 
 # =====================================================================================
 #                               COMPONENTS
@@ -43,7 +49,7 @@ class Animator(Component):
                 self.frame_idx = (self.frame_idx + 1) % len(self.current_anim.seq)
                 sprite_id = self.current_anim.seq[self.frame_idx]
 
-            self.parent.image = self.ss.get_sprite(sprite_id)
+            self.parent.texture = self.ss.get_sprite(sprite_id)
 
     def play(self, name:str):
         
@@ -56,7 +62,7 @@ class Animator(Component):
             self.timer = 0
 
             sprite_id = self.current_anim.seq[self.frame_idx]
-            self.parent.image = self.ss.get_sprite(sprite_id)
+            self.parent.texture = self.ss.get_sprite(sprite_id)
 
     def is_finished(self) -> bool:
         if self.current_anim: 
@@ -71,16 +77,16 @@ class Animator(Component):
 # PhysicalBall: the one in charge of following the rules of physics updating itself
 # Problem: sometimes the npc jumps too much, there is dependecy with the frames
 class PhysicalBall(Component):
-    __slots__ = ['pos', 'vel', 'acc', 'mass', 'radius', 'air_resist', 'retention_x', 'retention_y', 'is_hitting_floor', 'is_hitting_wall', 'is_grounded']
-    def __init__(self, pos=(SCREEN_CENTER[0], SCREEN_CENTER[1]), vel = (0,0), mass:float=1, radius:float=1, air_resist:float=0.5, retention_x:float=0.8, retention_y:float=0.4):
+    __slots__ = ['pos', 'vel', 'acc', 'mass', 'radius', 'air_resist', 'retention_x', 'retention_y', 'is_hitting_floor', 'is_hitting_wall', 'is_grounded', 'directed']
+    def __init__(self, pos=(SCREEN_CENTER[0], SCREEN_CENTER[1]), vel = (0,0), mass:float=1, radius:float=1, air_resist:float=0.05, retention_x:float=0.8, retention_y:float=0.4, directed:bool = True):
         # State of the object
         self.pos:Vector2D = Vector2D(pos[0], pos[1])
         self.vel:Vector2D = Vector2D(vel[0], vel[1])
         self.acc:Vector2D = Vector2D(0,0)
         
         # Properties of body
-        self.mass:float = max(0.001, mass)
-        self.radius:float = max(0.001, radius)
+        self.mass:float = max(0.01, mass)
+        self.radius:float = max(0.01, radius)
         self.air_resist:float = air_resist
         
         # How much of the speed is retained on collision
@@ -92,6 +98,8 @@ class PhysicalBall(Component):
         self.is_hitting_wall:       bool = False
         # extra info
         self.is_grounded:           bool = False
+
+        self.directed = directed
 
     # Applying gravity and normal floor force
     def gravityEffect(self) -> None:
@@ -147,7 +155,6 @@ class PhysicalBall(Component):
         drag_dir = -self.vel.normalized()
         self.applyForce(drag_dir*self.air_resist*(self.vel.dot(self.vel)))
     
-
     # Update call from the entity
     def update(self, dt:float):
 
@@ -166,12 +173,13 @@ class PhysicalBall(Component):
         self.acc.x = 0
         self.acc.y = 0
 
-        if abs(self.vel.x) > 50:
-            if self.vel.x < 0:
-                self.parent.facing = -1
-            elif self.vel.x > 0:
-                self.parent.facing = 1
-        
+        if self.directed:
+            if abs(self.vel.x) > 50:
+                if self.vel.x < 0:
+                    self.parent.facing = -1
+                elif self.vel.x > 0:
+                    self.parent.facing = 1
+            
         self.parent.pos = self.pos
 
 # MouseDrag lets the entity get dragged with physics by the mouse
@@ -318,9 +326,9 @@ class TextBubble(Component):
         self.phrase = new_phrase
 
     def draw(self):
-        if self.show:
+        if self.show and self.parent.texture:
             bubble = self.generate_bubble()
-            SCREEN.blit(bubble, (self.parent.pos.x + self.parent.image.get_width()*0.25, self.parent.pos.y - self.parent.image.get_height()*1.2))
+            SCREEN.blit(bubble, (self.parent.pos.x + self.parent.texture.get_width()*0.25, self.parent.pos.y - self.parent.texture.get_height()*1.2))
     
     # Returns a Surface with the current phrase
     def generate_bubble(self, padding: int = 5) -> pygame.Surface:
@@ -596,9 +604,17 @@ class EntityEraser(Component):
                 e.active = False        # Inactives the entity it touches
 
 class ParticlesEmitter(Component):
-    __slots__ = ['frequency', 'timer', 'manager']
-    def __init__(self, manager, frequency=0.1):
+    __slots__ = ['manager', 'particle', 'frecuency', 'timer']
+    def __init__(self, manager, particle:str ='spark', frecuency=1.0):
         self.manager: ParticlesManager = manager
-        self.frequency = frequency
+        self.particle = particle
+        self.frecuency = frecuency
         self.timer = 0
-    
+        
+    def update(self, dt:float):
+        self.timer += dt
+        if self.timer > self.frecuency:
+            x= self.parent.pos.x
+            y= self.parent.pos.y
+            self.manager.emit(x,y,*POPCORN_PRTS)
+            self.timer = 0
