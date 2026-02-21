@@ -27,7 +27,10 @@ class Vector2D():
     
     def magnitude(self) -> float:
         return math.sqrt(self.x**2 + self.y**2)
-
+    
+    def magnitude_squared(self) -> float:
+        return self.x**2 + self.y**2
+    
     def __str__(self) -> str:
         return f'({self.x}, {self.y})'
 

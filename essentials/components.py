@@ -5,7 +5,7 @@ from typing import Type
 from pygame._sdl2 import Window, Renderer, Texture, Image
 
 # Custom
-from .basics import Component, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
+from .basics import Component, Input, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
 from .window_setup import RENDERER, SCREEN_W, SCREEN_H, WINDOW, SCREEN_CENTER
 
 from game_consts import GRAVITY, BOUNCE_STOP, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
@@ -205,29 +205,24 @@ class MouseDrag(Component):
             
 
     def update(self, dt: float):
-        if self.phys is None:
-            comp = self.parent.get_component(PhysicalBall)
-            if isinstance(comp, PhysicalBall):
-                self.phys = comp 
+        # Ya no llamamos a win32api aquí
+        if Input.left_clicked:
+            self.pos_diff = Input.mouse_pos - self.phys.pos
             
-        
-        left_click_state = win32api.GetAsyncKeyState(0x01)
-
-        if left_click_state & 0x8000:
-            m_x, m_y = win32api.GetCursorPos()
-            self.mouse_pos.x  = m_x
-            self.mouse_pos.y  = m_y
+            # Optimizamos: solo calculamos magnitud si estamos cerca
+            # magnitude_squared es más rápido porque no hace raíz cuadrada
+            dist_sq = self.pos_diff.magnitude_squared()
             
-            self.pos_diff = self.mouse_pos - self.phys.pos
-            self.diff_mag = self.pos_diff.magnitude()
-            
-            if self.diff_mag <= self.phys.radius + 5:
+            if self.is_pulling or dist_sq <= (self.phys.radius + 10)**2:
                 self.is_pulling = True
         else:
             self.is_pulling = False
 
         if self.is_pulling:
-            self.phys.applyForce((self.pos_diff*USER_PULL_STRENGTH) - self.phys.vel*USER_PULL_DAMPING)
+            # Aplicamos la fuerza usando la diferencia ya calculada
+            pull = (self.pos_diff * USER_PULL_STRENGTH)
+            damp = (self.phys.vel * USER_PULL_DAMPING)
+            self.phys.applyForce(pull - damp)
 
 # Component who decides the current animation to be played
 class StatesManager(Component):

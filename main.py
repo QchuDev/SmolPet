@@ -10,7 +10,7 @@ import user_activity
 
 # Execute the entities_setup before reading World
 from entites_setup import prts_manager
-from essentials.basics import World
+from essentials.basics import Input, World
 
 
 # Time Variables
@@ -30,8 +30,10 @@ while running:
     accumulator += dt
     dt = max(0.001, min(0.1, dt))
 
+    # Draw the background
     RENDERER.draw_color = TRANSPARENT_COLOR
     RENDERER.clear()
+
     # Update the entities on a constant way, when the accumulator exceeds the dt_phys (delta time for physics)
     while accumulator >= dt_phys:
         # Update entities
@@ -39,7 +41,12 @@ while running:
            entity.update(dt_phys)
         accumulator -= dt_phys    
 
+    # Update mouse inputs
     m_x, m_y = win32api.GetCursorPos()
+    Input.mouse_pos.x, Input.mouse_pos.y = m_x, m_y
+    Input.left_clicked = bool(win32api.GetAsyncKeyState(0x01) & 0x8000)
+    
+    # Check for pygame events
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:        # Check for key events
             if event.key == pygame.K_ESCAPE:    
@@ -51,7 +58,7 @@ while running:
             elif event.key == pygame.K_3:
                 prts_manager.emit(m_x-15, m_y-15, *HEART_PRTS)
                 
-    # DRAWS.
+    # DRAWS
     for entity in World.entities:
         entity.draw()       # Draw entities
 
@@ -64,6 +71,6 @@ while running:
     monitor.update(dt)
     monitor.render()
 
-    
+
     RENDERER.present()
 

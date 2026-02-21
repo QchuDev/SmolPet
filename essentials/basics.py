@@ -16,6 +16,10 @@ from .window_setup import RENDERER, WINDOW
 #                               BASIC MANAGERS AND CLASSES
 # =====================================================================================
 
+class Input:
+    mouse_pos = Vector2D(0,0)
+    left_clicked = False
+
 
 # This objects is in charged of presenting all entities needed as fast as possible
 class World:
@@ -73,7 +77,6 @@ class ParticlesManager:
             texture = self.uvs[p[5]][p[6]]
             rect = Rect(p[0], p[1], self.w, self.h)
             RENDERER.blit(texture, rect)
-
 
 T = TypeVar('T', bound='Component')
 class Entity():
@@ -194,7 +197,6 @@ class SpriteSheet():
     
     def get_texture(self, index:int) -> Texture: 
         return self.gpu_textures[index]
-
 
 # Animation: has name, a sequence of indexes, frame duration and if its a loop
 class Animation():

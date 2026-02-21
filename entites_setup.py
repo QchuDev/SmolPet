@@ -26,7 +26,7 @@ def initial_entities():
     go_sleep:   Animation = Animation('go_sleep',   [15, 16, 17],   frame_duration=0.2,     loop=False)
     sleeping:   Animation = Animation('sleeping',   [18, 19, 20],   frame_duration=0.3)
     # entity and components
-    for i in range(500):
+    for i in range(250):
         npc = Entity(
                 name=f'Entity{i}',
                 components= [
