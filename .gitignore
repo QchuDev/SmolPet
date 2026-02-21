@@ -2,3 +2,14 @@ _pycache_/
 _pycache_/consts.cpython-314.pyc
 _pycache_/math_custom.cpython-314.pyc
 _pycache_/physics.cpython-314.pyc
+__pycache__/characters_setup.cpython-314.pyc
+__pycache__/entites_setup.cpython-314.pyc
+__pycache__/game_consts.cpython-314.pyc
+__pycache__/prefabs.cpython-314.pyc
+__pycache__/states_graph.cpython-314.pyc
+__pycache__/user_activity.cpython-314.pyc
+essentials/__pycache__/basics.cpython-314.pyc
+essentials/__pycache__/components.cpython-314.pyc
+essentials/__pycache__/debug_tools.cpython-314.pyc
+essentials/__pycache__/math_custom.cpython-314.pyc
+essentials/__pycache__/window_consts.cpython-314.pyc
