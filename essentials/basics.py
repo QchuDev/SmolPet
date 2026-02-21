@@ -31,6 +31,7 @@ class ParticlesManager:
             'spark': temp_sprites[0:4],
             'popcorn': temp_sprites[4:8],
             'heart': temp_sprites[8:12],
+            'smoke': temp_sprites[12:16],
         }
 
     # add to the particles array the new particles to be rendered by the draw()

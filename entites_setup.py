@@ -47,7 +47,8 @@ def initial_entities():
         image=popcorn_img.get_sprite(0),
         name='Popcorn Bucket',
         components= [
-            PhysicalBall(radius=30, mass=2, retention_y=0.3, air_resist=0.001)
+            PhysicalBall(radius=30, mass=2, retention_y=0.3, air_resist=0.001),
+            MouseDrag()
         ]
     )
     ents.append(popcorn_bucket)

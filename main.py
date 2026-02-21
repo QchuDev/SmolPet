@@ -5,7 +5,7 @@ import win32gui
 
 # Import Setup constants
 from essentials.window_consts import SCREEN, FPS, SCREEN_CENTER
-from prefabs import POPCORN_PRTS, SPARK_PRTS, HEART_PRTS
+from prefabs import POPCORN_PRTS, SMOKE_PRTS, SPARK_PRTS, HEART_PRTS
 # Setup scripts
 from essentials.debug_tools import monitor
 import user_activity
@@ -69,6 +69,8 @@ while running:
                 prts_manager.emit(m_x-15, m_y-15, *POPCORN_PRTS)
             elif event.key == pygame.K_3:
                 prts_manager.emit(m_x-15, m_y-15, *HEART_PRTS)
+            elif event.key == pygame.K_4:
+                prts_manager.emit(m_x-15, m_y-15, *SMOKE_PRTS)
                 
     # DRAWS.
     for entity in World.entities:
