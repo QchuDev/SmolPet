@@ -1,6 +1,6 @@
 import random
 import pygame
-from essentials.basics import Entity, Animation, World
+from essentials.basics import Entity, Animation, SpriteSheet, World
 from essentials.math_custom import Vector2D
 from essentials.components import PhysicalBall, MouseDrag, Animator, AIController, StatesManager, TextBubble, CharactersHandler, EntityEraser
 from characters_setup import CHARACTERS
@@ -26,7 +26,7 @@ def initial_entities():
     for i in range(1):
         npc = Entity(name=f'Entity{i}',
                 components= [
-                PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
+                PhysicalBall(radius=30, mass=1, retention_y=0.45),
                 MouseDrag(),
                 Animator(anims = [idle, hit_floor, hit_wall, air, talk, go_sleep, sleeping]),  # sleeping WIP
                 AIController(timer_range=(0.5, 2)),
@@ -41,6 +41,17 @@ def initial_entities():
         if phys: phys.applyForce(rand_push)
         
         ents.append(npc)
+    
+    popcorn_img= SpriteSheet('resources/images/props_16.png', (16,16), 4)
+    popcorn_bucket = Entity(
+        image=popcorn_img.get_sprite(0),
+        name='Popcorn Bucket',
+        components= [
+            PhysicalBall(radius=30, mass=2, retention_y=0.3, air_resist=0.001)
+        ]
+    )
+    ents.append(popcorn_bucket)
+
 
     return ents
 
