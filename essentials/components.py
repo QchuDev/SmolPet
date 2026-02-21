@@ -49,8 +49,7 @@ class Animator(Component):
             if self.current_anim.loop or self.frame_idx < len(self.current_anim.seq)-1:
                 self.frame_idx = (self.frame_idx + 1) % len(self.current_anim.seq)
                 sprite_id = self.current_anim.seq[self.frame_idx]
-
-            self.parent.texture = self.ss.get_texture(sprite_id)
+                self.parent.texture = self.ss.get_texture(sprite_id)
 
     def play(self, name:str):
         
@@ -312,11 +311,12 @@ class CharactersHandler(Component):
             self.animator.ss = character.ss
             self.ai_controller.phrases = character.phrases           
 
+global bubble_sheet
+bubble_sheet: SpriteSheet = SpriteSheet('resources/images/text_bubble.png', (4,4), 4)
 class TextBubble(Component):
     __slots__ = ['raw_sheet', 'c', 'font', 'phrase', 'show', 'texture']
-    def __init__(self, sheet_path: str, corner_size: int = 8):
-        self.raw_sheet: SpriteSheet = SpriteSheet(sheet_path, (4,4), 4)
-        self.c = corner_size
+    def __init__(self):
+        self.c = 8
         self.font = pygame.font.SysFont('ocraextended', 16)
         self.phrase: str = '(I need some phrases mate...)'
         self.show: bool = False
@@ -357,25 +357,25 @@ class TextBubble(Component):
         mid_w = bw - (s * 2)
         mid_h = bh - (s * 2)
 
-        bubble_surf.blit(self.raw_sheet.surfaces[0], (0, 0))
-        bubble_surf.blit(self.raw_sheet.surfaces[2], (bw - s, 0))
-        bubble_surf.blit(self.raw_sheet.surfaces[6], (0, bh - s))
-        bubble_surf.blit(self.raw_sheet.surfaces[8], (bw - s, bh - s))
+        bubble_surf.blit(bubble_sheet.surfaces[0], (0, 0))
+        bubble_surf.blit(bubble_sheet.surfaces[2], (bw - s, 0))
+        bubble_surf.blit(bubble_sheet.surfaces[6], (0, bh - s))
+        bubble_surf.blit(bubble_sheet.surfaces[8], (bw - s, bh - s))
 
         if mid_w > 0:
-            top = pygame.transform.scale(self.raw_sheet.surfaces[1], (mid_w, s))
-            bottom = pygame.transform.scale(self.raw_sheet.surfaces[7], (mid_w, s))
+            top = pygame.transform.scale(bubble_sheet.surfaces[1], (mid_w, s))
+            bottom = pygame.transform.scale(bubble_sheet.surfaces[7], (mid_w, s))
             bubble_surf.blit(top, (s, 0))
             bubble_surf.blit(bottom, (s, bh - s))
 
         if mid_h > 0:
-            left = pygame.transform.scale(self.raw_sheet.surfaces[3], (s, mid_h))
-            right = pygame.transform.scale(self.raw_sheet.surfaces[5], (s, mid_h))
+            left = pygame.transform.scale(bubble_sheet.surfaces[3], (s, mid_h))
+            right = pygame.transform.scale(bubble_sheet.surfaces[5], (s, mid_h))
             bubble_surf.blit(left, (0, s))
             bubble_surf.blit(right, (bw - s, s))
 
         if mid_w > 0 and mid_h > 0:
-            center = pygame.transform.scale(self.raw_sheet.surfaces[4], (mid_w, mid_h))
+            center = pygame.transform.scale(bubble_sheet.surfaces[4], (mid_w, mid_h))
             bubble_surf.blit(center, (s, s))
 
         current_y = (bh - total_h) // 2
@@ -415,6 +415,7 @@ class TextBubble(Component):
                 largest_verse = full_line
 
         return lines, largest_verse
+
 # Component to decide the next action of the NPC
 # This class changes the state of the StateManager to play certain animations
 class AIController(Component):
@@ -422,7 +423,7 @@ class AIController(Component):
     def __init__(self, timer_range:tuple[float,float] = (1,3)) -> None:
         # Needed components
         self.phys: PhysicalBall = PhysicalBall()
-        self.bubb: TextBubble = TextBubble('resources/images/text_bubble.png')
+        self.bubb: TextBubble = TextBubble()
 
         # Timer for taking action
         self.timer_range:tuple[float, float] = timer_range
@@ -543,6 +544,7 @@ class AIController(Component):
                     # 1. Choose an image from the prev list, load it and show it on screen as an Entity
                     # 2. Activate animation
                     # 3. Apply a knockback force to the entity
+                    print(f'Right corner reached')
                     pass
 
     def randomize_action(self):

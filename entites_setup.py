@@ -26,7 +26,7 @@ def initial_entities():
     go_sleep:   Animation = Animation('go_sleep',   [15, 16, 17],   frame_duration=0.2,     loop=False)
     sleeping:   Animation = Animation('sleeping',   [18, 19, 20],   frame_duration=0.3)
     # entity and components
-    for i in range(250):
+    for i in range(500):
         npc = Entity(
                 name=f'Entity{i}',
                 components= [
@@ -35,7 +35,7 @@ def initial_entities():
                 Animator(anims = [idle, hit_floor, hit_wall, air, talk, go_sleep, sleeping]),  # sleeping WIP
                 AIController(timer_range=(0.5, 2)),
                 StatesManager(STATES),
-                TextBubble('resources/images/text_bubble.png', corner_size=16),
+                TextBubble(),
                 CharactersHandler(CHARACTERS)
                 ]
             )

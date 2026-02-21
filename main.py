@@ -60,7 +60,10 @@ while running:
     prts_manager.draw()
 
     # Debug tools
-    monitor.render(clock)
+    monitor.clock.tick()
+    monitor.update(dt)
+    monitor.render()
 
+    
     RENDERER.present()
 
