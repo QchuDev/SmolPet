@@ -1,9 +1,12 @@
 import random
 import pygame
+from pygame._sdl2 import Texture
+
 from essentials.basics import Entity, Animation, ParticlesManager, SpriteSheet, World
 from essentials.math_custom import Vector2D
 from essentials.components import ParticlesEmitter, PhysicalBall, MouseDrag, Animator, AIController, StatesManager, TextBubble, CharactersHandler, EntityEraser
 from characters_setup import CHARACTERS
+from essentials.window_setup import RENDERER
 from states_graph import STATES
 
 # Initialize the font
@@ -45,9 +48,9 @@ def initial_entities():
         ents.append(npc)
 
     # POPCORN BUCKET ========================================================================
-    popcorn_bucket_img = SpriteSheet('resources/images/props_16.png', (16,16), scale_factor=4)
+    popcorn_bucket_ss = SpriteSheet('resources/images/props_16.png', (16,16), scale_factor=4)
     popcorn_bucket = Entity(
-        popcorn_bucket_img.get_sprite(0), 
+        popcorn_bucket_ss.get_texture(0), 
         name='Popcorn Bucket',
         components= [
             PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.3, directed=False),

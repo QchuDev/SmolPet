@@ -3,7 +3,7 @@ from pygame import Rect, Surface
 import random
 from abc import ABC, abstractmethod
 from typing import TypeVar, Type, Optional
-from pygame._sdl2 import Window, Renderer, Texture, Image
+from pygame._sdl2 import Texture
 
 # Custom
 from .math_custom import Vector2D
@@ -27,12 +27,13 @@ class ParticlesManager:
         # The states of each particle is represented by: [x,y, vx,vy, lifetime, id, state, accy]
         self.particles = []
         self.textures = Texture.from_surface(RENDERER, pygame.image.load('resources/images/particles_8.png'))
-        
-        temp_sprites = SpriteSheet('resources/images/particles_8.png', cell_size=(8,8), scale_factor=4).sprites
+        ss = SpriteSheet('resources/images/particles_8.png', cell_size=(8,8), scale_factor=4)
+        temp_texture: list[Texture] = ss.gpu_textures
+        self.w, self.h = ss.sprite_w, ss.sprite_h
         self.uvs = {
-            'spark': temp_sprites[0:4],
-            'popcorn': temp_sprites[4:8],
-            'heart': temp_sprites[8:12],
+            'spark': temp_texture[0:4],
+            'popcorn': temp_texture[4:8],
+            'heart': temp_texture[8:12],
         }
 
     # add to the particles array the new particles to be rendered by the draw()
@@ -69,8 +70,9 @@ class ParticlesManager:
     # draws all the particles at once 
     def draw(self):
         for p in self.particles:
-            img_rect = self.uvs[p[5]][p[6]]
-            RENDERER.blit(self.textures, img_rect, img_rect)
+            texture = self.uvs[p[5]][p[6]]
+            rect = Rect(p[0], p[1], self.w, self.h)
+            RENDERER.blit(texture, rect)
 
 
 T = TypeVar('T', bound='Component')
@@ -153,8 +155,11 @@ class Component(ABC):
 
 # Spritesheet: extracts the images of a spritesheet and saves the parts
 class SpriteSheet():
-    __slots__ = ['sprites', 'size', 'texture', 'sprite_w','sprite_h']
+    __slots__ = ['texture', 'sprite_w', 'sprite_h', 'surfaces', 'gpu_textures']
     def __init__(self, file_path:str, cell_size=(64,64), scale_factor=1) -> None:
+        self.surfaces: list[Surface] = []
+        self.gpu_textures: list[Texture] = []
+        
         if file_path == '': return
         sheet:Surface = pygame.image.load(file_path)
 
@@ -168,22 +173,28 @@ class SpriteSheet():
 
         # CREATING THE TEXTURE AT VRAM
         self.texture = Texture.from_surface(RENDERER, sheet)
-
-        self.sprites: list[Rect] = []
-        sheet_w, sheet_h = sheet.get_size()
         
+        
+        sheet_w, sheet_h = sheet.get_size()
+        step_w = int(w)
+        step_h = int(h)
         # Cutting the sheet to sprites
-        for j in range(0, sheet_h, int(h)):
-            for i in range(0, sheet_w, int(w)):
+        for j in range(0, sheet_h, step_h):
+            for i in range(0, sheet_w, step_w):
                 rect = pygame.Rect(i, j, w, h)
-                self.sprites.append(rect)
-
-        self.size = len(self.sprites)
+                sprite_surf = sheet.subsurface(rect)
+                self.surfaces.append(sprite_surf)
+                self.gpu_textures.append(Texture.from_surface(RENDERER, sprite_surf))
+                print(f"DEBUG: Sheet size: {sheet_w}x{sheet_h} | Step: {step_w}x{step_h}")
 
         self.sprite_w, self.sprite_h = w, h
         
-    def get_sprite(self, index:int) -> Rect: # (x,y) coords of the sprite in the sheet
-        return self.sprites[index]
+    def get_sprite(self, index:int) -> Surface: 
+        return self.surfaces[index]
+    
+    def get_texture(self, index:int) -> Texture: 
+        return self.gpu_textures[index]
+
 
 # Animation: has name, a sequence of indexes, frame duration and if its a loop
 class Animation():

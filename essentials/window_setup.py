@@ -12,6 +12,7 @@ WINDOW = Window(title=proyect_name, borderless=False, size=(1920,1080))
 SCREEN_W, SCREEN_H = WINDOW.size
 
 # Renderer (we use the GPU for better performance)
+global RENDERER
 RENDERER = Renderer(WINDOW, accelerated=1)
 
 
