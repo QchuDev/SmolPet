@@ -22,7 +22,6 @@ dt_phys = 1/60  # once per 60FPS
 accumulator = 0.0
 
 # testing 
-t=0.0
 ## MAIN LOOP ======================================================
 running:bool = True
 while running:
@@ -40,7 +39,7 @@ while running:
     m_x, m_y = win32api.GetCursorPos()
     Input.mouse_pos.x, Input.mouse_pos.y = m_x, m_y
     Input.left_clicked = bool(win32api.GetAsyncKeyState(0x01) & 0x8000)
-    
+
     # Check for pygame events
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:        # Check for key events
@@ -57,8 +56,7 @@ while running:
     while accumulator >= dt_phys:
         # Update entities
         for entity in World.entities:
-           entity.update(dt_phys)
-
+            entity.update(dt_phys)
         accumulator -= dt_phys
          
     # DRAWS

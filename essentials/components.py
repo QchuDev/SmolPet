@@ -77,8 +77,8 @@ class Animator(Component):
 # PhysicalBall: the one in charge of following the rules of physics updating itself
 # Problem: sometimes the npc jumps too much, there is dependecy with the frames
 class PhysicalBall(Component):
-    __slots__ = ['pos', 'vel', 'acc', 'mass', 'radius', 'air_resist', 'retention_x', 'retention_y', 'is_hitting_floor', 'is_hitting_wall', 'is_grounded', 'directed']
-    def __init__(self, pos=(SCREEN_CENTER[0], SCREEN_CENTER[1]), vel = (0,0), mass:float=1, radius:float=1, air_resist:float=0.05, retention_x:float=0.8, retention_y:float=0.4, directed:bool = True):
+    __slots__ = ['pos', 'vel', 'acc', 'mass', 'radius', 'air_resist', 'retention_x', 'retention_y', 'is_hitting_floor', 'is_hitting_wall', 'is_grounded', 'directed', 'show_hitboxes']
+    def __init__(self, pos=(SCREEN_CENTER[0], SCREEN_CENTER[1]), vel = (0,0), mass:float=1, radius:float=1, air_resist:float=0.05, retention_x:float=0.8, retention_y:float=0.4, directed:bool = True, show_hitboxes:bool = False):
         # State of the object
         self.pos:Vector2D = Vector2D(pos[0], pos[1])
         self.vel:Vector2D = Vector2D(vel[0], vel[1])
@@ -100,6 +100,7 @@ class PhysicalBall(Component):
         self.is_grounded:           bool = False
 
         self.directed = directed
+        self.show_hitboxes= show_hitboxes
 
     # Applying gravity and normal floor force
     def gravityEffect(self) -> None:
@@ -181,6 +182,23 @@ class PhysicalBall(Component):
                     self.parent.facing = 1
             
         self.parent.pos = self.pos
+
+
+
+    # hitboxes draw
+    def draw(self):
+        if self.show_hitboxes:
+            if not self.parent.texture: return
+
+            RENDERER.draw_color = (0,255,0,255)
+            diameter = self.radius * 2
+            draw_x = self.parent.pos.x - self.radius*0.5
+            draw_y = self.parent.pos.y - self.radius
+
+            rect_border= (draw_x, draw_y, diameter*0.5, diameter)
+            RENDERER.draw_rect(rect_border)
+
+    
 
 # MouseDrag lets the entity get dragged with physics by the mouse
 class MouseDrag(Component):

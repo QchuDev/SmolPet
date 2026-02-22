@@ -114,8 +114,8 @@ class Entity():
         
         # WIP CHANGING THE WAY OF DRAWING ON SCREEN
         RENDERER.blit(
-            self.texture, 
-            dest_rect
+            source = self.texture, 
+            dest = dest_rect
         )
 
         for c in self.components:
@@ -247,3 +247,8 @@ class Transition():
     
     def check(self, entity:Entity) -> bool:
         return self.condition(entity)
+
+
+# Class idea for an object that can interact directly with player (click, drag, hover, etc)
+class Interactable:
+    pass
