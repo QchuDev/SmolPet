@@ -49,7 +49,7 @@ class Animator(Component):
             if self.current_anim.loop or self.frame_idx < len(self.current_anim.seq)-1:
                 self.frame_idx = (self.frame_idx + 1) % len(self.current_anim.seq)
                 sprite_id = self.current_anim.seq[self.frame_idx]
-                self.parent.texture = self.ss.get_texture(sprite_id)
+                self.parent.texture = self.ss.get_texture(sprite_id, flipped = self.parent.facing<0)
 
     def play(self, name:str):
         
@@ -62,7 +62,7 @@ class Animator(Component):
             self.timer = 0
 
             sprite_id = self.current_anim.seq[self.frame_idx]
-            self.parent.texture = self.ss.get_texture(sprite_id)
+            self.parent.texture = self.ss.get_texture(sprite_id, flipped = self.parent.facing<0)
 
     def is_finished(self) -> bool:
         if self.current_anim: 

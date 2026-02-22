@@ -20,7 +20,6 @@ class Input:
     mouse_pos = Vector2D(0,0)
     left_clicked = False
 
-
 # This objects is in charged of presenting all entities needed as fast as possible
 class World:
     entities: list[Entity] = []
@@ -32,7 +31,7 @@ class ParticlesManager:
         self.particles = []
         self.textures = Texture.from_surface(RENDERER, pygame.image.load('resources/images/particles_8.png'))
         ss = SpriteSheet('resources/images/particles_8.png', cell_size=(8,8), scale_factor=4)
-        temp_texture: list[Texture] = ss.gpu_textures
+        temp_texture: list[Texture] = ss.right_textures
         self.w, self.h = ss.sprite_w, ss.sprite_h
         self.uvs = {
             'spark': temp_texture[0:4],
@@ -80,16 +79,19 @@ class ParticlesManager:
 
 T = TypeVar('T', bound='Component')
 class Entity():
-    __slots__ = ['components', 'pos', 'texture', 'name', 'facing', 'active']
+    __slots__ = ['components', 'pos', 'scale', 'texture', 'name', 'facing', 'active']
 
     def __init__(self, texture:Texture | None = None, name:str = 'no_name', components:list[Component] = []):
         self.components = components 
         self.pos:   Vector2D = Vector2D(0,0)
+        self.scale: Vector2D = Vector2D(1,1)
+
         self.texture: Texture | None  = texture
+
         self.name:  str = name
         self.facing:int = 1
         self.active:bool = True
-        
+
     # Called once at the very beggining
     def start(self):
         for comp in self.components:
@@ -102,20 +104,22 @@ class Entity():
 
         # Dont draw if not visible
         if self.pos.y < -20: return
+        
+        s_x = self.scale.x*self.texture.width
+        s_y = self.scale.y*self.texture.height
+        draw_x = self.pos.x - s_x * 0.5
+        draw_y = self.pos.y - s_y * 0.5
+        dest_rect = Rect(draw_x, draw_y, s_x, s_y)
 
-        for c in self.components:
-            c.draw()
-
-
-        draw_x = self.pos.x - self.texture.width * 0.5
-        draw_y = self.pos.y - self.texture.height * 0.5
-        dest_rect = Rect(draw_x, draw_y, self.texture.width, self.texture.height)
-
+        
         # WIP CHANGING THE WAY OF DRAWING ON SCREEN
         RENDERER.blit(
             self.texture, 
             dest_rect
         )
+
+        for c in self.components:
+            c.draw()
 
         
     # Updates everycomponent
@@ -158,10 +162,11 @@ class Component(ABC):
 
 # Spritesheet: extracts the images of a spritesheet and saves the parts
 class SpriteSheet():
-    __slots__ = ['texture', 'sprite_w', 'sprite_h', 'surfaces', 'gpu_textures']
+    __slots__ = ['texture', 'sprite_w', 'sprite_h', 'surfaces', 'right_textures', 'left_textures']
     def __init__(self, file_path:str, cell_size=(64,64), scale_factor=1) -> None:
         self.surfaces: list[Surface] = []
-        self.gpu_textures: list[Texture] = []
+        self.right_textures: list[Texture] = []
+        self.left_textures: list[Texture] = []
         
         if file_path == '': return
         sheet:Surface = pygame.image.load(file_path)
@@ -187,7 +192,9 @@ class SpriteSheet():
                 rect = pygame.Rect(i, j, w, h)
                 sprite_surf = sheet.subsurface(rect)
                 self.surfaces.append(sprite_surf)
-                self.gpu_textures.append(Texture.from_surface(RENDERER, sprite_surf))
+                self.right_textures.append(Texture.from_surface(RENDERER, sprite_surf))
+                self.left_textures.append(Texture.from_surface(RENDERER, pygame.transform.flip(sprite_surf, True, False)))
+                
                 print(f"DEBUG: Sheet size: {sheet_w}x{sheet_h} | Step: {step_w}x{step_h}")
 
         self.sprite_w, self.sprite_h = w, h
@@ -195,8 +202,8 @@ class SpriteSheet():
     def get_sprite(self, index:int) -> Surface: 
         return self.surfaces[index]
     
-    def get_texture(self, index:int) -> Texture: 
-        return self.gpu_textures[index]
+    def get_texture(self, index:int, flipped:bool=False) -> Texture: 
+        return self.right_textures[index] if not flipped else self.left_textures[index]
 
 # Animation: has name, a sequence of indexes, frame duration and if its a loop
 class Animation():
