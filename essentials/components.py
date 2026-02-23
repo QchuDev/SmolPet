@@ -183,8 +183,6 @@ class PhysicalBall(Component):
             
         self.parent.pos = self.pos
 
-
-
     # hitboxes draw
     def draw(self):
         if self.show_hitboxes:
@@ -221,14 +219,9 @@ class MouseDrag(Component):
         else:
             raise Exception(f"{self.parent.name}: Has not a PhysicsBall Component. It's required if using {self.__class__.__name__}")
             
-
     def update(self, dt: float):
-        # Ya no llamamos a win32api aquí
         if Input.left_clicked:
             self.pos_diff = Input.mouse_pos - self.phys.pos
-            
-            # Optimizamos: solo calculamos magnitud si estamos cerca
-            # magnitude_squared es más rápido porque no hace raíz cuadrada
             dist_sq = self.pos_diff.magnitude_squared()
             
             if self.is_pulling or dist_sq <= (self.phys.radius + 10)**2:
@@ -237,7 +230,6 @@ class MouseDrag(Component):
             self.is_pulling = False
 
         if self.is_pulling:
-            # Aplicamos la fuerza usando la diferencia ya calculada
             pull = (self.pos_diff * USER_PULL_STRENGTH)
             damp = (self.phys.vel * USER_PULL_DAMPING)
             self.phys.applyForce(pull - damp)
@@ -601,17 +593,18 @@ class EntityEraser(Component):
                 e.active = False        # Inactives the entity it touches
 
 class ParticlesEmitter(Component):
-    __slots__ = ['manager', 'particle', 'frecuency', 'timer']
-    def __init__(self, manager, particle:str ='spark', frecuency=1.0):
+    __slots__ = ['manager', 'particle', 'frequency', 'timer', 'offset']
+    def __init__(self, manager, particle:str ='spark', frequency=1.0, offset: tuple[float,float] = (0,0)):
         self.manager: ParticlesManager = manager
         self.particle = particle
-        self.frecuency = frecuency
+        self.frequency = frequency
         self.timer = 0
+        self.offset = offset
         
     def update(self, dt:float):
         self.timer += dt
-        if self.timer > self.frecuency:
-            x= self.parent.pos.x
-            y= self.parent.pos.y
+        if self.timer > self.frequency:
+            x= self.parent.pos.x + self.offset[0]
+            y= self.parent.pos.y + self.offset[1]
             self.manager.emit(x,y,*POPCORN_PRTS)
             self.timer = 0

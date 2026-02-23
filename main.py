@@ -4,6 +4,7 @@ import pygame
 import win32api
 
 # Import Setup constants
+from essentials.math_custom import Vector2D
 from essentials.window_setup import RENDERER, TRANSPARENT_COLOR, WINDOW, FPS, SCREEN_CENTER, WINDOW
 from prefabs import POPCORN_PRTS, SPARK_PRTS, HEART_PRTS
 # Setup scripts
@@ -12,20 +13,28 @@ import user_activity
 
 # Execute the entities_setup before reading World
 from entites_setup import prts_manager
-from essentials.basics import Input, World
+from essentials.basics import Entity, Input, World
 
+def handle_input(m_x, m_y, prts_manager):
+    keys = pygame.key.get_pressed()
+
+    if keys[pygame.K_1]:
+        prts_manager.emit(m_x-15, m_y-15, *SPARK_PRTS)
+    if keys[pygame.K_2]:
+        prts_manager.emit(m_x-15, m_y-15, *POPCORN_PRTS)
+    if keys[pygame.K_3]:
+        prts_manager.emit(m_x-15, m_y-15, *HEART_PRTS)
 
 # Time Variables
 clock = pygame.time.Clock()
 dt = 0.01
 dt_phys = 1/60  # once per 60FPS
 accumulator = 0.0
-
+m_x, m_y = 0, 0
 # testing 
 ## MAIN LOOP ======================================================
 running:bool = True
 while running:
-    
     # Update delta_time
     dt = clock.tick(FPS) / 1000
     accumulator += dt
@@ -45,12 +54,9 @@ while running:
         if event.type == pygame.KEYDOWN:        # Check for key events
             if event.key == pygame.K_ESCAPE:
                 running = False                 # Close with the ESC button
-            elif event.key == pygame.K_1:
-                prts_manager.emit(m_x-15, m_y-15, *SPARK_PRTS)
-            elif event.key == pygame.K_2:
-                prts_manager.emit(m_x-15, m_y-15, *POPCORN_PRTS)
-            elif event.key == pygame.K_3:
-                prts_manager.emit(m_x-15, m_y-15, *HEART_PRTS)
+
+    # TESTING THE INPUTS
+    handle_input(m_x, m_y, prts_manager)
     
     # Update the entities on a constant way, when the accumulator exceeds the dt_phys (delta time for physics)
     while accumulator >= dt_phys:

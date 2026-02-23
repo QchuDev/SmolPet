@@ -23,6 +23,8 @@ class Input:
 # This objects is in charged of presenting all entities needed as fast as possible
 class World:
     entities: list[Entity] = []
+    def spawn_entity(self, new_entity:Entity):
+        self.entities.append(new_entity)
 
 # The one in charge of all Particles
 class ParticlesManager:
@@ -74,7 +76,7 @@ class ParticlesManager:
     def draw(self):
         for p in self.particles:
             texture = self.uvs[p[5]][p[6]]
-            rect = Rect(p[0], p[1], self.w, self.h)
+            rect = Rect(p[0]-self.w*0.5, p[1]-self.h*0.5, self.w, self.h)
             RENDERER.blit(texture, rect)
 
 T = TypeVar('T', bound='Component')
@@ -248,7 +250,11 @@ class Transition():
     def check(self, entity:Entity) -> bool:
         return self.condition(entity)
 
-
-# Class idea for an object that can interact directly with player (click, drag, hover, etc)
-class Interactable:
+# WIP
+# This class is in charge of checking for possible events, such as achievements or special moments.
+class EventsManager:
     pass
+
+class Event():
+    def __init__(self, condition , spawns=[]) -> None:
+        pass

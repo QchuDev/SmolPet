@@ -26,7 +26,7 @@ def initial_entities():
     go_sleep:   Animation = Animation('go_sleep',   [15, 16, 17],   frame_duration=0.2,     loop=False)
     sleeping:   Animation = Animation('sleeping',   [18, 19, 20],   frame_duration=0.3)
     # entity and components
-    for i in range(250):
+    for i in range(1):
         npc = Entity(
                 name=f'Entity{i}',
                 components= [
@@ -53,14 +53,13 @@ def initial_entities():
         popcorn_bucket_ss.get_texture(0), 
         name='Popcorn Bucket',
         components= [
-            PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.3, directed=False),
+            PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.3, directed=False, show_hitboxes=True),
             MouseDrag(),
-            ParticlesEmitter(prts_manager, 'popcorn')
+            ParticlesEmitter(prts_manager, 'popcorn', frequency=1, offset= (0, -4))
         ]
     )
     ents.append(popcorn_bucket)
 
-    
     return ents
 
 def setup_entities(ents: list[Entity]):

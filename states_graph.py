@@ -6,7 +6,7 @@ anim = lambda e: e.get_component(Animator)
 phys = lambda e: e.get_component(PhysicalBall)
 aic = lambda e: e.get_component(AIController)
 
-# Creating the states for the StatesManager 
+# Creating the states for the StatesManager
 IDLE_STATE = State('idle',
     [
         Transition('air', lambda e: not phys(e).is_grounded),
@@ -54,20 +54,6 @@ SLEEPING_STATE = State('sleeping',
         Transition('idle', lambda e: aic(e).curr_action != 'sleep')
     ]
 )
-
-# WIP: giving ability to hitting nearby entities
-START_PUNCH_STATE = State('start_punch',
-    [
-        Transition('punch', lambda e: anim(e).is_finished())
-    ]
-)
-
-PUNCH_STATE = State('punch',
-    [
-        Transition('idle', lambda e: True)
-    ]
-)
-
 
 STATES: list[State] = [
     IDLE_STATE, 
