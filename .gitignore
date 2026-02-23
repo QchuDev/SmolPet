@@ -2,3 +2,8 @@ _pycache_/
 _pycache_/consts.cpython-314.pyc
 _pycache_/math_custom.cpython-314.pyc
 _pycache_/physics.cpython-314.pyc
+__pycache__/entites_setup.cpython-314.pyc
+__pycache__/states_graph.cpython-314.pyc
+essentials/__pycache__/basics.cpython-314.pyc
+essentials/__pycache__/components.cpython-314.pyc
+essentials/__pycache__/window_setup.cpython-314.pyc

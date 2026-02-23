@@ -55,7 +55,7 @@ SLEEPING_STATE = State('sleeping',
     ]
 )
 
-STATES: list[State] = [
+NPC_STATES: list[State] = [
     IDLE_STATE, 
     AIR_STATE, 
     HIT_FLOOR_STATE, 

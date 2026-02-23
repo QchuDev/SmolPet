@@ -1,3 +1,6 @@
+import win32api
+import keyboard
+
 import pygame
 from pygame import Rect, Surface
 import random
@@ -17,8 +20,23 @@ from .window_setup import RENDERER, WINDOW
 # =====================================================================================
 
 class Input:
-    mouse_pos = Vector2D(0,0)
-    left_clicked = False
+    _mouse_pos = Vector2D(0,0)
+
+    # Place to search for the key codes
+    # https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+
+    @classmethod
+    def update(cls) -> None:
+        cls._mouse_pos.x, cls._mouse_pos.y = win32api.GetCursorPos()
+
+    @classmethod
+    def is_down(cls, vk_code) -> bool:
+        return win32api.GetAsyncKeyState(vk_code) < 0
+    
+    @classmethod
+    def mouse_pos(cls) -> Vector2D:
+        return cls._mouse_pos
+
 
 # This objects is in charged of presenting all entities needed as fast as possible
 class World:
@@ -62,15 +80,16 @@ class ParticlesManager:
             # Acceleration in y axis
             p[3] += p[8]
             
-            p[4] -= dt  # lifetime -= dt
-            if p[4]<0:
-                self.particles.pop(i)   # remove particle if its time is over
-
             # Update state 
             if      p[4]>0.8*p[7]:   p[6] = 0
             elif    p[4]>0.6*p[7]:   p[6] = 1
             elif    p[4]>0.4*p[7]:   p[6] = 2
             else:                    p[6] = 3
+
+            p[4] -= dt  # lifetime -= dt
+            if p[4]<0:
+                self.particles.pop(i)   # remove particle if its time is over
+
     
     # draws all the particles at once 
     def draw(self):
@@ -196,8 +215,6 @@ class SpriteSheet():
                 self.surfaces.append(sprite_surf)
                 self.right_textures.append(Texture.from_surface(RENDERER, sprite_surf))
                 self.left_textures.append(Texture.from_surface(RENDERER, pygame.transform.flip(sprite_surf, True, False)))
-                
-                print(f"DEBUG: Sheet size: {sheet_w}x{sheet_h} | Step: {step_w}x{step_h}")
 
         self.sprite_w, self.sprite_h = w, h
         
