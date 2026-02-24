@@ -317,11 +317,15 @@ class CharactersHandler(Component):
             self.ai_controller.phrases = character.phrases           
 
 global bubble_sheet
+# Asegúrate de que (4,4) coincide con los frames reales de tu PNG
 bubble_sheet: SpriteSheet = SpriteSheet('resources/images/text_bubble.png', (4,4), 4)
+
 class TextBubble(Component):
     __slots__ = ['raw_sheet', 'c', 'font', 'phrase', 'show', 'texture']
+    
     def __init__(self):
-        self.c = 8
+        # self.c define el grosor de las esquinas en el resultado final
+        self.c = 8 
         self.font = pygame.font.Font("resources/fonts/Minecraft.ttf", 16)
         self.phrase: str = '(I need some phrases mate...)'
         self.show: bool = False
@@ -335,54 +339,68 @@ class TextBubble(Component):
 
     def update_texture(self):
         surf = self.generate_bubble_surf()
+        # Subimos a VRAM para mantener los 16ms estables
         self.texture = Texture.from_surface(RENDERER, surf)
 
     def draw(self):
         if self.show and self.texture and self.parent.texture:
-            x = self.parent.pos.x + self.parent.texture.width * 0.25
-            y = self.parent.pos.y - self.parent.texture.height * 1.2
-            dest_rect = pygame.Rect(x, y, self.texture.width, self.texture.height)
+            # Posicionamiento sobre la cabeza del NPC
+            x = self.parent.pos.x + (self.parent.texture.width * 0.5) - (self.texture.width * 0.5)
+            y = self.parent.pos.y - self.texture.height - 5
+            
+            dest_rect = pygame.Rect(int(x), int(y), self.texture.width, self.texture.height)
             RENDERER.blit(self.texture, dest=dest_rect)
     
-    def generate_bubble_surf(self, padding: int = 5) -> pygame.Surface:
+    def generate_bubble_surf(self, padding: int = 6) -> pygame.Surface:
         lines, _ = self.text_info(self.phrase)
         if not lines: return pygame.Surface((0, 0), pygame.SRCALPHA)
 
-        line_surfs = [self.font.render(l, True, (0, 0, 0)) for l in lines]
+        # 1. Render nitido (Sin suavizado para estilo Minecraft)
+        line_surfs = [self.font.render(l, False, (0, 0, 0)) for l in lines]
         max_w = max(s.get_width() for s in line_surfs)
         line_h = self.font.get_linesize()
         total_h = line_h * len(lines)
 
         s = self.c 
-        bw = max_w + (padding * 2) + (s * 2)
-        bh = total_h + (padding * 2) + (s * 2)
-        bw, bh = max(bw, s * 2), max(bh, s * 2)
+        # Forzamos enteros para evitar el "bleeding" de píxeles
+        bw = int(max_w + (padding * 2) + (s * 2))
+        bh = int(total_h + (padding * 2) + (s * 2))
         
         bubble_surf = pygame.Surface((bw, bh), pygame.SRCALPHA)
+        
+        # PRE-ESCALADO DE PIEZAS: 
+        # Escalamos las piezas de 4x4 originales a piezas de SxS (8x8)
+        # Esto evita que el 9-slice intente estirar y mover al mismo tiempo
+        p = [pygame.transform.scale(surf, (s, s)) for surf in bubble_sheet.surfaces]
+
         mid_w = bw - (s * 2)
         mid_h = bh - (s * 2)
 
-        bubble_surf.blit(bubble_sheet.surfaces[0], (0, 0))
-        bubble_surf.blit(bubble_sheet.surfaces[2], (bw - s, 0))
-        bubble_surf.blit(bubble_sheet.surfaces[6], (0, bh - s))
-        bubble_surf.blit(bubble_sheet.surfaces[8], (bw - s, bh - s))
+        # --- ESQUINAS ---
+        bubble_surf.blit(p[0], (0, 0))          # TL
+        bubble_surf.blit(p[2], (bw - s, 0))     # TR
+        bubble_surf.blit(p[6], (0, bh - s))     # BL
+        bubble_surf.blit(p[8], (bw - s, bh - s))# BR
 
+        # --- BORDES ---
         if mid_w > 0:
-            top = pygame.transform.scale(bubble_sheet.surfaces[1], (mid_w, s))
-            bottom = pygame.transform.scale(bubble_sheet.surfaces[7], (mid_w, s))
+            top = pygame.transform.scale(p[1], (mid_w, s))
+            bottom = pygame.transform.scale(p[7], (mid_w, s))
             bubble_surf.blit(top, (s, 0))
             bubble_surf.blit(bottom, (s, bh - s))
 
         if mid_h > 0:
-            left = pygame.transform.scale(bubble_sheet.surfaces[3], (s, mid_h))
-            right = pygame.transform.scale(bubble_sheet.surfaces[5], (s, mid_h))
+            left = pygame.transform.scale(p[3], (s, mid_h))
+            right = pygame.transform.scale(p[5], (s, mid_h))
             bubble_surf.blit(left, (0, s))
             bubble_surf.blit(right, (bw - s, s))
 
+        # --- CENTRO ---
         if mid_w > 0 and mid_h > 0:
-            center = pygame.transform.scale(bubble_sheet.surfaces[4], (mid_w, mid_h))
+            center = pygame.transform.scale(p[4], (mid_w, mid_h))
             bubble_surf.blit(center, (s, s))
 
+        # --- TEXTO (Centrado con corrección visual) ---
         current_y = (bh - total_h) // 2
         for surf in line_surfs:
             text_x = (bw - surf.get_width()) // 2
@@ -392,7 +410,7 @@ class TextBubble(Component):
         return bubble_surf
     
     def text_info(self, text: str) -> tuple[list[str], str]:
-        max_chars = 16
+        max_chars = 18 # Aumentado un poco para mejor lectura
         words = text.split(' ')
         lines = []
         current_line_words = []
@@ -420,7 +438,7 @@ class TextBubble(Component):
                 largest_verse = full_line
 
         return lines, largest_verse
-
+    
 # Component to decide the next action of the NPC
 # This class changes the state of the StateManager to play certain animations
 class AIController(Component):
