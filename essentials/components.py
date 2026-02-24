@@ -1,5 +1,3 @@
-import time
-
 import pygame
 from pygame import Rect
 import random
@@ -10,7 +8,7 @@ from essentials.basics import UIElement
 
 # Custom
 from .basics import GameManager, UIComponent, Listener, Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
-from .window_setup import RENDERER, SCREEN_W, SCREEN_H, WINDOW, SCREEN_CENTER
+from .window_setup import RENDERER, SCREEN_W, SCREEN_H, SCREEN_CENTER
 
 from game_consts import GRAVITY, BOUNCE_STOP, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
 from game_consts import WAIT_TIME, SLEEP_TIME, JUMP_FORCE, TARGET_STOP, ACTION_WEIGHTS
@@ -82,9 +80,9 @@ class Animator(Component):
 # Problem: sometimes the npc jumps too much, there is dependecy with the frames
 class PhysicalBall(Component):
     __slots__ = ['pos', 'vel', 'acc', 'mass', 'radius', 'air_resist', 'retention_x', 'retention_y', 'is_hitting_floor', 'is_hitting_wall', 'is_grounded', 'directed', 'show_hitboxes']
-    def __init__(self, pos=(SCREEN_CENTER[0], SCREEN_CENTER[1]), vel = (0,0), mass:float=1, radius:float=1, air_resist:float=0.05, retention_x:float=0.8, retention_y:float=0.4, directed:bool = True, show_hitboxes:bool = False):
+    def __init__(self, pos:Vector2D=SCREEN_CENTER, vel = (0,0), mass:float=1, radius:float=1, air_resist:float=0.05, retention_x:float=0.8, retention_y:float=0.4, directed:bool = True, show_hitboxes:bool = False):
         # State of the object
-        self.pos:Vector2D = Vector2D(pos[0], pos[1])
+        self.pos:Vector2D = pos
         self.vel:Vector2D = Vector2D(vel[0], vel[1])
         self.acc:Vector2D = Vector2D(0,0)
         
@@ -324,7 +322,7 @@ class TextBubble(Component):
     __slots__ = ['raw_sheet', 'c', 'font', 'phrase', 'show', 'texture']
     def __init__(self):
         self.c = 8
-        self.font = pygame.font.SysFont('ocraextended', 16)
+        self.font = pygame.font.Font("resources/fonts/Minecraft.ttf", 16)
         self.phrase: str = '(I need some phrases mate...)'
         self.show: bool = False
         self.texture: Texture | None = None
@@ -581,26 +579,42 @@ class Button(UIComponent):
         self.listeners: list[Listener] = []
 
     def update(self):
-        if MouseInput.left_clicked:
-            self.click_up = False
-            if self.parent.pos.distance(MouseInput.pos) < self.click_radius:
-                self.click_down = True
-                self.parent.source_area = self.pressed_rect
+        is_click_held = MouseInput.left_clicked
+        is_close = self.parent.pos.distance(MouseInput.pos) < self.click_radius
+
+        # If close and held... change texture
+        if is_close and is_click_held:
+            self.parent.source_area = self.pressed_rect
         else:
-            if self.click_down: self.click_up = True
-            self.click_down = False
             self.parent.source_area = self.not_pressed_rect
 
-        if self.click_up:
-            for l in self.listeners:
+        # If pressed while inside
+        if is_close and is_click_held and not self.click_down:
+            self.click_down = True
+            self.click_up = False
+        
+        # If the button is up
+        elif not is_click_held and self.click_down:
+            self.click_down = False
+            
+            # Only sent an event when its close enough
+            if is_close:
+                self.click_up = True
+                for l in self.listeners:
                     l.hear()
+            else:
+                # If its lifted up but outside, then no event is sent
+                self.click_up = False
+            
 
-
-
+        # Safety reset, if not clicking then the click_down should be false
+        if not is_click_held:
+            self.click_down = False
 
 # =====================================================================================
 #                                 LISTENERS
 # =====================================================================================
+
 # On click it will close the game
 class QuitOnClick(UIComponent, Listener):
     def __init__(self) -> None:

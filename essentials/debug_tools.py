@@ -36,7 +36,7 @@ class PerformanceMonitor:
     def render(self):
         if self.fps_tex and self.ms_tex:
             # Fondo semi-transparente para legibilidad
-            RENDERER.draw_color = (0, 0, 0, 180)
+            RENDERER.draw_color = (0, 0, 0, 90)
             RENDERER.fill_rect((5, 5, 110, 50))
             
             # Dibujar textos

@@ -1,10 +1,9 @@
 import win32api
-import keyboard
 
 import pygame
 from pygame import Rect, Surface
 import random
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import TypeVar, Type, Optional
 from pygame._sdl2 import Texture
 
@@ -13,39 +12,34 @@ from .math_custom import Vector2D
 from .window_setup import RENDERER, WINDOW
 
 
-
-
 # =====================================================================================
 #                               BASIC MANAGERS AND CLASSES
 # =====================================================================================
 class GameManager:
+    # Starting value should be true, if want to play ofc
     running = True
-
-class MouseInput:
-    pos = Vector2D(0,0)
-    left_clicked: bool = False
-    right_clicked: bool = False
-
-    # Place to search for the key codes
-    # https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-
-    @classmethod
-    def update(cls) -> None:
-        cls.pos.x, cls.pos.y = win32api.GetCursorPos()
-
-    @classmethod
-    def is_down(cls, vk_code) -> bool:
-        return win32api.GetAsyncKeyState(vk_code) < 0
-    
-    @classmethod
-    def mouse_pos(cls) -> Vector2D:
-        return cls.pos
 
 # This objects is in charged of presenting all entities needed as fast as possible
 class World:
     entities: list[Entity] = []
     def spawn_entity(self, new_entity:Entity):
         self.entities.append(new_entity)
+
+# Gets both clicks and the position of the mouse at the screen
+class MouseInput:
+    pos = Vector2D(0,0)
+    left_clicked: bool = False
+    right_clicked: bool = False
+
+    @classmethod
+    def update(cls) -> None:
+        cls.pos.x, cls.pos.y = win32api.GetCursorPos()
+        cls.left_clicked = bool(win32api.GetAsyncKeyState(0x01) & 0x8000)
+        cls.right_clicked = bool(win32api.GetAsyncKeyState(0x02) & 0x8000)
+    
+    @classmethod
+    def mouse_pos(cls) -> Vector2D:
+        return cls.pos
 
 # The one in charge of all Particles
 class ParticlesManager:
@@ -244,7 +238,7 @@ class CharacterData():
         self.phrases:   list[str] = phrases
         self.ss:        SpriteSheet = ss
 
-# State:
+# State: a name and has a set of transitions
 class State():
     __slots__ = ['name', 'transitions']
     def __init__(self, name:str = '', trans: list[Transition] = []):
@@ -260,7 +254,7 @@ class State():
                 break
         return next_state
 
-# Transition: 
+# Transition: has a conditions and the state that it goes to 
 class Transition():
     __slots__ = ['to_state', 'condition']
     def __init__(self, to_state: str, condition):
@@ -270,7 +264,7 @@ class Transition():
     def check(self, entity:Entity) -> bool:
         return self.condition(entity)
 
-# WIP
+# The one in chraged of storing all the UI elements and calling their update methods
 class UIManager:
     ui_elements: list[UIElement] = []
 
@@ -338,3 +332,4 @@ class UIComponent():
 class Listener(ABC):
     def hear(self):
         pass
+

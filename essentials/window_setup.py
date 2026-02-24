@@ -3,6 +3,8 @@ import win32api
 import win32con
 import win32gui
 from pygame._sdl2 import Window, Renderer, Texture, Image
+
+from essentials.math_custom import Vector2D
 pygame.init()
 
 proyect_name = 'smol pet'
@@ -16,7 +18,7 @@ global RENDERER
 RENDERER = Renderer(WINDOW, accelerated=1)
 
 
-SCREEN_CENTER: tuple[float, float] = (SCREEN_W*0.5, SCREEN_H*0.5)
+SCREEN_CENTER: Vector2D = Vector2D(SCREEN_W*0.5, SCREEN_H*0.5)
 
 FPS:int = 60
 

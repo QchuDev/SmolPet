@@ -24,7 +24,6 @@ accumulator = 0.0
 t=0
 # testing 
 ## MAIN LOOP ======================================================
-GameManager.running = True
 while GameManager.running:
     # Update delta_time
     dt = clock.tick(FPS) / 1000
@@ -36,9 +35,8 @@ while GameManager.running:
     RENDERER.clear()
 
     # Update mouse inputs
-    m_x, m_y = win32api.GetCursorPos()
-    MouseInput.pos.x, MouseInput.pos.y = m_x, m_y
-    MouseInput.left_clicked = bool(win32api.GetAsyncKeyState(0x01) & 0x8000)
+    MouseInput.update()
+    
 
     # To clean the request queue
     for event in pygame.event.get():
@@ -50,7 +48,6 @@ while GameManager.running:
         for entity in World.entities:
             entity.update(dt_phys)
         accumulator -= dt_phys
-    
     
     # DRAWS
     for entity in World.entities:
@@ -64,6 +61,9 @@ while GameManager.running:
     for u in UIManager.ui_elements:
         u.update()
     
+    u.pos.x, u.pos.y = 0*math.sin(t)+SCREEN_CENTER.x, 0*math.sin(15*t)+SCREEN_CENTER.y
+    t+=dt
+
     for u in UIManager.ui_elements:
         u.draw()
 

@@ -12,6 +12,7 @@ from states_graph import NPC_STATES
 # Initialize the font
 pygame.font.init()
 
+# Entities
 prts_manager = ParticlesManager()
 def initial_entities():
     # entities array
@@ -26,7 +27,7 @@ def initial_entities():
     go_sleep:   Animation = Animation('go_sleep',   [15, 16, 17],   frame_duration=0.2,     loop=False)
     sleeping:   Animation = Animation('sleeping',   [18, 19, 20],   frame_duration=0.3)
     # entity and components
-    for i in range(1):
+    for i in range(250):
         npc = Entity(
                 name=f'Entity{i}',
                 components= [
@@ -66,6 +67,7 @@ def initial_entities():
 
     return ents
 
+# UI Elements
 def initial_ui():
     # entities array
     ui_elems = []
@@ -90,5 +92,6 @@ def initial_ui():
 
     return ui_elems
 
+# hand them to World and UIManager
 World.entities = initial_entities()
 UIManager.ui_elements = initial_ui()
