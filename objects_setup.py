@@ -12,6 +12,19 @@ from states_graph import NPC_STATES
 # Initialize the font
 pygame.font.init()
 
+# NPC ANIMATIONS
+NPC_ANIMATIONS = [
+    Animation('idle',       [0, 1, 2],      frame_duration=0.2),
+    Animation('hit_floor',  [3, 4, 5],      frame_duration=0.08,    loop=False),
+    Animation('air',        [6, 7, 8],      frame_duration=0.2),
+    Animation('talk',       [9, 10, 11],    frame_duration=0.2),
+    Animation('hit_wall',   [12, 13, 14],   frame_duration=0.08,    loop=False),
+    Animation('go_sleep',   [15, 16, 17],   frame_duration=0.2,     loop=False),
+    Animation('sleeping',   [18, 19, 20],   frame_duration=0.3),
+    Animation('go_sit',     [21,22,23],     frame_duration=0.2,     loop=False),
+    Animation('sit',        [24,25,26],     frame_duration=0.3)
+]
+
 # Entities
 prts_manager = ParticlesManager()
 def initial_entities():
@@ -19,21 +32,15 @@ def initial_entities():
     ents = []
 
     # animations
-    idle:       Animation = Animation('idle',       [0, 1, 2],      frame_duration=0.2)
-    hit_floor:  Animation = Animation('hit_floor',  [3, 4, 5],      frame_duration=0.08,    loop=False)
-    air:        Animation = Animation('air',        [6, 7, 8],      frame_duration=0.2)
-    talk:       Animation = Animation('talk',       [9, 10, 11],    frame_duration=0.2)
-    hit_wall:   Animation = Animation('hit_wall',   [12, 13, 14],   frame_duration=0.08,    loop=False)
-    go_sleep:   Animation = Animation('go_sleep',   [15, 16, 17],   frame_duration=0.2,     loop=False)
-    sleeping:   Animation = Animation('sleeping',   [18, 19, 20],   frame_duration=0.3)
+    
     # entity and components
-    for i in range(250):
+    for i in range(10):
         npc = Entity(
                 name=f'Entity{i}',
                 components= [
                 PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
                 MouseDrag(),
-                Animator(anims = [idle, hit_floor, hit_wall, air, talk, go_sleep, sleeping]),  # sleeping WIP
+                Animator(anims = NPC_ANIMATIONS),  # sleeping WIP
                 AIController(timer_range=(0.5, 2)),
                 StatesManager(NPC_STATES),
                 TextBubble(),
@@ -91,6 +98,9 @@ def initial_ui():
         u.start()
 
     return ui_elems
+
+def achievements_setup():
+    pass
 
 # hand them to World and UIManager
 World.entities = initial_entities()

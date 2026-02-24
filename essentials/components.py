@@ -454,7 +454,7 @@ class AIController(Component):
         self.timer: float = 0.0
 
         # All the possible actions and the current one 
-        self.actions: list[str] = ['move', 'talk', 'wait', 'sleep']
+        self.actions: list[str] = ['move', 'talk', 'wait', 'sleep', 'sit']
         self.curr_action: str = 'wait'
 
         # Target zone (for 'intelligent' movement)
@@ -557,7 +557,9 @@ class AIController(Component):
                     self.max_time = self.timer_range[0] + random.random()*(self.timer_range[1] - self.timer_range[0])
 
             case 'open_img':
+                
                 if not self.target_setted:
+                    print('LETS OPEN AN IMAGE!!!')
                     self.target_x = SCREEN_W-10
                     self.target_setted = True
                     self.going_to_open = True
@@ -567,8 +569,14 @@ class AIController(Component):
                     # 1. Choose an image from the prev list, load it and show it on screen as an Entity
                     # 2. Activate animation
                     # 3. Apply a knockback force to the entity
-                    print(f'Right corner reached')
+                    print(f'OPENING IMAGE!!!')
                     pass
+
+            case 'sit':
+                print('Sitting down...')
+                # Timer reset
+                if self.phys.is_grounded: self.max_time = WAIT_TIME + 2*random.random()*random.randrange(-1, 2)    # wait for (3 - 7) seconds
+                else: self.max_time = self.timer_range[0] + random.random()*(self.timer_range[1] - self.timer_range[0])
 
     def randomize_action(self):
         rand = random.randrange(0, self.total_weight+1)

@@ -13,7 +13,8 @@ IDLE_STATE = State('idle',
         Transition('hit_floor', lambda e: phys(e).is_hitting_floor),
         Transition('hit_wall', lambda e: phys(e).is_hitting_wall),
         Transition('talk', lambda e: aic(e).curr_action == 'talk'),
-        Transition('go_sleep', lambda e: aic(e).curr_action == 'sleep')
+        Transition('go_sleep', lambda e: aic(e).curr_action == 'sleep'),
+        Transition('go_sit', lambda e: aic(e).curr_action == 'sit')
     ]
 )
 AIR_STATE = State('air',
@@ -54,6 +55,17 @@ SLEEPING_STATE = State('sleeping',
         Transition('idle', lambda e: aic(e).curr_action != 'sleep')
     ]
 )
+GO_SIT_STATE = State('go_sit',
+    [
+        Transition('sit', lambda e: anim(e).is_finished())
+    ]
+)
+SIT_STATE = State('sit',
+    [
+        Transition('air', lambda e: not phys(e).is_grounded),
+        Transition('idle', lambda e: aic(e).curr_action != 'sit')
+    ]
+)
 
 NPC_STATES: list[State] = [
     IDLE_STATE, 
@@ -62,5 +74,7 @@ NPC_STATES: list[State] = [
     HIT_WALL_STATE, 
     TALK_STATE, 
     GO_SLEEP_STATE, 
-    SLEEPING_STATE
+    SLEEPING_STATE,
+    GO_SIT_STATE,
+    SIT_STATE
 ]

@@ -18,6 +18,7 @@ from .window_setup import RENDERER, WINDOW
 class GameManager:
     # Starting value should be true, if want to play ofc
     running = True
+    achievements: dict[str, Achievement] = {}
 
 # This objects is in charged of presenting all entities needed as fast as possible
 class World:
@@ -333,3 +334,14 @@ class Listener(ABC):
     def hear(self):
         pass
 
+# Achievemnt class
+class Achievement():
+    __slots__ = ['name', 'unlocked', 'condition', 'desc']
+    def __init__(self, name, condition, desc:str='') -> None:
+        self.name: str = name
+        self.unlocked:  bool = False
+        self.desc    :  str = desc
+        self.condition = condition
+
+    def check(self):
+        pass
