@@ -10,7 +10,7 @@ from essentials.basics import UIElement
 from .basics import GameManager, UIComponent, Listener, Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
 from .window_setup import RENDERER, SCREEN_W, SCREEN_H, SCREEN_CENTER
 
-from game_consts import GRAVITY, BOUNCE_STOP, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
+from game_consts import GRAVITY, BOUNCE_STOP, SIT_TIME, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
 from game_consts import WAIT_TIME, SLEEP_TIME, JUMP_FORCE, TARGET_STOP, ACTION_WEIGHTS
 from prefabs import POPCORN_PRTS
 
@@ -62,7 +62,6 @@ class Animator(Component):
             self.current_anim = self.anims[name]
             self.frame_idx = 0
             self.timer = 0
-
             sprite_id = self.current_anim.seq[self.frame_idx]
             self.parent.texture = self.ss.get_texture(sprite_id, flipped = self.parent.facing<0)
 
@@ -339,13 +338,12 @@ class TextBubble(Component):
 
     def update_texture(self):
         surf = self.generate_bubble_surf()
-        # Subimos a VRAM para mantener los 16ms estables
         self.texture = Texture.from_surface(RENDERER, surf)
 
     def draw(self):
         if self.show and self.texture and self.parent.texture:
             # Posicionamiento sobre la cabeza del NPC
-            x = self.parent.pos.x + (self.parent.texture.width * 0.5) - (self.texture.width * 0.5)
+            x = self.parent.pos.x + (self.parent.texture.width * 0.5)
             y = self.parent.pos.y - self.texture.height - 5
             
             dest_rect = pygame.Rect(int(x), int(y), self.texture.width, self.texture.height)
@@ -492,6 +490,7 @@ class AIController(Component):
     def update(self, dt:float):
         # Handle the timer     
         self.interruptAction()
+        if self.curr_action != 'talk': self.bubb.show = False
 
         self.timer += dt
         if self.timer > self.max_time:
@@ -500,7 +499,8 @@ class AIController(Component):
         
     # A function to interrupt actions when meeting certain conditions
     def interruptAction(self):
-        if self.curr_action == 'sleep' and not self.phys.is_grounded: 
+        interrputed_from_lifting: list[str] = ['sleep', 'sit']
+        if self.curr_action in interrputed_from_lifting and not self.phys.is_grounded: 
             self.curr_action = 'wait'
 
     def decide(self):
@@ -536,8 +536,8 @@ class AIController(Component):
 
             case 'wait':
                 # Timer reset
-                if self.phys.is_grounded: self.max_time = WAIT_TIME + 2*random.random()*random.randrange(-1, 2)    # wait for (3 - 7) seconds
-                else: self.max_time = self.timer_range[0] + random.random()*(self.timer_range[1] - self.timer_range[0])
+                if self.phys.is_grounded: self.max_time = random.uniform(0.8, 1.2)*WAIT_TIME
+                else: self.max_time = random.uniform(*self.timer_range)
 
             case 'talk':
                 # Change the phrase of the TextBubble and show it
@@ -554,7 +554,7 @@ class AIController(Component):
                     self.max_time = SLEEP_TIME # wait SLEEP_TIME ammount
                     self.parent.facing = 1
                 else: 
-                    self.max_time = self.timer_range[0] + random.random()*(self.timer_range[1] - self.timer_range[0])
+                    self.max_time = random.uniform(*self.timer_range)
 
             case 'open_img':
                 
@@ -575,8 +575,8 @@ class AIController(Component):
             case 'sit':
                 print('Sitting down...')
                 # Timer reset
-                if self.phys.is_grounded: self.max_time = WAIT_TIME + 2*random.random()*random.randrange(-1, 2)    # wait for (3 - 7) seconds
-                else: self.max_time = self.timer_range[0] + random.random()*(self.timer_range[1] - self.timer_range[0])
+                if self.phys.is_grounded: self.max_time = random.uniform(0.8, 1.2)*SIT_TIME   # wait for (28 - 32) seconds
+                else: self.max_time = random.uniform(*self.timer_range)
 
     def randomize_action(self):
         rand = random.randrange(0, self.total_weight+1)

@@ -17,6 +17,7 @@ USER_PULL_DAMPING:float = 2.0
 # AICONTROLLER
 JUMP_FORCE: Vector2D = Vector2D(4000, -15000)
 WAIT_TIME:  float = 10
+SIT_TIME:  float = 30
 SLEEP_TIME: float = 120
 TARGET_STOP:float = 100
 
@@ -27,5 +28,5 @@ ACTION_WEIGHTS  :list[tuple[str,int]] = [
     ('wait', 60), 
     ('talk', 10), 
     ('open_image', 1),
-    ('sit', 20)
+    ('sit', 400)
 ]  # Randomize weights for actions

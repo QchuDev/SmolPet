@@ -6,7 +6,7 @@ anim = lambda e: e.get_component(Animator)
 phys = lambda e: e.get_component(PhysicalBall)
 aic = lambda e: e.get_component(AIController)
 
-# Creating the states for the StatesManager
+# Creating the states for the NPCS
 IDLE_STATE = State('idle',
     [
         Transition('air', lambda e: not phys(e).is_grounded),
@@ -77,4 +77,23 @@ NPC_STATES: list[State] = [
     SLEEPING_STATE,
     GO_SIT_STATE,
     SIT_STATE
+]
+
+# =================================================================================================================================
+
+# State graph for the ITEMS
+STILL_STATE = State('still',
+    [
+        Transition('bounce', lambda e: phys(e).is_hitting_floor),
+    ]
+)
+BOUNCE_STATE = State('bounce',
+    [
+        Transition('still', lambda e: anim(e).is_finished()),
+    ]
+)
+
+ITEM_STATES: list[State] = [
+    STILL_STATE,
+    BOUNCE_STATE
 ]

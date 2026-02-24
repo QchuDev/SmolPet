@@ -86,5 +86,10 @@ PACHU_PHRASES = [
 
 # Character DATA
 CHARACTERS: list[CharacterData] = [
-    CharacterData(bobby_ss, 'Bobby', BOBBY_PHRASES)
+    CharacterData(bobby_ss, 'Bobby', BOBBY_PHRASES),
+    CharacterData(cuchu_ss, 'Cuchu', CUCHU_PHRASES),
+    CharacterData(pol_ss, 'Pol', POL_PHRASES),
+    CharacterData(squalo_ss, 'Squalo', SQUALO_PHRASES),
+    CharacterData(dino_ss, 'Dino', DINO_PHRASES),
+    CharacterData(pachu_ss, 'Pachu', PACHU_PHRASES)
 ]
