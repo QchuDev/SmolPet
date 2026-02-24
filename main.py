@@ -12,8 +12,8 @@ from essentials.debug_tools import monitor
 import user_activity
 
 # Execute the entities_setup before reading World
-from entites_setup import prts_manager
-from essentials.basics import Entity, MouseInput, World
+from objects_setup import prts_manager
+from essentials.basics import Entity, GameManager, MouseInput, UIManager, World
 
 
 # Time Variables
@@ -21,11 +21,11 @@ clock = pygame.time.Clock()
 dt = 0.01
 dt_phys = 1/60  # once per 60FPS
 accumulator = 0.0
-
+t=0
 # testing 
 ## MAIN LOOP ======================================================
-running:bool = True
-while running:
+GameManager.running = True
+while GameManager.running:
     # Update delta_time
     dt = clock.tick(FPS) / 1000
     accumulator += dt
@@ -50,14 +50,22 @@ while running:
         for entity in World.entities:
             entity.update(dt_phys)
         accumulator -= dt_phys
-         
+    
+    
     # DRAWS
     for entity in World.entities:
         entity.draw()       # Draw entities
-    
+
     # Particles manager
     prts_manager.update(dt)
     prts_manager.draw()
+
+    # UI ELEMENTS UPDATE AND DRAW
+    for u in UIManager.ui_elements:
+        u.update()
+    
+    for u in UIManager.ui_elements:
+        u.draw()
 
     # Debug tools
     monitor.clock.tick()
@@ -65,4 +73,3 @@ while running:
     monitor.render()
 
     RENDERER.present()
-

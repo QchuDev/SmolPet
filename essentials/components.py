@@ -1,11 +1,15 @@
+import time
+
 import pygame
-import win32api
+from pygame import Rect
 import random
 from typing import Type
-from pygame._sdl2 import Window, Renderer, Texture, Image
+from pygame._sdl2 import Texture
+
+from essentials.basics import UIElement
 
 # Custom
-from .basics import Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
+from .basics import GameManager, UIComponent, Listener, Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
 from .window_setup import RENDERER, SCREEN_W, SCREEN_H, WINDOW, SCREEN_CENTER
 
 from game_consts import GRAVITY, BOUNCE_STOP, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
@@ -565,7 +569,54 @@ class AIController(Component):
 # =====================================================================================
 #                               UI COMPONENTS
 # =====================================================================================
+class Button(UIComponent):
+    
+    __slots__ = ['pressed_rect', 'not_pressed_rect', 'click_radius', 'click_down', 'click_up', 'listeners']
+    def __init__(self, pressed_rect:Rect = Rect(16,0,16,16), not_pressed_rect:Rect = Rect(0,0,16,16), click_radius:float=16) -> None:
+        self.pressed_rect:Rect = pressed_rect
+        self.not_pressed_rect:Rect = not_pressed_rect
+        self.click_radius:float = max(1, click_radius)
+        self.click_down: bool = False
+        self.click_up: bool = False
+        self.listeners: list[Listener] = []
 
+    def update(self):
+        if MouseInput.left_clicked:
+            self.click_up = False
+            if self.parent.pos.distance(MouseInput.pos) < self.click_radius:
+                self.click_down = True
+                self.parent.source_area = self.pressed_rect
+        else:
+            if self.click_down: self.click_up = True
+            self.click_down = False
+            self.parent.source_area = self.not_pressed_rect
+
+        if self.click_up:
+            for l in self.listeners:
+                    l.hear()
+
+
+
+
+# =====================================================================================
+#                                 LISTENERS
+# =====================================================================================
+# On click it will close the game
+class QuitOnClick(UIComponent, Listener):
+    def __init__(self) -> None:
+        self.button:Button|None = None
+
+    def start(self, ui_element: UIElement):
+        super().start(ui_element)
+        e_button = self.parent.get_component(Button)
+        if not e_button:
+            raise Exception(f"{self.parent.name}: Has not a Button Component. It's required if using {self.__class__.__name__}")
+        self.button = e_button
+
+        self.button.listeners.append(self)
+
+    def hear(self):
+        GameManager.running = False
 
 # =====================================================================================
 #                                   W.I.P                                

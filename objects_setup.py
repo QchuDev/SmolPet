@@ -1,10 +1,12 @@
 import random
 import pygame
+from pygame import Rect
 from pygame._sdl2 import Texture
-from essentials.basics import Entity, Animation, ParticlesManager, SpriteSheet, World
+from essentials.basics import UIElement, Entity, Animation, ParticlesManager, SpriteSheet, UIManager, World
 from essentials.math_custom import Vector2D
-from essentials.components import ParticlesEmitter, PhysicalBall, MouseDrag, Animator, AIController, StatesManager, TextBubble, CharactersHandler, EntityEraser
+from essentials.components import Button, ParticlesEmitter, PhysicalBall, MouseDrag, Animator, AIController, QuitOnClick, StatesManager, TextBubble, CharactersHandler, EntityEraser
 from characters_setup import CHARACTERS
+from essentials.window_setup import RENDERER, SCREEN_CENTER, SCREEN_W, SCREEN_H
 from states_graph import NPC_STATES
 
 # Initialize the font
@@ -24,7 +26,7 @@ def initial_entities():
     go_sleep:   Animation = Animation('go_sleep',   [15, 16, 17],   frame_duration=0.2,     loop=False)
     sleeping:   Animation = Animation('sleeping',   [18, 19, 20],   frame_duration=0.3)
     # entity and components
-    for i in range(250):
+    for i in range(1):
         npc = Entity(
                 name=f'Entity{i}',
                 components= [
@@ -58,11 +60,35 @@ def initial_entities():
     )
     ents.append(popcorn_bucket)
 
-    return ents
-
-def setup_entities(ents: list[Entity]):
+    # Sets up all entities
     for e in ents:
         e.start()
 
+    return ents
+
+def initial_ui():
+    # entities array
+    ui_elems = []
+
+    # quit button
+    qbutton_surface = pygame.image.load('resources/images/ui/buttons_16.png')
+    quit_button = UIElement(
+        texture=Texture.from_surface(RENDERER, qbutton_surface),
+        rect=Rect(0,0,32,32),
+        ui_components=[
+            Button(click_radius=38),
+            QuitOnClick()
+        ]
+    )
+    quit_button.pos.x, quit_button.pos.y  = SCREEN_W - 42, 16
+
+    ui_elems.append(quit_button)
+
+    # Sets up all entities
+    for u in ui_elems:
+        u.start()
+
+    return ui_elems
+
 World.entities = initial_entities()
-setup_entities(World.entities)
+UIManager.ui_elements = initial_ui()

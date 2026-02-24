@@ -18,6 +18,8 @@ from .window_setup import RENDERER, WINDOW
 # =====================================================================================
 #                               BASIC MANAGERS AND CLASSES
 # =====================================================================================
+class GameManager:
+    running = True
 
 class MouseInput:
     pos = Vector2D(0,0)
@@ -269,14 +271,22 @@ class Transition():
         return self.condition(entity)
 
 # WIP
-# This class is in charge of checking for possible events, such as achievements or special moments.
+class UIManager:
+    ui_elements: list[UIElement] = []
 
+# This class is in charge of checking for possible events, such as achievements or special moments.
+U = TypeVar('U', bound='UIComponent')
 class UIElement():
-    __slots__ = ['pos', 'size', 'texture', 'components', 'show']
-    def __init__(self, rect:Rect=Rect(0,0, 8,8), texture:Texture|None = None, ui_components:list[UIComponent]=[]) -> None:
+    __slots__ = ['name', 'pos', 'size', 'texture', 'components', 'show', 'source_area']
+    def __init__(self, name:str='', rect:Rect=Rect(0,0, 8,8), texture:Texture|None = None, ui_components:list[UIComponent]=[]) -> None:
+        self.name: str = name
+        
         self.pos: Vector2D = Vector2D(rect[0], rect[1])
         self.size: Vector2D = Vector2D(rect[2], rect[3])
+
         self.texture : Texture|None = texture
+        self.source_area: Rect = Rect(0,0, 16, 16)
+
         self.components: list[UIComponent] = ui_components
         self.show: bool = True
     
@@ -289,15 +299,20 @@ class UIElement():
             ui_c.update()
 
     def draw(self):
+        if not self.texture: return
+
+        dest_rect = Rect(*self.pos, *self.size)
+        RENDERER.blit(self.texture, dest_rect, self.source_area)
+        
         for ui_c in self.components:
             ui_c.draw()
-
-        if not self.texture: return
-        dest_rect = Rect(*self.pos, *self.size)
-        RENDERER.blit(self.texture, dest_rect)
+    
+    def get_component(self, component_type: Type[U]) -> Optional[U]:
+        for c in self.components:
+            if isinstance(c, component_type):
+                return c
         
-
-        
+        return None
 
 # Father of all Components ("what should they have")
 class UIComponent():
@@ -319,10 +334,7 @@ class UIComponent():
     def draw(self):
         pass
 
-
-class EventsManager:
-    pass
-
-class Event():
-    def __init__(self, condition , spawns=[]) -> None:
+# A listener can hear the input of a button when happens, then acts according 
+class Listener(ABC):
+    def hear(self):
         pass
