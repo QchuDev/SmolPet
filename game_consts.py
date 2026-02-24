@@ -21,12 +21,12 @@ SIT_TIME:  float = 30
 SLEEP_TIME: float = 120
 TARGET_STOP:float = 100
 
-# WEIGHTS
+# WEIGHTS for AIController actions
 ACTION_WEIGHTS  :list[tuple[str,int]] = [
     ('sleep', 2), 
     ('move', 40), 
     ('wait', 60), 
-    ('talk', 10), 
+    ('talk', 8), 
     ('open_image', 1),
-    ('sit', 400)
-]  # Randomize weights for actions
+    ('sit', 15)
+]

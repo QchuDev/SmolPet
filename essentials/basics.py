@@ -96,6 +96,7 @@ class ParticlesManager:
             rect = Rect(p[0]-self.w*0.5, p[1]-self.h*0.5, self.w, self.h)
             RENDERER.blit(texture, rect)
 
+# An entity has name, position, texture, scale and a set of compoenents to create new behavior
 T = TypeVar('T', bound='Component')
 class Entity():
     __slots__ = ['components', 'pos', 'scale', 'texture', 'name', 'facing', 'active']
@@ -140,7 +141,6 @@ class Entity():
         for c in self.components:
             c.draw()
 
-        
     # Updates everycomponent
     def update(self, dt:float):
         # Dont do a thing if inactive
@@ -152,6 +152,7 @@ class Entity():
     def add_component(self, new_comp):
         self.components.append(new_comp)
 
+    # Gives the component asked for and if not found -> None
     def get_component(self, component_type: Type[T]) -> Optional[T]:
         for c in self.components:
             if isinstance(c, component_type):
