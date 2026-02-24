@@ -5,7 +5,7 @@ from typing import Type
 from pygame._sdl2 import Window, Renderer, Texture, Image
 
 # Custom
-from .basics import Component, Input, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
+from .basics import Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
 from .window_setup import RENDERER, SCREEN_W, SCREEN_H, WINDOW, SCREEN_CENTER
 
 from game_consts import GRAVITY, BOUNCE_STOP, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
@@ -21,7 +21,7 @@ from .math_custom import Vector2D
 # BROKEN VERSION: WIP CHANGING THE WAY OF DRAWING
 
 # =====================================================================================
-#                               COMPONENTS
+#                               ENTITY COMPONENTS
 # =====================================================================================
 
 # Animator: decides which is the next frame from a group of animations
@@ -196,8 +196,6 @@ class PhysicalBall(Component):
             rect_border= (draw_x, draw_y, diameter*0.5, diameter)
             RENDERER.draw_rect(rect_border)
 
-    
-
 # MouseDrag lets the entity get dragged with physics by the mouse
 class MouseDrag(Component):
     __slots__ = ['mouse_pos', 'is_pulling', 'phys', 'animator', 'pos_diff', 'diff_mag']
@@ -220,8 +218,8 @@ class MouseDrag(Component):
             raise Exception(f"{self.parent.name}: Has not a PhysicsBall Component. It's required if using {self.__class__.__name__}")
             
     def update(self, dt: float):
-        if Input.left_clicked:
-            self.pos_diff = Input.mouse_pos - self.phys.pos
+        if MouseInput.left_clicked:
+            self.pos_diff = MouseInput.pos - self.phys.pos
             dist_sq = self.pos_diff.magnitude_squared()
             
             if self.is_pulling or dist_sq <= (self.phys.radius + 10)**2:
@@ -563,6 +561,10 @@ class AIController(Component):
             accum += w[1]
         
         self.curr_action = action
+
+# =====================================================================================
+#                               UI COMPONENTS
+# =====================================================================================
 
 
 # =====================================================================================

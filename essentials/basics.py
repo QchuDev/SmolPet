@@ -19,15 +19,17 @@ from .window_setup import RENDERER, WINDOW
 #                               BASIC MANAGERS AND CLASSES
 # =====================================================================================
 
-class Input:
-    _mouse_pos = Vector2D(0,0)
+class MouseInput:
+    pos = Vector2D(0,0)
+    left_clicked: bool = False
+    right_clicked: bool = False
 
     # Place to search for the key codes
     # https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
 
     @classmethod
     def update(cls) -> None:
-        cls._mouse_pos.x, cls._mouse_pos.y = win32api.GetCursorPos()
+        cls.pos.x, cls.pos.y = win32api.GetCursorPos()
 
     @classmethod
     def is_down(cls, vk_code) -> bool:
@@ -35,8 +37,7 @@ class Input:
     
     @classmethod
     def mouse_pos(cls) -> Vector2D:
-        return cls._mouse_pos
-
+        return cls.pos
 
 # This objects is in charged of presenting all entities needed as fast as possible
 class World:
@@ -161,8 +162,8 @@ class Entity():
         
         return None
 
-# Interface of the Components ("what should they have")
-class Component(ABC):
+# Father of all Components ("what should they have")
+class Component():
     __slots__ = ['parent']
 
     # A component only has to know its parent
@@ -269,6 +270,56 @@ class Transition():
 
 # WIP
 # This class is in charge of checking for possible events, such as achievements or special moments.
+
+class UIElement():
+    __slots__ = ['pos', 'size', 'texture', 'components', 'show']
+    def __init__(self, rect:Rect=Rect(0,0, 8,8), texture:Texture|None = None, ui_components:list[UIComponent]=[]) -> None:
+        self.pos: Vector2D = Vector2D(rect[0], rect[1])
+        self.size: Vector2D = Vector2D(rect[2], rect[3])
+        self.texture : Texture|None = texture
+        self.components: list[UIComponent] = ui_components
+        self.show: bool = True
+    
+    def start(self):
+        for ui_c in self.components:
+            ui_c.start(self)
+
+    def update(self):
+        for ui_c in self.components:
+            ui_c.update()
+
+    def draw(self):
+        for ui_c in self.components:
+            ui_c.draw()
+
+        if not self.texture: return
+        dest_rect = Rect(*self.pos, *self.size)
+        RENDERER.blit(self.texture, dest_rect)
+        
+
+        
+
+# Father of all Components ("what should they have")
+class UIComponent():
+    __slots__ = ['parent']
+
+    # A component only has to know its parent
+    def __init__(self) -> None:
+        self.parent: UIElement = UIElement()
+    
+    # Ref the parent of the component
+    def start(self, ui_element:UIElement):
+        self.parent = ui_element
+        if not self.parent: 
+            raise Exception(f"No parent detected for {self.__class__.__name__}")
+
+    def update(self):
+        pass
+
+    def draw(self):
+        pass
+
+
 class EventsManager:
     pass
 

@@ -45,3 +45,7 @@ class Vector2D():
 
     def __neg__(self) -> Vector2D:
         return Vector2D(-self.x, -self.y)
+
+    def __iter__(self):
+        yield self.x
+        yield self.y
