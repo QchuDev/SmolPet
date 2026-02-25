@@ -21,5 +21,12 @@ ALL = {
     'BOOOM!':               [False, False, 'Consigue todos los logros, una genia <3']
 }
 
-UNLOCKED = {}
-LOCKED = {}
+# Getting the state of the achievements
+def get_save_data():
+    return {name: info[0] for name, info in ALL.items()}
+
+# Loading the information stored back to the dictionary
+def load_save_data(data):
+    for name, unlocked in data.items():
+        if name in ALL:
+            ALL[name][0] = unlocked
