@@ -7,7 +7,7 @@ from essentials.math_custom import Vector2D
 from essentials.components import Button, ParticlesEmitter, PhysicalBall, MouseDrag, Animator, AIController, QuitOnClick, StatesManager, TextBubble, CharactersHandler, EntityEraser
 from characters_setup import CHARACTERS
 from essentials.window_setup import RENDERER, SCREEN_CENTER, SCREEN_W, SCREEN_H
-from states_graph import NPC_STATES
+from states_graph import NPC_STATES, PROP_STATES
 
 # Initialize the font
 pygame.font.init()
@@ -23,6 +23,11 @@ NPC_ANIMATIONS = [
     Animation('sleeping',   [18, 19, 20],   frame_duration=0.3),
     Animation('go_sit',     [21,22,23],     frame_duration=0.2,     loop=False),
     Animation('sit',        [24,25,26],     frame_duration=0.3)
+]
+
+PROP_ANIMATIONS = [
+    Animation('still',      [0, 1, 2],      frame_duration=0.2),
+    Animation('bounce',     [3, 4, 5],      frame_duration=0.08,    loop=False),
 ]
 
 # Entities
@@ -56,17 +61,48 @@ def initial_entities():
         ents.append(npc)
 
     # POPCORN BUCKET ========================================================================
-    popcorn_bucket_ss = SpriteSheet('resources/images/props_16.png', (16,16), scale_factor=4)
-    popcorn_bucket = Entity(
-        popcorn_bucket_ss.get_texture(0), 
+    popcorn_bucket_ss = SpriteSheet('resources/images/popcorn_bucket_16.png', (16,16), scale_factor=4)
+    popcorn_bucket = Entity( 
         name='Popcorn Bucket',
         components= [
             PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.3, directed=False),
             MouseDrag(),
-            ParticlesEmitter(prts_manager, 'popcorn', frequency=1, offset= (0, -2))
+            ParticlesEmitter(prts_manager, 'popcorn', frequency=3, offset= (0, -2)),
+            Animator(popcorn_bucket_ss, anims=PROP_ANIMATIONS),
+            StatesManager(PROP_STATES)
         ]
     )
     ents.append(popcorn_bucket)
+
+    # TIRAMISU ========================================================================
+    tiramisu_ss = SpriteSheet('resources/images/tiramisu_16.png', (16,16), scale_factor=4)
+    tiramisu = Entity( 
+        name='Tiramisu',
+        components= [
+            PhysicalBall(pos=SCREEN_CENTER+Vector2D(32,0), radius=30, air_resist=0.001, mass=1, retention_y=0.2, directed=False),
+            MouseDrag(),
+            Animator(tiramisu_ss, anims=PROP_ANIMATIONS),
+            StatesManager(PROP_STATES)
+        ]
+    )
+    ents.append(tiramisu)
+
+    # BALLOONS ========================================================================
+    balloon_sss=[]
+    for i in range(4):
+        balloon_sss.append(SpriteSheet(f'resources/images/balloons/balloon{i}_16.png', (16,16), scale_factor=4))
+    
+    for i in range(1):
+        balloon = Entity( 
+            name='Balloon',
+            components= [
+                PhysicalBall(pos=SCREEN_CENTER+Vector2D(-32,0), radius=15, air_resist=0.005, mass=1, retention_y=0.6, grav_scale=0.1, directed=False),
+                MouseDrag(),
+                Animator(balloon_sss[random.randint(0, len(balloon_sss)-1)], anims=PROP_ANIMATIONS),
+                StatesManager(PROP_STATES)
+            ]
+        )
+        ents.append(balloon)
 
     # Sets up all entities
     for e in ents:
@@ -98,9 +134,6 @@ def initial_ui():
         u.start()
 
     return ui_elems
-
-def achievements_setup():
-    pass
 
 # hand them to World and UIManager
 World.entities = initial_entities()

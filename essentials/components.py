@@ -78,8 +78,8 @@ class Animator(Component):
 # PhysicalBall: the one in charge of following the rules of physics updating itself
 # Problem: sometimes the npc jumps too much, there is dependecy with the frames
 class PhysicalBall(Component):
-    __slots__ = ['pos', 'vel', 'acc', 'mass', 'radius', 'air_resist', 'retention_x', 'retention_y', 'is_hitting_floor', 'is_hitting_wall', 'is_grounded', 'directed', 'show_hitboxes']
-    def __init__(self, pos:Vector2D=SCREEN_CENTER, vel = (0,0), mass:float=1, radius:float=1, air_resist:float=0.05, retention_x:float=0.8, retention_y:float=0.4, directed:bool = True, show_hitboxes:bool = False):
+    __slots__ = ['pos', 'vel', 'acc', 'mass', 'radius', 'air_resist', 'retention_x', 'retention_y', 'is_hitting_floor', 'is_hitting_wall', 'is_grounded', 'directed', 'grav_scale', 'show_hitboxes']
+    def __init__(self, pos:Vector2D=SCREEN_CENTER, vel = (0,0), mass:float=1, radius:float=1, air_resist:float=0.05, retention_x:float=0.8, retention_y:float=0.4, directed:bool = True, grav_scale:float = 1,show_hitboxes:bool = False):
         # State of the object
         self.pos:Vector2D = pos
         self.vel:Vector2D = Vector2D(vel[0], vel[1])
@@ -87,6 +87,7 @@ class PhysicalBall(Component):
         
         # Properties of body
         self.mass:float = max(0.01, mass)
+        self.grav_scale = max(0, grav_scale)
         self.radius:float = max(0.01, radius)
         self.air_resist:float = air_resist
         
@@ -105,8 +106,8 @@ class PhysicalBall(Component):
 
     # Applying gravity and normal floor force
     def gravityEffect(self) -> None:
-        self.acc.x += GRAVITY.x
-        self.acc.y += GRAVITY.y
+        self.acc.x += GRAVITY.x * self.grav_scale
+        self.acc.y += GRAVITY.y * self.grav_scale
 
         if self.pos.y >= SCREEN_H - self.radius:
             self.is_grounded = True
@@ -316,9 +317,7 @@ class CharactersHandler(Component):
             self.ai_controller.phrases = character.phrases           
 
 global bubble_sheet
-# Asegúrate de que (4,4) coincide con los frames reales de tu PNG
 bubble_sheet: SpriteSheet = SpriteSheet('resources/images/text_bubble.png', (4,4), 4)
-
 class TextBubble(Component):
     __slots__ = ['raw_sheet', 'c', 'font', 'phrase', 'show', 'texture']
     

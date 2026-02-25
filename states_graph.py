@@ -93,7 +93,7 @@ BOUNCE_STATE = State('bounce',
     ]
 )
 
-ITEM_STATES: list[State] = [
+PROP_STATES: list[State] = [
     STILL_STATE,
     BOUNCE_STATE
 ]
