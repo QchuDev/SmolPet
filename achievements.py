@@ -1,4 +1,5 @@
 from essentials.basics import GameManager
+import user_activity
 
 ALL_ACHIEVEMENTS = {
     # name      :       unlocked, condition, desc
@@ -29,18 +30,13 @@ ALL_ACHIEVEMENTS = {
     ],
     'Soy yo, soy yo':       [
         False, 
-        lambda: GameManager.is_unlocked('dino'), 
+        lambda: GameManager.is_unlocked('pachu'), 
         'Desbloquea a Mini-Pachu'
     ],
     'Carboncito':           [
         False, 
-        lambda: GameManager.is_unlocked('dino'), 
+        lambda: GameManager.is_unlocked('pol'), 
         'Desbloquea a Mini-Pol'
-    ],
-    'Tiburon? Osito?':      [
-        False, 
-        lambda: GameManager.is_unlocked('dino'), 
-        'Desbloquea a Mini-Squalo'
     ],
     'La familia reunida':   [
         False, 
@@ -79,13 +75,18 @@ ALL_ACHIEVEMENTS = {
     ],
     'ABSOLUTE CINEMA':      [
         False, 
-        lambda: False, 
+        lambda: GameManager.is_unlocked('cuchu') and user_activity.shared_state['is_watching_video'], 
         'Mira una pelicula o serie con Cuchu'
+    ],
+    'KUCHAU!':              [
+        False,
+        lambda: GameManager.top_speed() > 10000,
+        'Supera los limites de velocidad, veloz como el rayo'
     ],
     'BOOOM!':               [
         False, 
-        lambda: False, 
-        'Consigue todos los logros, una genia <3'
+        lambda: GameManager.game_completed == True, 
+        'Termina el juego, una genia <3'
     ]
 }
 

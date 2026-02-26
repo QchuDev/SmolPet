@@ -37,8 +37,9 @@ def initial_entities() -> None:
                 new_ent = ALL_PREFABS[random_ballon].clone()
 
             # Change its starting position
-            padding = 40
-            new_ent.pos = Vector2D(padding + (SCREEN_W-2*padding)*i/len(save_data['entities']),-40)
+            padding = 800
+            x_pos = SCREEN_W*0.5 - padding*i/len(save_data['entities'])
+            new_ent.pos = Vector2D(x_pos,-40)
 
             # Insert it to the main loop
             World.entities.append(new_ent)
@@ -69,8 +70,18 @@ def initial_ui():
         ]
     )
     quit_button.pos.x, quit_button.pos.y  = SCREEN_W - 42, 16
-
     ui_elems.append(quit_button)
+
+    achievement_ui_surface = pygame.image.load('resources/images/ui/achievements_popup.png')
+    achievement_ui = UIElement(
+        texture=Texture.from_surface(RENDERER, qbutton_surface),
+        rect=Rect(0,0,32,32),
+        ui_components=[
+            # Add the respective achievement showing logic
+            
+        ]
+    )
+    ui_elems.append(achievement_ui)
 
     # Sets up all entities
     for u in ui_elems:

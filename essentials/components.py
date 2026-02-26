@@ -497,6 +497,7 @@ class AIController(Component):
         if self.curr_action in interrputed_from_lifting and not self.phys.is_grounded: 
             self.curr_action = 'wait'
 
+    # its a hard-coded method for the decision of NPCS
     def decide(self):
 
         # Dont show
