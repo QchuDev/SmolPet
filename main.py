@@ -71,6 +71,8 @@ while GameManager.running:
     monitor.update(dt)
     monitor.render()
 
+    # Check for achievement unlocks
+    GameManager.check_for_unlocks()
     RENDERER.present()
 
 persist_manager.save(World.entities)

@@ -15,6 +15,31 @@ from pygame._sdl2 import Texture
 from .math_custom import Vector2D
 from .window_setup import RENDERER, WINDOW
 
+def smart_copy(target, memo=None):
+    if memo is None: memo = {}
+    
+    # 1. Si es un tipo básico o None, devolver tal cual
+    if target is None or isinstance(target, (int, float, str, bool)):
+        return target
+    
+    # 2. Si es un objeto de Pygame/SDL2, NO clonar, solo pasar la referencia
+    t_name = type(target).__name__
+    if t_name in ('Texture', 'Font', 'Surface', 'Renderer', 'Context'):
+        return target
+        
+    # 3. Para todo lo demás, dejar que Python haga su magia
+    # Esto ahora funcionará perfecto porque hay __dict__
+    return copy.deepcopy(target, memo)
+def _bypass_pickle(obj, memo):
+    return obj
+
+# 2. Registramos la regla para Texturas y Fuentes de SDL2
+# Esto afecta a TODO el programa, incluyendo deepcopy dentro de listas/dicts
+copy._deepcopy_dispatch[pygame._sdl2.video.Texture] = _bypass_pickle # type: ignore
+try:
+    copy._deepcopy_dispatch[pygame.font.Font] = _bypass_pickle # type: ignore
+except:
+    pass
 
 # =====================================================================================
 #                               BASIC MANAGERS AND CLASSES
@@ -23,6 +48,19 @@ class GameManager:
     # Starting value should be true, if want to play ofc
     first_time = True
     running = True
+
+    @classmethod
+    def check_for_unlocks(cls):
+        from achievements import ALL_ACHIEVEMENTS
+        for n, a in ALL_ACHIEVEMENTS.items():
+            if a[0]: continue
+            if a[1]:
+                a[0] = True
+                cls.trigger_achievement_unlock(n,a)
+    @classmethod
+    def trigger_achievement_unlock(cls, name:str, a: list):
+        print(f'{name}: unlocked? {a[0]}')
+        print(f'"{a[2]}"')
 
 # This objects is in charged of presenting all entities needed as fast as possible
 class World:
@@ -46,15 +84,13 @@ class MouseInput:
     def mouse_pos(cls) -> Vector2D:
         return cls.pos
 
-
 # An entity has name, position, texture, scale and a set of compoenents to create new behavior
 T = TypeVar('T', bound='Component')
 class Entity():
-    __slots__ = ['components', 'pos', 'scale', 'texture', 'name', 'facing', 'active']
 
-    def __init__(self, texture:Texture | None = None, name:str = 'no_name', components:list[Component] = []):
+    def __init__(self,  pos:Vector2D = Vector2D(0,0), texture:Texture | None = None, name:str = 'no_name', components:list[Component] = []):
         self.components = components 
-        self.pos:   Vector2D = Vector2D(0,0)
+        self.pos:   Vector2D = pos
         self.scale: Vector2D = Vector2D(1,1)
 
         self.texture: Texture | None  = texture
@@ -111,14 +147,36 @@ class Entity():
         
         return None
 
-    # Clone the entity, it returns an identical but different entity
+    # Returns a copy itself, copying components and everything
     def clone(self):
-        new_copy = copy.deepcopy(self)
-        return new_copy
+        # Con el parche global y sin slots, esto es ahora 100% seguro
+        new_ent = copy.deepcopy(self)
+        
+        # Re-vinculamos los componentes al nuevo clon
+        for comp in new_ent.components:
+            comp.parent = new_ent
+            
+        return new_ent
     
+    def __deepcopy__(self, memo):
+        # Creamos la instancia nueva
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        
+        # Copiamos el diccionario de atributos (__dict__)
+        for k, v in self.__dict__.items():
+            if k == 'parent':
+                # Evitamos copiar al padre para no entrar en bucle infinito
+                setattr(result, k, None)
+            else:
+                # El parche global de arriba se encargará de las texturas
+                # aquí, incluso si están dentro de listas o diccionarios.
+                setattr(result, k, copy.deepcopy(v, memo))
+                
+        return result
 # Father of all Components ("what should they have")
 class Component(ABC):
-    __slots__ = ['parent']
 
     # A component only has to know its parent
     def __init__(self) -> None:
@@ -136,9 +194,25 @@ class Component(ABC):
     def draw(self):
         pass
 
+    def __deepcopy__(self, memo):
+        # Creamos la instancia nueva
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        
+        # Copiamos el diccionario de atributos (__dict__)
+        for k, v in self.__dict__.items():
+            if k == 'parent':
+                # Evitamos copiar al padre para no entrar en bucle infinito
+                setattr(result, k, None)
+            else:
+                # El parche global de arriba se encargará de las texturas
+                # aquí, incluso si están dentro de listas o diccionarios.
+                setattr(result, k, copy.deepcopy(v, memo))
+                
+        return result
 # Spritesheet: extracts the images of a spritesheet and saves the parts
 class SpriteSheet():
-    __slots__ = ['texture', 'sprite_w', 'sprite_h', 'surfaces', 'right_textures', 'left_textures']
     def __init__(self, file_path:str, cell_size=(64,64), scale_factor=1) -> None:
         self.surfaces: list[Surface] = []
         self.right_textures: list[Texture] = []
@@ -237,7 +311,6 @@ class ParticlesManager:
 
 # Animation: has name, a sequence of indexes, frame duration and if its a loop
 class Animation():
-    __slots__ = ['name', 'seq', 'loop', 'frame_duration']
     def __init__(self, name:str, seq:list[int], loop:bool = True, frame_duration:float = 0.1) -> None:
         self.name = name
         self.seq = seq
@@ -246,7 +319,6 @@ class Animation():
 
 # CharacterData: has name, phrases and a SpriteSheet
 class CharacterData():
-    __slots__ = ['name', 'phrases', 'ss']
     def __init__(self, ss: SpriteSheet, name:str, phrases:list[str] = []):
         self.name:      str = name
         self.phrases:   list[str] = phrases
@@ -254,7 +326,6 @@ class CharacterData():
 
 # State: a name and has a set of transitions
 class State():
-    __slots__ = ['name', 'transitions']
     def __init__(self, name:str = '', trans: list[Transition] = []):
         self.name:  str = name
         self.transitions:  list[Transition] = trans
@@ -270,7 +341,6 @@ class State():
 
 # Transition: has a conditions and the state that it goes to 
 class Transition():
-    __slots__ = ['to_state', 'condition']
     def __init__(self, to_state: str, condition):
         self.to_state = to_state
         self.condition = condition
@@ -285,7 +355,6 @@ class UIManager:
 # This class is in charge of checking for possible events, such as achievements or special moments.
 U = TypeVar('U', bound='UIComponent')
 class UIElement():
-    __slots__ = ['name', 'pos', 'size', 'texture', 'components', 'show', 'source_area']
     def __init__(self, name:str='', rect:Rect=Rect(0,0, 8,8), texture:Texture|None = None, ui_components:list[UIComponent]=[]) -> None:
         self.name: str = name
         
@@ -324,7 +393,6 @@ class UIElement():
 
 # Father of all Components ("what should they have")
 class UIComponent():
-    __slots__ = ['parent']
 
     # A component only has to know its parent
     def __init__(self) -> None:

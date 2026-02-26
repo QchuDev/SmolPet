@@ -4,6 +4,7 @@ from pygame import Rect
 from pygame._sdl2 import Texture
 from essentials.basics import GameManager, PersistenceManager, UIElement, ParticlesManager, UIManager, World
 from essentials.components import Button, QuitOnClick
+from essentials.math_custom import Vector2D
 from essentials.window_setup import RENDERER,SCREEN_W
 from prefabs import ALL_PREFABS
 
@@ -36,9 +37,18 @@ def initial_entities() -> None:
                 new_ent = ALL_PREFABS[random_ballon].clone()
 
             # Change its starting position
+            print()
+            print()
+            print()
+            print(dir(new_ent))
+            print()
+            print()
+            print(f"Entidad: {new_ent.name}, tiene pos?: {hasattr(new_ent, 'pos')}")
+            if hasattr(new_ent, 'pos'):
+                print(f"Tipo de pos: {type(new_ent.pos)}")
+            print()
             padding = 40
-            new_ent.pos.x = padding + (SCREEN_W-2*padding)*i/len(save_data['entities'])
-            new_ent.pos.y = -40
+            new_ent.pos = Vector2D(padding + (SCREEN_W-2*padding)*i/len(save_data['entities']),-40)
 
             # Insert it to the main loop
             World.entities.append(new_ent)

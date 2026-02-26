@@ -1,3 +1,5 @@
+import copy
+
 import pygame
 from pygame import Rect
 import random
@@ -27,7 +29,6 @@ from .math_custom import Vector2D
 
 # Animator: decides which is the next frame from a group of animations
 class Animator(Component):
-    __slots__ = ['frame_idx', 'ss', 'anims', 'timer', 'current_anim']
     def __init__(self, ss:SpriteSheet=SpriteSheet(''), anims:list[Animation] = []) -> None:
         self.frame_idx:int = 0
         
@@ -77,7 +78,6 @@ class Animator(Component):
 # PhysicalBall: the one in charge of following the rules of physics updating itself
 # Problem: sometimes the npc jumps too much, there is dependecy with the frames
 class PhysicalBall(Component):
-    __slots__ = ['vel', 'acc', 'mass', 'radius', 'air_resist', 'retention_x', 'retention_y', 'is_hitting_floor', 'is_hitting_wall', 'is_grounded', 'directed', 'grav_scale', 'show_hitboxes']
     def __init__(self, vel = (0,0), mass:float=1, radius:float=1, air_resist:float=0.05, retention_x:float=0.8, retention_y:float=0.4, directed:bool = True, grav_scale:float = 1,show_hitboxes:bool = False):
         # State of the object
         self.vel:Vector2D = Vector2D(vel[0], vel[1])
@@ -198,7 +198,6 @@ class PhysicalBall(Component):
 
 # MouseDrag lets the entity get dragged with physics by the mouse
 class MouseDrag(Component):
-    __slots__ = ['mouse_pos', 'is_pulling', 'phys', 'animator', 'pos_diff', 'diff_mag']
     def __init__(self) -> None:
         # Mouse variables
         self.mouse_pos:Vector2D = Vector2D(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
@@ -234,7 +233,6 @@ class MouseDrag(Component):
 
 # Component who decides the current animation to be played
 class StatesManager(Component):
-    __slots__ = ['current_state', 'states', 'animator']
     def __init__(self, states:list[State]) :
         self.current_state:     State = states[0]
         self.states:            dict[str,State] = {s.name : s for s in states}
@@ -270,7 +268,6 @@ class StatesManager(Component):
 
 # Components which gets a set of CharactersData (Object)
 class CharactersHandler(Component):
-    __slots__ =['curr_char', 'characters', 'animator', 'ai_controller']
 
     def __init__(self, characters: list[CharacterData]) -> None:
         self.curr_char: str = characters[random.randrange(0,len(characters))].name
@@ -317,7 +314,6 @@ class CharactersHandler(Component):
 global bubble_sheet
 bubble_sheet: SpriteSheet = SpriteSheet('resources/images/text_bubble.png', (4,4), 4)
 class TextBubble(Component):
-    __slots__ = ['raw_sheet', 'c', 'font', 'phrase', 'show', 'texture']
     
     def __init__(self):
         # self.c define el grosor de las esquinas en el resultado final
@@ -434,10 +430,11 @@ class TextBubble(Component):
 
         return lines, largest_verse
     
+    
+    
 # Component to decide the next action of the NPC
 # This class changes the state of the StateManager to play certain animations
 class AIController(Component):
-    __slots__ = ['phys', 'bubb', 'timer_range', 'max_time', 'timer', 'actions', 'curr_action', 'target_x', 'target_setted', 'going_to_open', 'phrases', 'weights', 'total_weight']
     def __init__(self, timer_range:tuple[float,float] = (1,3)) -> None:
         # Needed components
         self.phys: PhysicalBall = PhysicalBall()
@@ -592,7 +589,6 @@ class AIController(Component):
 # =====================================================================================
 class Button(UIComponent):
     
-    __slots__ = ['pressed_rect', 'not_pressed_rect', 'click_radius', 'click_down', 'click_up', 'listeners']
     def __init__(self, pressed_rect:Rect = Rect(16,0,16,16), not_pressed_rect:Rect = Rect(0,0,16,16), click_radius:float=16) -> None:
         self.pressed_rect:Rect = pressed_rect
         self.not_pressed_rect:Rect = not_pressed_rect
@@ -660,7 +656,6 @@ class QuitOnClick(UIComponent, Listener):
 # =====================================================================================
 
 class EntityEraser(Component):
-    __slots__ = ['phys']
     def __init__(self) -> None:
         self.phys: PhysicalBall = PhysicalBall()        
 
@@ -683,7 +678,6 @@ class EntityEraser(Component):
                 e.active = False        # Inactives the entity it touches
 
 class ParticlesEmitter(Component):
-    __slots__ = [ 'particle_prefab', 'frequency', 'timer', 'offset']
     def __init__(self, particle_prefab, frequency=1.0, offset: tuple[float,float] = (0,0)):
         self.particle_prefab = particle_prefab
         self.frequency = frequency
