@@ -1,6 +1,6 @@
 from essentials.basics import GameManager
 
-ALL = {
+ALL_ACHIEVEMENTS = {
     # name      :       unlocked, condition, desc
     'UN VIRUS?!?':          [False, GameManager.first_time, 'Entra por primera vez al virus? juego? regalo?'],
     'Lo pario Cuchu?':      [False, False, 'Desbloquea a Mini-Dino'],
@@ -23,10 +23,10 @@ ALL = {
 
 # Getting the state of the achievements
 def get_save_data():
-    return {name: info[0] for name, info in ALL.items()}
+    return {name: info[0] for name, info in ALL_ACHIEVEMENTS.items()}
 
 # Loading the information stored back to the dictionary
 def load_save_data(data):
     for name, unlocked in data.items():
-        if name in ALL:
-            ALL[name][0] = unlocked
+        if name in ALL_ACHIEVEMENTS:
+            ALL_ACHIEVEMENTS[name][0] = unlocked

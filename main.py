@@ -12,7 +12,7 @@ from essentials.debug_tools import monitor
 import user_activity
 
 # Execute the entities_setup before reading World
-from objects_setup import prts_manager
+from objects_setup import prts_manager, persist_manager
 from essentials.basics import Entity, GameManager, MouseInput, UIManager, World
 
 
@@ -36,7 +36,6 @@ while GameManager.running:
 
     # Update mouse inputs
     MouseInput.update()
-    
 
     # To clean the request queue
     for event in pygame.event.get():
@@ -73,3 +72,6 @@ while GameManager.running:
     monitor.render()
 
     RENDERER.present()
+
+persist_manager.save(World.entities)
+pygame.quit()

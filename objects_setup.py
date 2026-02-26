@@ -2,7 +2,8 @@ import random
 import pygame
 from pygame import Rect
 from pygame._sdl2 import Texture
-from essentials.basics import UIElement, Entity, Animation, ParticlesManager, SpriteSheet, UIManager, World
+from achievements import ALL_ACHIEVEMENTS
+from essentials.basics import PersistenceManager, UIElement, Entity, Animation, ParticlesManager, SpriteSheet, UIManager, World
 from essentials.math_custom import Vector2D
 from essentials.components import Button, ParticlesEmitter, PhysicalBall, MouseDrag, Animator, AIController, QuitOnClick, StatesManager, TextBubble, CharactersHandler, EntityEraser
 from characters_setup import CHARACTERS
@@ -30,13 +31,33 @@ PROP_ANIMATIONS = [
     Animation('bounce',     [3, 4, 5],      frame_duration=0.08,    loop=False),
 ]
 
-# Entities
+# Main particles manager
 prts_manager = ParticlesManager()
+
+# Main persistence manager
+persist_manager = PersistenceManager()
+# Entities
 def initial_entities():
     # entities array
     ents = []
 
-    # animations
+    save_data = persist_manager.load()
+    if save_data:
+        # Load achievements
+        from achievements import load_save_data
+        load_save_data(save_data['achievements'])
+
+        # Spawn entities
+        for ent_info in save_data['entities']:
+            # For now we save only the name
+            
+            
+            
+            pass
+
+
+    else:
+        ALL_ACHIEVEMENTS['UN VIRUS?!?'][0] = True
     
     # entity and components
     for i in range(10):

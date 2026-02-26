@@ -1,3 +1,6 @@
+import json
+import os
+
 import win32api
 
 import pygame
@@ -334,3 +337,35 @@ class UIComponent():
 class Listener(ABC):
     def hear(self):
         pass
+
+# Class in charge of saving and loading the data from and to the json file save_data
+class PersistenceManager:
+    SAVE_FILE = 'save_data.json'
+
+    @classmethod
+    def save(cls, entities: list[Entity]):
+        entity_data=[]
+        for ent in entities:
+            entity_data.append({'name':ent.name})
+        
+        from achievements import get_save_data
+        achievement_data = get_save_data()
+
+        full_data = {
+            'entities': entity_data,
+            'achievements': achievement_data
+        }
+
+        with open(cls.SAVE_FILE, 'w') as f:
+            json.dump(full_data, f, indent=4)
+        print('Progreso guardado.')
+
+    @classmethod
+    def load(cls):
+        if not os.path.exists(cls.SAVE_FILE):
+            return None
+        try:
+            with open(cls.SAVE_FILE,'r') as f:
+                return json.load(f)
+        except:
+            return None
