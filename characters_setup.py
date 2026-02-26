@@ -80,12 +80,12 @@ PACHU_PHRASES = [
     'Quiero sushi'
 ]
 
-CUCHU_CHAR_DATA = CharacterData(cuchu_ss, 'Cuchu', CUCHU_PHRASES)
-BOBBY_CHAR_DATA = CharacterData(bobby_ss, 'Bobby', BOBBY_PHRASES)
-PACHU_CHAR_DATA = CharacterData(pachu_ss, 'Pachu', PACHU_PHRASES)
-POL_CHAR_DATA = CharacterData(pol_ss, 'Pol', POL_PHRASES)
-SQUALO_CHAR_DATA = CharacterData(squalo_ss, 'Squalo', SQUALO_PHRASES)
-DINO_CHAR_DATA = CharacterData(dino_ss, 'Dino', DINO_PHRASES)
+CUCHU_CHAR_DATA = CharacterData(cuchu_ss, 'cuchu', CUCHU_PHRASES)
+BOBBY_CHAR_DATA = CharacterData(bobby_ss, 'bobby', BOBBY_PHRASES)
+PACHU_CHAR_DATA = CharacterData(pachu_ss, 'pachu', PACHU_PHRASES)
+POL_CHAR_DATA = CharacterData(pol_ss, 'pol', POL_PHRASES)
+SQUALO_CHAR_DATA = CharacterData(squalo_ss, 'squalo', SQUALO_PHRASES)
+DINO_CHAR_DATA = CharacterData(dino_ss, 'dino', DINO_PHRASES)
 
 # Character DATA
 CHARACTERS: list[CharacterData] = [

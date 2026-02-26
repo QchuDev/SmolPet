@@ -37,16 +37,6 @@ def initial_entities() -> None:
                 new_ent = ALL_PREFABS[random_ballon].clone()
 
             # Change its starting position
-            print()
-            print()
-            print()
-            print(dir(new_ent))
-            print()
-            print()
-            print(f"Entidad: {new_ent.name}, tiene pos?: {hasattr(new_ent, 'pos')}")
-            if hasattr(new_ent, 'pos'):
-                print(f"Tipo de pos: {type(new_ent.pos)}")
-            print()
             padding = 40
             new_ent.pos = Vector2D(padding + (SCREEN_W-2*padding)*i/len(save_data['entities']),-40)
 

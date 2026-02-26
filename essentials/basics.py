@@ -11,6 +11,7 @@ from abc import ABC
 from typing import TypeVar, Type, Optional
 from pygame._sdl2 import Texture
 
+
 # Custom
 from .math_custom import Vector2D
 from .window_setup import RENDERER, WINDOW
@@ -48,19 +49,45 @@ class GameManager:
     # Starting value should be true, if want to play ofc
     first_time = True
     running = True
+    unlocked_entites = []
 
+    @classmethod
+    def is_unlocked(cls, name):
+        return name in cls.unlocked_entites
+    
+    @classmethod
+    def all_sleeping(cls) -> bool:
+        ents = World.entities
+
+        from .components import AIController
+        count = 0
+        for e in ents:
+            aic = e.get_component(AIController)
+            if aic:
+                if aic.curr_action != 'sleep':
+                    return False
+                count += 1
+
+        return count == 8   # HORRIBLE
+        
+
+    
     @classmethod
     def check_for_unlocks(cls):
         from achievements import ALL_ACHIEVEMENTS
         for n, a in ALL_ACHIEVEMENTS.items():
             if a[0]: continue
-            if a[1]:
+            condition_met = a[1]()
+            if condition_met:
                 a[0] = True
                 cls.trigger_achievement_unlock(n,a)
+
     @classmethod
     def trigger_achievement_unlock(cls, name:str, a: list):
+        print()
         print(f'{name}: unlocked? {a[0]}')
         print(f'"{a[2]}"')
+        print()
 
 # This objects is in charged of presenting all entities needed as fast as possible
 class World:

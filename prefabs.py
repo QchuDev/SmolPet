@@ -29,7 +29,7 @@ PROP_ANIMATIONS = [
 
 # CHARACTERS
 BOBBY_PREFAB = Entity(
-    name=f'Bobby',
+    name=f'bobby',
     components= [
         PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
         MouseDrag(),
@@ -41,7 +41,7 @@ BOBBY_PREFAB = Entity(
     ]
 )
 CUCHU_PREFAB = Entity(
-    name=f'Cuchu',
+    name=f'cuchu',
     components= [
         PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
         MouseDrag(),
@@ -53,7 +53,7 @@ CUCHU_PREFAB = Entity(
     ]
 )
 PACHU_PREFAB = Entity(
-    name=f'Pachu',
+    name=f'pachu',
     components= [
         PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
         MouseDrag(),
@@ -65,7 +65,7 @@ PACHU_PREFAB = Entity(
     ]
 )
 POL_PREFAB = Entity(
-    name=f'Pol',
+    name=f'pol',
     components= [
         PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
         MouseDrag(),
@@ -77,7 +77,7 @@ POL_PREFAB = Entity(
     ]
 )
 SQUALO_PREFAB = Entity(
-    name=f'Squalo',
+    name=f'squalo',
     components= [
         PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
         MouseDrag(),
@@ -89,7 +89,7 @@ SQUALO_PREFAB = Entity(
     ]
 )
 DINO_PREFAB = Entity(
-    name=f'Dino',
+    name=f'dino',
     components= [
         PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
         MouseDrag(),
