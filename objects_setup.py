@@ -47,7 +47,7 @@ def initial_entities() -> None:
         # Because we dont have save data is our first time
         # We spawn Pachu and set first_time equals True
         World.entities.append(ALL_PREFABS['pachu'])
-        GameManager.first_time = False
+        GameManager.first_time = True
     
     # Calling the start method of entities so components prepare
     for e in World.entities:

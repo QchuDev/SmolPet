@@ -4,7 +4,7 @@ ALL_ACHIEVEMENTS = {
     # name      :       unlocked, condition, desc
     'UN VIRUS?!?':          [
         False, 
-        lambda: GameManager.first_time, 
+        lambda: GameManager.first_time == True, 
         'Entra por primera vez al virus? juego? regalo?'
     ],
     'Lo pario Cuchu?':      [

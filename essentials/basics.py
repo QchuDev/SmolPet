@@ -47,7 +47,7 @@ except:
 # =====================================================================================
 class GameManager:
     # Starting value should be true, if want to play ofc
-    first_time = True
+    first_time = False
     running = True
     unlocked_entites = []
 

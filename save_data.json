@@ -1,0 +1,26 @@
+{
+    "entities": [
+        {
+            "name": "pachu"
+        }
+    ],
+    "achievements": {
+        "UN VIRUS?!?": true,
+        "Lo pario Cuchu?": false,
+        "Tiburon? Perro?": false,
+        "Los hermanitos": false,
+        "Mi novio autista": false,
+        "Soy yo, soy yo": false,
+        "Carboncito": false,
+        "Tiburon? Osito?": false,
+        "La familia reunida": false,
+        "Donde surgio...?": false,
+        "Dulce o Salado?": false,
+        "Diu": false,
+        "FIESTAA": false,
+        "Aprendiendo juntos": false,
+        "Hora de la siesta": false,
+        "ABSOLUTE CINEMA": false,
+        "BOOOM!": false
+    }
+}
