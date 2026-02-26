@@ -18,10 +18,6 @@ today = datetime.date.today()
 pachus_bd = datetime.date(datetime.datetime.now().year, 3, 6)
 if pachus_bd < datetime.date.today(): pachus_bd = datetime.date(datetime.datetime.now().year+1, 3, 6)
 days_left = (pachus_bd - today).days
-
-print(f"Faltan {days_left} días para el cumple de Pachu.")
-print(f"bd {pachus_bd} | today {today}")
-
 CUCHU_PHRASES = [
         'Te amo <3',
         'Estas ocupada amor?',
@@ -84,12 +80,19 @@ PACHU_PHRASES = [
     'Quiero sushi'
 ]
 
+CUCHU_CHAR_DATA = CharacterData(cuchu_ss, 'Cuchu', CUCHU_PHRASES)
+BOBBY_CHAR_DATA = CharacterData(bobby_ss, 'Bobby', BOBBY_PHRASES)
+PACHU_CHAR_DATA = CharacterData(pachu_ss, 'Pachu', PACHU_PHRASES)
+POL_CHAR_DATA = CharacterData(pol_ss, 'Pol', POL_PHRASES)
+SQUALO_CHAR_DATA = CharacterData(squalo_ss, 'Squalo', SQUALO_PHRASES)
+DINO_CHAR_DATA = CharacterData(dino_ss, 'Dino', DINO_PHRASES)
+
 # Character DATA
 CHARACTERS: list[CharacterData] = [
-    CharacterData(bobby_ss, 'Bobby', BOBBY_PHRASES),
-    CharacterData(cuchu_ss, 'Cuchu', CUCHU_PHRASES),
-    CharacterData(pol_ss, 'Pol', POL_PHRASES),
-    CharacterData(squalo_ss, 'Squalo', SQUALO_PHRASES),
-    CharacterData(dino_ss, 'Dino', DINO_PHRASES),
-    CharacterData(pachu_ss, 'Pachu', PACHU_PHRASES)
+    BOBBY_CHAR_DATA,
+    CUCHU_CHAR_DATA,
+    POL_CHAR_DATA,
+    SQUALO_CHAR_DATA,
+    DINO_CHAR_DATA,
+    PACHU_CHAR_DATA
 ]

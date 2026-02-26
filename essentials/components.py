@@ -12,7 +12,6 @@ from .window_setup import RENDERER, SCREEN_W, SCREEN_H, SCREEN_CENTER
 
 from game_consts import GRAVITY, BOUNCE_STOP, SIT_TIME, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
 from game_consts import WAIT_TIME, SLEEP_TIME, JUMP_FORCE, TARGET_STOP, ACTION_WEIGHTS
-from prefabs import POPCORN_PRTS
 
 from .math_custom import Vector2D
 
@@ -78,10 +77,9 @@ class Animator(Component):
 # PhysicalBall: the one in charge of following the rules of physics updating itself
 # Problem: sometimes the npc jumps too much, there is dependecy with the frames
 class PhysicalBall(Component):
-    __slots__ = ['pos', 'vel', 'acc', 'mass', 'radius', 'air_resist', 'retention_x', 'retention_y', 'is_hitting_floor', 'is_hitting_wall', 'is_grounded', 'directed', 'grav_scale', 'show_hitboxes']
-    def __init__(self, pos:Vector2D=SCREEN_CENTER, vel = (0,0), mass:float=1, radius:float=1, air_resist:float=0.05, retention_x:float=0.8, retention_y:float=0.4, directed:bool = True, grav_scale:float = 1,show_hitboxes:bool = False):
+    __slots__ = ['vel', 'acc', 'mass', 'radius', 'air_resist', 'retention_x', 'retention_y', 'is_hitting_floor', 'is_hitting_wall', 'is_grounded', 'directed', 'grav_scale', 'show_hitboxes']
+    def __init__(self, vel = (0,0), mass:float=1, radius:float=1, air_resist:float=0.05, retention_x:float=0.8, retention_y:float=0.4, directed:bool = True, grav_scale:float = 1,show_hitboxes:bool = False):
         # State of the object
-        self.pos:Vector2D = pos
         self.vel:Vector2D = Vector2D(vel[0], vel[1])
         self.acc:Vector2D = Vector2D(0,0)
         
@@ -109,12 +107,12 @@ class PhysicalBall(Component):
         self.acc.x += GRAVITY.x * self.grav_scale
         self.acc.y += GRAVITY.y * self.grav_scale
 
-        if self.pos.y >= SCREEN_H - self.radius:
+        if self.parent.pos.y >= SCREEN_H - self.radius:
             self.is_grounded = True
             
             if abs(self.vel.y) > SPLAT_VELOCITY.y:
                 self.is_hitting_floor = True
-            self.pos.y = SCREEN_H - self.radius
+            self.parent.pos.y = SCREEN_H - self.radius
             
             if abs(self.vel.x) > SLIDE_STOP:
                 self.vel.x *= self.retention_x
@@ -139,14 +137,14 @@ class PhysicalBall(Component):
     # Checks for walls and pushes the entity
     def wallsPush(self):
         # Right wall
-        if self.pos.x >= SCREEN_W-self.radius*0.5:
-            self.pos.x = SCREEN_W - self.radius
+        if self.parent.pos.x >= SCREEN_W-self.radius*0.5:
+            self.parent.pos.x = SCREEN_W - self.radius
             self.vel.x = -self.vel.x * self.retention_x
             
             if abs(self.vel.x) > SPLAT_VELOCITY.x: self.is_hitting_wall = True      
         # Left wall
-        elif self.pos.x <= self.radius*0.5:
-            self.pos.x = self.radius
+        elif self.parent.pos.x <= self.radius*0.5:
+            self.parent.pos.x = self.radius
             self.vel.x = -self.vel.x * self.retention_x
             self.is_hitting_wall = True
 
@@ -171,8 +169,10 @@ class PhysicalBall(Component):
         self.wallsPush()
         
         # Update physical state
-        self.vel += self.acc*dt
-        self.pos += self.vel*dt
+        self.vel.x += self.acc.x*dt
+        self.vel.y += self.acc.y*dt
+        self.parent.pos.x += self.vel.x*dt
+        self.parent.pos.y += self.vel.y*dt
         self.acc.x = 0
         self.acc.y = 0
 
@@ -182,8 +182,6 @@ class PhysicalBall(Component):
                     self.parent.facing = -1
                 elif self.vel.x > 0:
                     self.parent.facing = 1
-            
-        self.parent.pos = self.pos
 
     # hitboxes draw
     def draw(self):
@@ -221,7 +219,7 @@ class MouseDrag(Component):
             
     def update(self, dt: float):
         if MouseInput.left_clicked:
-            self.pos_diff = MouseInput.pos - self.phys.pos
+            self.pos_diff = MouseInput.pos - self.parent.pos
             dist_sq = self.pos_diff.magnitude_squared()
             
             if self.is_pulling or dist_sq <= (self.phys.radius + 10)**2:
@@ -685,10 +683,9 @@ class EntityEraser(Component):
                 e.active = False        # Inactives the entity it touches
 
 class ParticlesEmitter(Component):
-    __slots__ = ['manager', 'particle', 'frequency', 'timer', 'offset']
-    def __init__(self, manager, particle:str ='spark', frequency=1.0, offset: tuple[float,float] = (0,0)):
-        self.manager: ParticlesManager = manager
-        self.particle = particle
+    __slots__ = [ 'particle_prefab', 'frequency', 'timer', 'offset']
+    def __init__(self, particle_prefab, frequency=1.0, offset: tuple[float,float] = (0,0)):
+        self.particle_prefab = particle_prefab
         self.frequency = frequency
         self.timer = 0
         self.offset = offset
@@ -698,5 +695,5 @@ class ParticlesEmitter(Component):
         if self.timer > self.frequency:
             x= self.parent.pos.x + self.offset[0]
             y= self.parent.pos.y + self.offset[1]
-            self.manager.emit(x,y,*POPCORN_PRTS)
+            ParticlesManager.emit(x,y,*self.particle_prefab)
             self.timer = 0

@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 
@@ -45,59 +46,6 @@ class MouseInput:
     def mouse_pos(cls) -> Vector2D:
         return cls.pos
 
-# The one in charge of all Particles
-class ParticlesManager:
-    def __init__(self):
-        # The states of each particle is represented by: [x,y, vx,vy, lifetime, id, state, accy]
-        self.particles = []
-        self.textures = Texture.from_surface(RENDERER, pygame.image.load('resources/images/particles_8.png'))
-        ss = SpriteSheet('resources/images/particles_8.png', cell_size=(8,8), scale_factor=4)
-        temp_texture: list[Texture] = ss.right_textures
-        self.w, self.h = ss.sprite_w, ss.sprite_h
-        self.uvs = {
-            'spark': temp_texture[0:4],
-            'popcorn': temp_texture[4:8],
-            'heart': temp_texture[8:12],
-        }
-
-    # add to the particles array the new particles to be rendered by the draw()
-    def emit(self, x,y, particle_type:str, mid_lifetime=1.0, ammount:int=1, force=2.0, accy=0):
-        for _ in range(ammount):
-            vx=random.uniform(-force, force)
-            vy=random.uniform(-force, force)
-
-            # Some randomness for variation
-            lifetime = mid_lifetime*random.uniform(0.8, 1.2)
-
-            self.particles.append([x,y ,vx,vy, lifetime, particle_type, 0, mid_lifetime, accy])
-
-    # update the state of each particle
-    def update(self, dt):
-        for i in range(len(self.particles)-1, -1, -1):
-            p = self.particles[i]
-            p[0]+= p[2] # x += vx
-            p[1]+= p[3] # y += vy
-
-            # Acceleration in y axis
-            p[3] += p[8]
-            
-            # Update state 
-            if      p[4]>0.8*p[7]:   p[6] = 0
-            elif    p[4]>0.6*p[7]:   p[6] = 1
-            elif    p[4]>0.4*p[7]:   p[6] = 2
-            else:                    p[6] = 3
-
-            p[4] -= dt  # lifetime -= dt
-            if p[4]<0:
-                self.particles.pop(i)   # remove particle if its time is over
-
-    
-    # draws all the particles at once 
-    def draw(self):
-        for p in self.particles:
-            texture = self.uvs[p[5]][p[6]]
-            rect = Rect(p[0]-self.w*0.5, p[1]-self.h*0.5, self.w, self.h)
-            RENDERER.blit(texture, rect)
 
 # An entity has name, position, texture, scale and a set of compoenents to create new behavior
 T = TypeVar('T', bound='Component')
@@ -163,6 +111,11 @@ class Entity():
         
         return None
 
+    # Clone the entity, it returns an identical but different entity
+    def clone(self):
+        new_copy = copy.deepcopy(self)
+        return new_copy
+    
 # Father of all Components ("what should they have")
 class Component(ABC):
     __slots__ = ['parent']
@@ -225,6 +178,62 @@ class SpriteSheet():
     
     def get_texture(self, index:int, flipped:bool=False) -> Texture: 
         return self.right_textures[index] if not flipped else self.left_textures[index]
+
+# The one in charge of all Particles
+class ParticlesManager:
+    # The states of each particle is represented by: [x,y, vx,vy, lifetime, id, state, accy]
+    particles = []
+    textures = Texture.from_surface(RENDERER, pygame.image.load('resources/images/particles_8.png'))
+    ss = SpriteSheet('resources/images/particles_8.png', cell_size=(8,8), scale_factor=4)
+    temp_texture: list[Texture] = ss.right_textures
+    w, h = ss.sprite_w, ss.sprite_h
+    uvs = {
+        'spark': temp_texture[0:4],
+        'popcorn': temp_texture[4:8],
+        'heart': temp_texture[8:12],
+    }
+
+    # add to the particles array the new particles to be rendered by the draw()
+    @classmethod
+    def emit(cls, x,y, particle_type:str, mid_lifetime=1.0, ammount:int=1, force=2.0, accy=0):
+        for _ in range(ammount):
+            vx=random.uniform(-force, force)
+            vy=random.uniform(-force, force)
+
+            # Some randomness for variation
+            lifetime = mid_lifetime*random.uniform(0.8, 1.2)
+
+            cls.particles.append([x,y ,vx,vy, lifetime, particle_type, 0, mid_lifetime, accy])
+
+    # update the state of each particle
+    @classmethod
+    def update(cls, dt):
+        for i in range(len(cls.particles)-1, -1, -1):
+            p = cls.particles[i]
+            p[0]+= p[2] # x += vx
+            p[1]+= p[3] # y += vy
+
+            # Acceleration in y axis
+            p[3] += p[8]
+            
+            # Update state 
+            if      p[4]>0.8*p[7]:   p[6] = 0
+            elif    p[4]>0.6*p[7]:   p[6] = 1
+            elif    p[4]>0.4*p[7]:   p[6] = 2
+            else:                    p[6] = 3
+
+            p[4] -= dt  # lifetime -= dt
+            if p[4]<0:
+                cls.particles.pop(i)   # remove particle if its time is over
+
+    
+    # draws all the particles at once 
+    @classmethod
+    def draw(cls):
+        for p in cls.particles:
+            texture = cls.uvs[p[5]][p[6]]
+            rect = Rect(p[0]-cls.w*0.5, p[1]-cls.h*0.5, cls.w, cls.h)
+            RENDERER.blit(texture, rect)
 
 # Animation: has name, a sequence of indexes, frame duration and if its a loop
 class Animation():
@@ -346,7 +355,12 @@ class PersistenceManager:
     def save(cls, entities: list[Entity]):
         entity_data=[]
         for ent in entities:
-            entity_data.append({'name':ent.name})
+            # We only save the name of the entity for now
+            entity_data.append(
+                {
+                    'name':ent.name
+                }
+            )
         
         from achievements import get_save_data
         achievement_data = get_save_data()
@@ -358,7 +372,9 @@ class PersistenceManager:
 
         with open(cls.SAVE_FILE, 'w') as f:
             json.dump(full_data, f, indent=4)
-        print('Progreso guardado.')
+        print(full_data)
+        print()
+        print('Changes saved')
 
     @classmethod
     def load(cls):
