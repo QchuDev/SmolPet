@@ -419,14 +419,14 @@ class UIManager:
 # This class is in charge of checking for possible events, such as achievements or special moments.
 U = TypeVar('U', bound='UIComponent')
 class UIElement():
-    def __init__(self, name:str='', rect:Rect=Rect(0,0, 8,8), texture:Texture|None = None, ui_components:list[UIComponent]=[]) -> None:
+    def __init__(self, name:str='', rect:Rect=Rect(0,0, 8,8), texture:Texture|None = None, source_area:Rect=Rect(0,0, 16,16), ui_components:list[UIComponent]=[]) -> None:
         self.name: str = name
         
         self.pos: Vector2D = Vector2D(rect[0], rect[1])
         self.size: Vector2D = Vector2D(rect[2], rect[3])
 
         self.texture : Texture|None = texture
-        self.source_area: Rect = Rect(0,0, 16, 16)
+        self.source_area: Rect = source_area
 
         self.components: list[UIComponent] = ui_components
         self.show: bool = True

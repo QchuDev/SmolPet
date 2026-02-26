@@ -72,10 +72,12 @@ def initial_ui():
     quit_button.pos.x, quit_button.pos.y  = SCREEN_W - 42, 16
     ui_elems.append(quit_button)
 
+    scaling = 3
     achievement_ui_surface = pygame.image.load('resources/images/ui/achievements_popup.png')
     achievement_ui = UIElement(
-        texture=Texture.from_surface(RENDERER, qbutton_surface),
-        rect=Rect(0,0,32,32),
+        texture=Texture.from_surface(RENDERER, achievement_ui_surface),
+        rect=Rect(0,0,80*scaling,32*scaling),
+        source_area=Rect(0,0,80,32),
         ui_components=[
             # Add the respective achievement showing logic
             
