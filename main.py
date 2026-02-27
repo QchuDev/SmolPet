@@ -37,7 +37,8 @@ if __name__ == '__main__':
 
         # Update mouse inputs
         MouseInput.update()
-
+        if MouseInput.left_clicked:
+            print(f'{int(MouseInput.pos.x), int(MouseInput.pos.y)}')
         # To clean the request queue
         for event in pygame.event.get():
             pass

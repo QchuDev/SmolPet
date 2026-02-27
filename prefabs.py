@@ -1,8 +1,10 @@
 import random
 
+
 from characters_setup import BOBBY_CHAR_DATA, CHARACTERS, CUCHU_CHAR_DATA, DINO_CHAR_DATA, PACHU_CHAR_DATA, POL_CHAR_DATA, SQUALO_CHAR_DATA
 from essentials.basics import Animation, Entity, ParticlesManager, SpriteSheet
 from essentials.components import AIController, Animator, CharactersHandler, MouseDrag, ParticlesEmitter, PhysicalBall, StatesManager, TextBubble
+from essentials.math_custom import Vector2D
 from states_graph import NPC_STATES, PROP_STATES
 
 # PARTICLE PREFABS
@@ -182,10 +184,15 @@ def create_entity(prefab_name:str, x,y) -> Entity:
         if prefab_name != 'balloon':
             new_ent = ALL_PREFABS[prefab_name].clone()
         else:
-            random_ballon = ['red balloon', 'blue balloon', 'yellow ballon', 'green balloon'][random.randrange(0,4)]
+            random_ballon = ['red balloon', 'blue balloon', 'yellow balloon', 'green balloon'][random.randrange(0,4)]
             new_ent = ALL_PREFABS[random_ballon].clone()
         new_ent.pos.x = x
         new_ent.pos.y = y
+        # Call start method of entity for setup
+        new_ent.start()
+        phys = new_ent.get_component(PhysicalBall)
+        if phys: phys.applyForce(Vector2D(random.uniform(-8000, 8000), -8000))
+        
         ParticlesManager.emit(new_ent.pos.x, new_ent.pos.y, *SPARK_PRTS)
         
         return new_ent

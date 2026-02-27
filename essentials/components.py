@@ -446,8 +446,6 @@ class TextBubble(Component):
             current_y += line_h
 
         return bubble_surf
-
-
     
 # Component to decide the next action of the NPC
 # This class changes the state of the StateManager to play certain animations
@@ -658,7 +656,7 @@ class AchievementCycle(UIComponent):
         # [time_left, x, y, target_x, target_y, source_pos(16x16 icon)]
         self.showed_img = []
         self.n = len(self.showed_img)
-        self.popups_offet = 80
+        self.popups_offet = 120
         self.scale = scale
 
     def update(self, dt:float):
@@ -680,17 +678,16 @@ class AchievementCycle(UIComponent):
             
             if im[0] > 9:   # startin or leaving
                 delta_x = (im[3]-im[1])*pow(im[0]-9, 2)*0.2
-                delta_y = (im[4]-im[2])*pow(im[0]-9, 2)
             elif im[0] < 1:   # startin or leaving
                 delta_x = (im[3]+400-im[1])*pow(im[0], 2)*0.2
-                delta_y = (im[4]-im[2])*pow(im[0], 2)
+            
+            delta_y = (im[4]-im[2])*pow((im[0]-1)/8, 2)
 
             im[1] += delta_x
             im[2] += delta_y
 
     def draw(self):
         # draws using the data in self.showed_img and achievement_icons
-        print(f'{self.showed_img} <-----')
         for im in self.showed_img:
             RENDERER.blit(base_achievement, dest=Rect(int(im[1]), int(im[2]), base_achievement.width*self.scale, base_achievement.height*self.scale))
             icon_offset = 12

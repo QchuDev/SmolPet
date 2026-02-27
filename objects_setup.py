@@ -36,6 +36,7 @@ def initial_entities() -> None:
 
             # Insert it to the main loop
             World.entities.append(new_ent)
+            GameManager.unlocked_entites.append(prefab_name)
 
     else:
         # Because we dont have save data is our first time

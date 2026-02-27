@@ -50,7 +50,7 @@ ALL_ACHIEVEMENTS = {
     ],
     'La familia reunida':   [
         False, 
-        lambda: GameManager.is_unlocked('dino'), 
+        lambda: GameManager.is_unlocked(a for a in ['dino', 'squalo', 'cuchu', 'pachu']), 
         'Desbloquea todos los Minis',
         (48,16)
     ],

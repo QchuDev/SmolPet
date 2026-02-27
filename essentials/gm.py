@@ -4,6 +4,8 @@ from essentials.components import AchievementCycle, create_paragraph_texture
 from essentials.window_setup import RENDERER, SCREEN_H, SCREEN_W
 from pygame._sdl2 import Texture
 
+import prefabs
+
 class GameManager:
     # Starting value should be true, if want to play ofc
     first_time = False
@@ -40,7 +42,7 @@ class GameManager:
             if condition_met:
                 a[0] = True
                 cls.trigger_achievement_unlock(n,a)
-            
+        
         cls.game_completed = not achievement_left
     
     @classmethod
@@ -88,22 +90,23 @@ class GameManager:
         'tiramisu': ['tiramisu', 'torta', 'postre'],
         'balloon' : ['globos', 'fiesta']
     }
+
     @classmethod
     def check_user_activity(cls):
         # Retrieve the shared_state from the user_activity
         from user_activity import shared_state
 
         for n, a in cls.SEARCH_KEYWORDS.items():
-            if shared_state['last_search'] in a:
-                
-                # WIP
-
-                pass
+            if shared_state['last_search'] in a and n not in cls.unlocked_entites:
+                new_entity = prefabs.create_entity(n, SCREEN_W*0.144, SCREEN_H*0.141)
+                cls.unlocked_entites.append(n)
+                World.entities.append(new_entity)
 
     # For achievement conditions
     @classmethod
     def is_unlocked(cls, name):
         return name in cls.unlocked_entites
+    
     @classmethod
     def all_sleeping(cls) -> bool:
         ents = World.entities
