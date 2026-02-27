@@ -1,92 +1,112 @@
-from essentials.basics import GameManager
+
+from essentials.gm import GameManager
 import user_activity
 
 ALL_ACHIEVEMENTS = {
-    # name      :       unlocked, condition, desc
+    # REMEMBER TO ADD THE ACHIEVEMENTS AT THE BOTTOM OF THE DICT
+
+    # name      :       unlocked, condition, desc, source_pos
     'UN VIRUS?!?':          [
         False, 
         lambda: GameManager.first_time == True, 
-        'Entra por primera vez al virus? juego? regalo?'
+        'Que descargaste? un regalo...?',
+        (0,0)
     ],
     'Lo pario Cuchu?':      [
         False, 
         lambda: GameManager.is_unlocked('dino'), 
-        'Desbloquea a Mini-Dino'
+        'Desbloquea a Mini-Dino',
+        (16,0)
     ],
     'Tiburon? Perro?':      [
         False, 
         lambda: GameManager.is_unlocked('squalo'), 
-        'Desbloquea a Mini-Squalo'
+        'Desbloquea a Mini-Squalo',
+        (32,0)
     ],
     'Los hermanitos':       [
         False, 
         lambda: all(GameManager.is_unlocked(name) for name in ['dino', 'squalo']), 
-        'Desbloquea a Mini-Squalo y Mini-Dino'
+        'Desbloquea a Mini-Squalo y Mini-Dino',
+        (48,0)
     ],
-    'Mi novio autista':     [
+    'Mi novio melo':     [
         False, 
         lambda: GameManager.is_unlocked('cuchu'), 
-        'Desbloquea a Mini-Cuchu'
+        'Desbloquea a Mini-Cuchu',
+        (0,16)
     ],
     'Soy yo, soy yo':       [
         False, 
         lambda: GameManager.is_unlocked('pachu'), 
-        'Desbloquea a Mini-Pachu'
+        'Desbloquea a Mini-Pachu',
+        (16,16)
     ],
     'Carboncito':           [
         False, 
         lambda: GameManager.is_unlocked('pol'), 
-        'Desbloquea a Mini-Pol'
+        'Desbloquea a Mini-Pol',
+        (32,16)
     ],
     'La familia reunida':   [
         False, 
         lambda: GameManager.is_unlocked('dino'), 
-        'Desbloquea todos los Minis'
+        'Desbloquea todos los Minis',
+        (48,16)
     ],
     'Donde surgio...?':     [
         False, 
         lambda: GameManager.is_unlocked('tiramisu'), 
-        'Aparece un tiramisu'
+        'Aparece un tiramisu',
+        (0,32)
     ],
     'Dulce o Salado?':      [
         False, 
         lambda: GameManager.is_unlocked('popcorn bucket'), 
-        'Aparece pochoclos'
+        'Aparece pochoclos',
+        (16,32)
     ],
     'Diu':                  [
         False, 
         lambda: GameManager.is_unlocked('poop'),  
-        'Aparece caca'
+        'Aparece caca',
+        (32,32)
     ],
     'FIESTAA':              [
         False, 
         lambda: GameManager.is_unlocked('balloon'),  
-        'Aparece globooos'
+        'Aparece globooos',
+        (48,32)
     ],
     'Aprendiendo juntos':   [
         False, 
         lambda: False, 
-        'Mira un video de Javier Ledesma con Mini-Pachu y Mini-Cuchu'
+        'Mira un video de Javier Ledesma con Mini-Pachu y Mini-Cuchu',
+        (0,48)
     ],
     'Hora de la siesta':    [
         False, 
         lambda: GameManager.all_sleeping(),
-        'Que todos se vayan a dormir'
+        'Que todos se vayan a dormir',
+        (16,48)
     ],
     'ABSOLUTE CINEMA':      [
         False, 
         lambda: GameManager.is_unlocked('cuchu') and user_activity.shared_state['is_watching_video'], 
-        'Mira una pelicula o serie con Cuchu'
+        'Mira una pelicula o serie con Cuchu',
+        (32,48)
     ],
     'KUCHAU!':              [
         False,
         lambda: GameManager.top_speed() > 10000,
-        'Supera los limites de velocidad, veloz como el rayo'
+        'Supera los limites de velocidad, veloz como el rayo',
+        (48,48)
     ],
     'BOOOM!':               [
         False, 
         lambda: GameManager.game_completed == True, 
-        'Termina el juego, una genia <3'
+        'Termina el juego, una genia <3',
+        (0,64)
     ]
 }
 

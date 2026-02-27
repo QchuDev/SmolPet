@@ -1,3 +1,6 @@
+from essentials.gm import GameManager
+
+
 if __name__ == '__main__':
     import pygame
 
@@ -9,7 +12,7 @@ if __name__ == '__main__':
 
     # Execute the entities_setup before reading World
     from objects_setup import prts_manager, persist_manager
-    from essentials.basics import GameManager, MouseInput, UIManager, World
+    from essentials.basics import MouseInput, UIManager, World
 
     # Time Variables
     clock = pygame.time.Clock()
@@ -56,10 +59,10 @@ if __name__ == '__main__':
 
         # UI ELEMENTS UPDATE AND DRAW
         for u in UIManager.ui_elements:
-            u.update()
+            u.update(dt)
         
-        u.pos.x, u.pos.y = SCREEN_CENTER.x, SCREEN_CENTER.y
 
+        u.pos.x, u.pos.y = SCREEN_CENTER.x, SCREEN_CENTER.y
         for u in UIManager.ui_elements:
             u.draw()
 

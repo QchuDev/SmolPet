@@ -2,11 +2,13 @@ import random
 import pygame
 from pygame import Rect
 from pygame._sdl2 import Texture
-from essentials.basics import GameManager, PersistenceManager, UIElement, ParticlesManager, UIManager, World
-from essentials.components import Animator, Button, QuitOnClick, StatesManager
+from essentials.basics import PersistenceManager, UIElement, ParticlesManager, UIManager, World
+from essentials.components import AchievementCycle, Animator, Button, QuitOnClick, StatesManager
+from essentials.gm import GameManager
 from essentials.math_custom import Vector2D
-from essentials.window_setup import RENDERER,SCREEN_W
+from essentials.window_setup import RENDERER,SCREEN_W,SCREEN_H
 from prefabs import ALL_PREFABS
+import prefabs
 
 # Initialize the font
 pygame.font.init()
@@ -29,17 +31,8 @@ def initial_entities() -> None:
             # For now we save only the name
             prefab_name = ent_info['name'].lower()
 
-            # Call the necessary prefab to spawn 
-            if prefab_name != 'balloon':
-                new_ent = ALL_PREFABS[prefab_name].clone()
-            else:
-                random_ballon = ['red balloon', 'blue balloon', 'yellow ballon', 'green balloon'][random.randrange(0,4)]
-                new_ent = ALL_PREFABS[random_ballon].clone()
-
-            # Change its starting position
-            padding = 800
-            x_pos = SCREEN_W*0.5 - padding*i/len(save_data['entities'])
-            new_ent.pos = Vector2D(x_pos,-40)
+            # Create an entity from prefabs
+            new_ent = prefabs.create_entity(prefab_name, x=SCREEN_W*random.uniform(0,1), y=SCREEN_H*0.8)
 
             # Insert it to the main loop
             World.entities.append(new_ent)
@@ -61,6 +54,7 @@ def initial_ui():
     # quit button
     qbutton_surface = pygame.image.load('resources/images/ui/buttons_16.png')
     quit_button = UIElement(
+        name='quit button',
         texture=Texture.from_surface(RENDERER, qbutton_surface),
         rect=Rect(0,0,32,32),
         ui_components=[
@@ -71,18 +65,19 @@ def initial_ui():
     quit_button.pos.x, quit_button.pos.y  = SCREEN_W - 42, 16
     ui_elems.append(quit_button)
 
-    scaling = 3
-    achievement_ui_surface = pygame.image.load('resources/images/ui/achievements_popup.png')
-    achievement_ui = UIElement(
-        texture=Texture.from_surface(RENDERER, achievement_ui_surface),
-        rect=Rect(0,0,80*scaling,32*scaling),
-        source_area=Rect(0,0,80,32),
+
+
+    # The UIElement in charge of showing the achievements
+    achievements_displayer = AchievementCycle(scale=3)
+    displayer_uielement = UIElement(
+        name='achievement pop-up',
         ui_components=[
-            # Add the respective achievement showing logic
-            # Text
+            achievements_displayer
         ]
     )
-    ui_elems.append(achievement_ui)
+    ui_elems.append(displayer_uielement)
+    GameManager.achievements_displayer = achievements_displayer
+
 
     # Sets up all entities
     for u in ui_elems:

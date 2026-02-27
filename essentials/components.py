@@ -9,19 +9,13 @@ from pygame._sdl2 import Texture
 from essentials.basics import UIElement
 
 # Custom
-from .basics import GameManager, UIComponent, Listener, Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
+from .basics import UIComponent, Listener, Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
 from .window_setup import RENDERER, SCREEN_W, SCREEN_H, SCREEN_CENTER
 
 from game_consts import GRAVITY, BOUNCE_STOP, SIT_TIME, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
 from game_consts import WAIT_TIME, SLEEP_TIME, JUMP_FORCE, TARGET_STOP, ACTION_WEIGHTS
 
 from .math_custom import Vector2D
-
-# BROKEN VERSION: WIP CHANGING THE WAY OF DRAWING
-# BROKEN VERSION: WIP CHANGING THE WAY OF DRAWING
-# BROKEN VERSION: WIP CHANGING THE WAY OF DRAWING
-# BROKEN VERSION: WIP CHANGING THE WAY OF DRAWING
-# BROKEN VERSION: WIP CHANGING THE WAY OF DRAWING
 
 # =====================================================================================
 #                               ENTITY COMPONENTS
@@ -311,14 +305,67 @@ class CharactersHandler(Component):
             self.animator.ss = character.ss
             self.ai_controller.phrases = character.phrases           
 
+global pixel_font
+pixel_font = pygame.font.Font("resources/fonts/Minecraft.ttf", 16)
+
 global bubble_sheet
 bubble_sheet: SpriteSheet = SpriteSheet('resources/images/text_bubble.png', (4,4), 4)
+
+    
+def text_info(text: str) -> tuple[list[str], str]:
+    max_chars = 18 # Aumentado un poco para mejor lectura
+    words = text.split(' ')
+    lines = []
+    current_line_words = []
+    current_count = 0
+    largest_verse = ""
+
+    for word in words:
+        word_len = len(word)
+        space = 1 if current_line_words else 0
+        if current_count + space + word_len <= max_chars:
+            current_line_words.append(word)
+            current_count += space + word_len
+        else:
+            full_line = " ".join(current_line_words)
+            lines.append(full_line)
+            if len(full_line) > len(largest_verse):
+                largest_verse = full_line
+            current_line_words = [word]
+            current_count = word_len
+
+    if current_line_words:
+        full_line = " ".join(current_line_words)
+        lines.append(full_line)
+        if len(full_line) > len(largest_verse):
+            largest_verse = full_line
+
+    return lines, largest_verse
+def create_paragraph_texture(text, color=(255, 255, 255)):
+    font = pixel_font
+    lines, _ = text_info(text)
+    line_surfaces = [font.render(l, False, color) for l in lines]
+    
+    if not line_surfaces: return None
+
+    # Calculamos el tamaño total del párrafo
+    w = max(s.get_width() for s in line_surfaces)
+    line_height = font.get_linesize()
+    h = line_height * len(line_surfaces)
+
+    # Creamos una superficie transparente para "pegar" las líneas
+    paragraph_surf = pygame.Surface((w, h), pygame.SRCALPHA)
+    for i, s in enumerate(line_surfaces):
+        paragraph_surf.blit(s, (0, i * line_height))
+    
+    # Convertimos a textura de SDL2 para el RENDERER
+    return Texture.from_surface(RENDERER, paragraph_surf)
+
 class TextBubble(Component):
     
     def __init__(self):
         # self.c define el grosor de las esquinas en el resultado final
         self.c = 8 
-        self.font = pygame.font.Font("resources/fonts/Minecraft.ttf", 16)
         self.phrase: str = '(I need some phrases mate...)'
         self.show: bool = False
         self.texture: Texture | None = None
@@ -343,13 +390,13 @@ class TextBubble(Component):
             RENDERER.blit(self.texture, dest=dest_rect)
     
     def generate_bubble_surf(self, padding: int = 6) -> pygame.Surface:
-        lines, _ = self.text_info(self.phrase)
+        lines, _ = text_info(self.phrase)
         if not lines: return pygame.Surface((0, 0), pygame.SRCALPHA)
 
         # 1. Render nitido (Sin suavizado para estilo Minecraft)
-        line_surfs = [self.font.render(l, False, (0, 0, 0)) for l in lines]
+        line_surfs = [pixel_font.render(l, False, (0, 0, 0)) for l in lines]
         max_w = max(s.get_width() for s in line_surfs)
-        line_h = self.font.get_linesize()
+        line_h = pixel_font.get_linesize()
         total_h = line_h * len(lines)
 
         s = self.c 
@@ -399,38 +446,8 @@ class TextBubble(Component):
             current_y += line_h
 
         return bubble_surf
-    
-    def text_info(self, text: str) -> tuple[list[str], str]:
-        max_chars = 18 # Aumentado un poco para mejor lectura
-        words = text.split(' ')
-        lines = []
-        current_line_words = []
-        current_count = 0
-        largest_verse = ""
 
-        for word in words:
-            word_len = len(word)
-            space = 1 if current_line_words else 0
-            if current_count + space + word_len <= max_chars:
-                current_line_words.append(word)
-                current_count += space + word_len
-            else:
-                full_line = " ".join(current_line_words)
-                lines.append(full_line)
-                if len(full_line) > len(largest_verse):
-                    largest_verse = full_line
-                current_line_words = [word]
-                current_count = word_len
 
-        if current_line_words:
-            full_line = " ".join(current_line_words)
-            lines.append(full_line)
-            if len(full_line) > len(largest_verse):
-                largest_verse = full_line
-
-        return lines, largest_verse
-    
-    
     
 # Component to decide the next action of the NPC
 # This class changes the state of the StateManager to play certain animations
@@ -598,7 +615,7 @@ class Button(UIComponent):
         self.click_up: bool = False
         self.listeners: list[Listener] = []
 
-    def update(self):
+    def update(self, dt:float):
         is_click_held = MouseInput.left_clicked
         is_close = self.parent.pos.distance(MouseInput.pos) < self.click_radius
 
@@ -631,35 +648,66 @@ class Button(UIComponent):
         if not is_click_held:
             self.click_down = False
 
-class AchievementCycle(UIComponent):
-    all_achievement_imgs: dict = {
-        '':''
-    }
-    def __init__(self) -> None:
+global achievements_icons
+achievements_icons: Texture = Texture.from_surface(RENDERER, pygame.image.load('resources/images/ui/achievement_icons.png'))
+global base_achievement
+base_achievement: Texture = Texture.from_surface(RENDERER, pygame.image.load('resources/images/ui/achievements_popup.png'))
 
-        # [time_left, x, y, target_x, target_y]
+class AchievementCycle(UIComponent):
+    def __init__(self, scale:int = 3) -> None:
+        # [time_left, x, y, target_x, target_y, source_pos(16x16 icon)]
         self.showed_img = []
         self.n = len(self.showed_img)
-        self.offset = 80
+        self.popups_offet = 80
+        self.scale = scale
 
-    def update(self):
-        
+    def update(self, dt:float):
         # if added an img
         if self.n != len(self.showed_img):
             self.n = len(self.showed_img)
-
             for im in self.showed_img:
-                im[4] += self.offset
+                im[4] -= self.popups_offet
         
         # Move the animations
-        for im in self.showed_img:
-            dt_aprox= 0.0001
-            im[0] -= dt_aprox
-            im[1] += (im[3]-im[1])*dt_aprox
-            im[2] += (im[4]-im[2])*dt_aprox
+        for i, im in enumerate(self.showed_img):
+            im[0] -= dt
+            if im[0] < 0 :
+                self.showed_img.pop(i)
 
-            if im[0] < 0.2:
-                im[3] = SCREEN_W + 67 # Sum of offset to leave the screen
+            # The notification will last 10 senconds: 1 to enter, 8 to show and 1 to leave
+            delta_x = 0
+            delta_y = 0
+            
+            if im[0] > 9:   # startin or leaving
+                delta_x = (im[3]-im[1])*pow(im[0]-9, 2)*0.2
+                delta_y = (im[4]-im[2])*pow(im[0]-9, 2)
+            elif im[0] < 1:   # startin or leaving
+                delta_x = (im[3]+400-im[1])*pow(im[0], 2)*0.2
+                delta_y = (im[4]-im[2])*pow(im[0], 2)
+
+            im[1] += delta_x
+            im[2] += delta_y
+
+    def draw(self):
+        # draws using the data in self.showed_img and achievement_icons
+        print(f'{self.showed_img} <-----')
+        for im in self.showed_img:
+            RENDERER.blit(base_achievement, dest=Rect(int(im[1]), int(im[2]), base_achievement.width*self.scale, base_achievement.height*self.scale))
+            icon_offset = 12
+            RENDERER.blit(
+                achievements_icons, 
+                dest=Rect(int(im[1]+icon_offset), int(im[2]+icon_offset), 16*self.scale, 16*self.scale), 
+                area=Rect(int(im[5][0]), int(im[5][1]), 16, 16)
+            )
+
+            name_text: Texture = im[6]
+            desc_text: Texture = im[7]
+
+            # Here goes the logic for text showing
+            offset_x = 70
+            RENDERER.blit(name_text, dest=Rect(im[1]+offset_x, im[2]+12, name_text.width, name_text.height))
+            RENDERER.blit(desc_text, dest=Rect(im[1]+offset_x, im[2]+30, desc_text.width, desc_text.height))
+            
 
 # =====================================================================================
 #                                 LISTENERS
@@ -680,6 +728,7 @@ class QuitOnClick(UIComponent, Listener):
         self.button.listeners.append(self)
 
     def hear(self):
+        from essentials.gm import GameManager
         GameManager.running = False
 
 # =====================================================================================

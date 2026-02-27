@@ -1,12 +1,14 @@
+import random
+
 from characters_setup import BOBBY_CHAR_DATA, CHARACTERS, CUCHU_CHAR_DATA, DINO_CHAR_DATA, PACHU_CHAR_DATA, POL_CHAR_DATA, SQUALO_CHAR_DATA
-from essentials.basics import Animation, Entity, SpriteSheet
+from essentials.basics import Animation, Entity, ParticlesManager, SpriteSheet
 from essentials.components import AIController, Animator, CharactersHandler, MouseDrag, ParticlesEmitter, PhysicalBall, StatesManager, TextBubble
 from states_graph import NPC_STATES, PROP_STATES
 
 # PARTICLE PREFABS
 # name =        [texture, lifetime,ammount, force, accy]
 POPCORN_PRTS =  ['popcorn', 0.8,    8,      3,      0.2     ]
-SPARK_PRTS =    ['spark',   0.8,    8,      3,      0       ]
+SPARK_PRTS =    ['spark',   2,    8,      3,      0       ]
 HEART_PRTS =    ['heart',   0.8,    8,      3,      -0.05   ]
 
 # ENTITY PREFABS ================================================================================================================================================================
@@ -173,3 +175,17 @@ ALL_PREFABS = {
     'yellow balloon': YELLOW_BALLOON_PREFAB,
     'green balloon': GREEN_BALLOON_PREFAB,
 }
+
+# Creates the entity at posistion x,y with a vfx
+def create_entity(prefab_name:str, x,y) -> Entity:
+    # Call the necessary prefab to spawn 
+        if prefab_name != 'balloon':
+            new_ent = ALL_PREFABS[prefab_name].clone()
+        else:
+            random_ballon = ['red balloon', 'blue balloon', 'yellow ballon', 'green balloon'][random.randrange(0,4)]
+            new_ent = ALL_PREFABS[random_ballon].clone()
+        new_ent.pos.x = x
+        new_ent.pos.y = y
+        ParticlesManager.emit(new_ent.pos.x, new_ent.pos.y, *SPARK_PRTS)
+        
+        return new_ent

@@ -25,7 +25,7 @@ def monitor_system(state):
             pass
         
         #print(f'Shared State:{state}')
-        time.sleep(2)   # wait 2 seconds 
+        time.sleep(3)   # wait 3 seconds 
 
 shared_state = {
     "is_watching_video": False,
