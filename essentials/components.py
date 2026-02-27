@@ -631,6 +631,36 @@ class Button(UIComponent):
         if not is_click_held:
             self.click_down = False
 
+class AchievementCycle(UIComponent):
+    all_achievement_imgs: dict = {
+        '':''
+    }
+    def __init__(self) -> None:
+
+        # [time_left, x, y, target_x, target_y]
+        self.showed_img = []
+        self.n = len(self.showed_img)
+        self.offset = 80
+
+    def update(self):
+        
+        # if added an img
+        if self.n != len(self.showed_img):
+            self.n = len(self.showed_img)
+
+            for im in self.showed_img:
+                im[4] += self.offset
+        
+        # Move the animations
+        for im in self.showed_img:
+            dt_aprox= 0.0001
+            im[0] -= dt_aprox
+            im[1] += (im[3]-im[1])*dt_aprox
+            im[2] += (im[4]-im[2])*dt_aprox
+
+            if im[0] < 0.2:
+                im[3] = SCREEN_W + 67 # Sum of offset to leave the screen
+
 # =====================================================================================
 #                                 LISTENERS
 # =====================================================================================

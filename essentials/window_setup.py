@@ -32,7 +32,6 @@ import time
 
 # 1. Esperar un instante para que Windows registre la creación de la ventana
 time.sleep(0.2) 
-
 # 2. Buscar la ventana por su título exacto
 # IMPORTANTE: El título debe ser exactamente el mismo que pusiste en Window(title=proyect_name)
 hwnd = win32gui.FindWindow(None, proyect_name)
@@ -64,5 +63,4 @@ if hwnd != 0:
 else:
     print("Error: No se encontró la ventana proyect_name. Asegúrate de que el título coincida.")
 
-RENDERER.draw_color = TRANSPARENT_COLOR
 ## ============================================================================

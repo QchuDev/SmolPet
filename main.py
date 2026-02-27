@@ -1,35 +1,32 @@
 if __name__ == '__main__':
-    import math
-
     import pygame
-    import win32api
 
     # Import Setup constants
-    from essentials.math_custom import Vector2D
-    from essentials.window_setup import RENDERER, TRANSPARENT_COLOR, WINDOW, FPS, SCREEN_CENTER, WINDOW
-    from prefabs import POPCORN_PRTS, SPARK_PRTS, HEART_PRTS
+    from essentials.window_setup import RENDERER, TRANSPARENT_COLOR, FPS, SCREEN_CENTER
     # Setup scripts
     from essentials.debug_tools import monitor
     import user_activity
 
     # Execute the entities_setup before reading World
     from objects_setup import prts_manager, persist_manager
-    from essentials.basics import Entity, GameManager, MouseInput, UIManager, World
-
+    from essentials.basics import GameManager, MouseInput, UIManager, World
 
     # Time Variables
     clock = pygame.time.Clock()
     dt = 0.01
     dt_phys = 1/60  # once per 60FPS
     accumulator = 0.0
-    t=0
-    # testing 
+    scan_timer=0
+
     ## MAIN LOOP ======================================================
     while GameManager.running:
         # Update delta_time
         dt = clock.tick(FPS) / 1000
         accumulator += dt
         dt = max(0.001, min(0.1, dt))
+        
+        # Update the GameManager
+        GameManager.update()
 
         # Draw the background
         RENDERER.draw_color = TRANSPARENT_COLOR
@@ -61,8 +58,7 @@ if __name__ == '__main__':
         for u in UIManager.ui_elements:
             u.update()
         
-        u.pos.x, u.pos.y = 0*math.sin(t)+SCREEN_CENTER.x, 0*math.sin(15*t)+SCREEN_CENTER.y
-        t+=dt
+        u.pos.x, u.pos.y = SCREEN_CENTER.x, SCREEN_CENTER.y
 
         for u in UIManager.ui_elements:
             u.draw()
@@ -72,9 +68,9 @@ if __name__ == '__main__':
         monitor.update(dt)
         monitor.render()
 
-        # Check for achievement unlocks
-        GameManager.check_for_unlocks()
+        # SHOW AL RENDERED STUFF
         RENDERER.present()
+
 
     persist_manager.save(World.entities)
     pygame.quit()

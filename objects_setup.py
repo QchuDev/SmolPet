@@ -3,7 +3,7 @@ import pygame
 from pygame import Rect
 from pygame._sdl2 import Texture
 from essentials.basics import GameManager, PersistenceManager, UIElement, ParticlesManager, UIManager, World
-from essentials.components import Button, QuitOnClick
+from essentials.components import Animator, Button, QuitOnClick, StatesManager
 from essentials.math_custom import Vector2D
 from essentials.window_setup import RENDERER,SCREEN_W
 from prefabs import ALL_PREFABS
@@ -46,9 +46,8 @@ def initial_entities() -> None:
 
     else:
         # Because we dont have save data is our first time
-        # We spawn Pachu and set first_time equals True
-        World.entities.append(ALL_PREFABS['pachu'])
         GameManager.first_time = True
+        
     
     # Calling the start method of entities so components prepare
     for e in World.entities:
@@ -80,7 +79,7 @@ def initial_ui():
         source_area=Rect(0,0,80,32),
         ui_components=[
             # Add the respective achievement showing logic
-            
+            # Text
         ]
     )
     ui_elems.append(achievement_ui)
