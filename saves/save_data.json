@@ -1,31 +1,19 @@
 {
     "entities": [
         {
-            "name": "dino"
-        },
-        {
             "name": "cuchu"
         },
         {
-            "name": "squalo"
+            "name": "pol"
         },
         {
-            "name": "squalo"
-        },
-        {
-            "name": "Tiramisu"
-        },
-        {
-            "name": "Balloon"
+            "name": "dino"
         },
         {
             "name": "pachu"
         },
         {
-            "name": "cuchu"
-        },
-        {
-            "name": "pol"
+            "name": "squalo"
         }
     ],
     "achievements": {
@@ -36,15 +24,15 @@
         "Mi novio melo": true,
         "Soy yo, soy yo": true,
         "Carboncito": true,
-        "La familia reunida": false,
-        "Donde surgio...?": true,
+        "La familia reunida": true,
+        "Donde surgio...?": false,
         "Dulce o Salado?": false,
         "Diu": false,
-        "FIESTAA": true,
+        "FIESTAA": false,
         "Aprendiendo juntos": false,
-        "Hora de la siesta": false,
+        "Hora de la siesta": true,
         "ABSOLUTE CINEMA": false,
-        "KUCHAU!": false,
+        "KUCHAU!": true,
         "BOOOM!": false
     }
 }

@@ -2,7 +2,7 @@ import pygame
 import win32api
 import win32con
 import win32gui
-from pygame._sdl2 import Window, Renderer, Texture, Image
+from pygame._sdl2 import Window, Renderer
 
 from essentials.math_custom import Vector2D
 pygame.init()

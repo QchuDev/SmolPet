@@ -1,5 +1,5 @@
 from essentials import components
-from essentials.basics import World
+from essentials.basics import ParticlesManager, World
 from essentials.components import AchievementCycle, create_paragraph_texture
 from essentials.window_setup import RENDERER, SCREEN_H, SCREEN_W
 from pygame._sdl2 import Texture
@@ -50,7 +50,6 @@ class GameManager:
 
         # 1. Feedback en consola (opcional)
         print(f"DEBUG: Desbloqueado {name}")
-
         # 2. Si el displayer está vinculado, agregamos la lista de datos
         if cls.achievements_displayer:
             # im = [time_left, x, y, target_x, target_y, (src_x, src_y), name, desc]

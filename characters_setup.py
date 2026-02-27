@@ -89,7 +89,7 @@ DINO_CHAR_DATA = CharacterData(dino_ss, 'dino', DINO_PHRASES)
 
 # Character DATA
 CHARACTERS: list[CharacterData] = [
-    BOBBY_CHAR_DATA,
+    #BOBBY_CHAR_DATA,
     CUCHU_CHAR_DATA,
     POL_CHAR_DATA,
     SQUALO_CHAR_DATA,

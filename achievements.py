@@ -50,7 +50,7 @@ ALL_ACHIEVEMENTS = {
     ],
     'La familia reunida':   [
         False, 
-        lambda: GameManager.is_unlocked(a for a in ['dino', 'squalo', 'cuchu', 'pachu']), 
+        lambda: all(GameManager.is_unlocked(a) for a in ['dino', 'squalo', 'cuchu', 'pachu', 'pol']), 
         'Desbloquea todos los Minis',
         (48,16)
     ],
@@ -93,7 +93,7 @@ ALL_ACHIEVEMENTS = {
     'ABSOLUTE CINEMA':      [
         False, 
         lambda: GameManager.is_unlocked('cuchu') and user_activity.shared_state['is_watching_video'], 
-        'Mira una pelicula o serie con Cuchu',
+        'Mira un video, pelicula o serie con Cuchu',
         (32,48)
     ],
     'KUCHAU!':              [

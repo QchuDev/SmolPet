@@ -1,5 +1,3 @@
-import copy
-
 import pygame
 from pygame import Rect
 import random
