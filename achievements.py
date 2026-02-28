@@ -80,8 +80,8 @@ ALL_ACHIEVEMENTS = {
     ],
     'Aprendiendo juntos':   [
         False, 
-        lambda: False, 
-        'Mira un video de Javier Ledesma con Mini-Pachu y Mini-Cuchu',
+        lambda: all(GameManager.is_unlocked(name) for name in ['cuchu', 'pachu']) and user_activity.shared_state['is_watching_ytvideo'], 
+        'Mira Javier Ledesma con Pachu y Cuchu',
         (0,48)
     ],
     'Hora de la siesta':    [

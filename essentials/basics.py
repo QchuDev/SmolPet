@@ -425,7 +425,19 @@ class PersistenceManager:
     @classmethod
     def save(cls, entities: list[Entity]):
         entity_data=[]
+        skipped_ents = [
+            'popcorn bucket', 
+            'tiramisu', 
+            'balloon red',
+            'balloon blue',
+            'balloon yellow',
+            'balloon green',
+            'poop'
+        ]
+        
         for ent in entities:
+            if ent.name in skipped_ents: continue
+
             # We only save the name of the entity for now
             entity_data.append(
                 {

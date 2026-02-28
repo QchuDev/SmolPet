@@ -1,3 +1,5 @@
+import datetime
+
 import pygame
 from pygame import Color, Rect
 import random
@@ -475,12 +477,18 @@ class AIController(Component):
 
         # Random action and weights system
         self.weights = ACTION_WEIGHTS
+        self.is_night: bool = False
+
+        # Night behavior
 
         temp: int = 0
-        for w in self.weights:
-            temp += w[1]
+        for w in self.weights.values():
+            temp += w
+
+        
         
         self.total_weight: int = temp
+
 
     # Getting all needed componets
     def start(self, entity:Entity):
@@ -508,6 +516,10 @@ class AIController(Component):
         if self.timer > self.max_time:
             self.timer = 0
             self.decide()
+            if not self.is_night:
+                if datetime.datetime.now().hour > 21:
+                    self.weights['sleep'] = ACTION_WEIGHTS['sleep']*10 # At night we boost the sleeping stat to be more common.
+                    self.is_night = True
         
     # A function to interrupt actions when meeting certain conditions
     def interruptAction(self):
@@ -582,15 +594,10 @@ class AIController(Component):
                     pass
 
             case 'sit':
-                print('Sitting down...')
                 # Timer reset
                 if self.phys.is_grounded: self.max_time = random.uniform(0.8, 1.2)*SIT_TIME   # wait for (28 - 32) seconds
                 else: self.max_time = random.uniform(*self.timer_range)
         
-        # we consume the first element of the list, we already did that
-        print(f'Plan list of {self.parent.name}:  {self.plan}')
-        
-
     def next_action(self):
         ## When there is no other aciton than de current one , then randomize
         if len(self.plan) == 1:
@@ -601,14 +608,14 @@ class AIController(Component):
     def randomize_action(self):
         rand = random.randrange(0, self.total_weight+1)
         #print(f'Random number: {rand}/{self.total_weight}')
-        action = ''
+        chosen_action = ''
         accum = 0
-        for w in self.weights:
+        for a, w in self.weights.items():
             if accum > rand: break
-            action = w[0]
-            accum += w[1]
+            chosen_action = a
+            accum += w
         
-        self.plan.append(action)
+        self.plan.append(chosen_action)
 
 # =====================================================================================
 #                               UI COMPONENTS

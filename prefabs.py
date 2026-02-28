@@ -119,12 +119,23 @@ POPCORN_PREFAB = Entity(
 )
 
 TIRAMISU_PREFAB = Entity( 
-    name='Tiramisu',
+    name='tiramisu',
     components= [
         PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.2, directed=False),
         MouseDrag(),
         ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -2)),
         Animator(SpriteSheet('resources/images/tiramisu_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
+        StatesManager(PROP_STATES)
+    ]
+)
+
+POOP_PREFAB = Entity( 
+    name='poop',
+    components= [
+        PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.2, directed=False),
+        MouseDrag(),
+        ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -1)),
+        Animator(SpriteSheet('resources/images/poop_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES)
     ]
 )
@@ -180,10 +191,11 @@ ALL_PREFABS = {
     'balloon blue': BLUE_BALLOON_PREFAB,
     'balloon yellow': YELLOW_BALLOON_PREFAB,
     'balloon green': GREEN_BALLOON_PREFAB,
+    'poop': POOP_PREFAB,
 }
 
 # Creates the entity at posistion x,y with a vfx
-def create_entity(prefab_name:str, x,y) -> Entity:
+def create_entity(prefab_name:str, x,y, push:bool = True) -> Entity:
     # Call the necessary prefab to spawn 
         if prefab_name != 'balloon':
             new_ent = ALL_PREFABS[prefab_name].clone()
@@ -192,10 +204,13 @@ def create_entity(prefab_name:str, x,y) -> Entity:
             new_ent = ALL_PREFABS[random_ballon].clone()
         new_ent.pos.x = x
         new_ent.pos.y = y
+        
         # Call start method of entity for setup
         new_ent.start()
-        phys = new_ent.get_component(PhysicalBall)
-        if phys: phys.applyForce(Vector2D(random.uniform(-8000, 8000), -8000))
+
+        if push:
+            phys = new_ent.get_component(PhysicalBall)
+            if phys: phys.applyForce(Vector2D(random.uniform(-8000, 8000), -8000))
         
         ParticlesManager.emit(new_ent.pos.x, new_ent.pos.y, *SPARK_PRTS)
         

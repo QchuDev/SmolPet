@@ -22,11 +22,11 @@ SLEEP_TIME: float = 120
 TARGET_STOP:float = 100
 
 # WEIGHTS for AIController actions
-ACTION_WEIGHTS  :list[tuple[str,int]] = [
-    ('sleep', 2), 
-    ('move', 40), 
-    ('wait', 60), 
-    ('talk', 8), 
-    ('open_image', 1),
-    ('sit', 15)
-]
+ACTION_WEIGHTS  :dict[str,int] = {
+    'sleep': 2, 
+    'move': 40, 
+    'wait': 60, 
+    'talk': 8, 
+    'open_image': 1,
+    'sit': 15
+}

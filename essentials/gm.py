@@ -1,3 +1,5 @@
+import random
+
 from essentials import components
 from essentials.basics import ParticlesManager, SFXManager, World
 from essentials.components import AIController, AchievementCycle, create_paragraph_texture
@@ -37,7 +39,7 @@ class GameManager:
         from achievements import ALL_ACHIEVEMENTS
         for n, a in ALL_ACHIEVEMENTS.items():
             if a[0]: continue
-            achievement_left = True
+            if n != 'BOOOM!': achievement_left = True   # CHECK FOR EVERY ACHIEVEMENT, but not itself
             condition_met = a[1]()
             if condition_met:
                 a[0] = True
@@ -86,13 +88,14 @@ class GameManager:
 
 
     SEARCH_KEYWORDS = {
-        'dino': ['dino', 'dinosaurio', 't-rex'],
-        'squalo': ['squalo', 'tiburon', 'shark', 'pez', 'fish'],
-        'pachu': ['pachu', 'yo', 'bombon'],
-        'cuchu': ['cuchu', 'novio', 'autista', 'lindo' 'ñoño'],
-        'pol' : ['pol', 'perro', 'bebe', 'carboncito', 'coquito'],
+        'dino':     ['dino', 'dinosaurio', 't-rex'],
+        'squalo':   ['squalo', 'tiburon', 'shark', 'pez', 'fish'],
+        'pachu':    ['pachu', 'yo', 'bombon'],
+        'cuchu':    ['cuchu', 'novio', 'autista', 'lindo' 'ñoño'],
+        'pol' :     ['pol', 'perro', 'bebe', 'carboncito', 'coquito'],
         'tiramisu': ['tiramisu', 'torta', 'postre'],
-        'balloon' : ['globo', 'globos', 'fiesta']
+        'balloon' : ['globo', 'globos', 'fiesta'],
+        'poop':     ['caca', 'popo', 'sorete']
     }
 
     @classmethod
@@ -116,7 +119,7 @@ class GameManager:
             
             # if missing bucket of popcorn, then spawn it
             if is_missing_bucket:
-                popcornb_entity = prefabs.create_entity('popcorn bucket', SCREEN_W*0.5, SCREEN_H*0.4)
+                popcornb_entity = prefabs.create_entity('popcorn bucket', SCREEN_W*0.5, SCREEN_H*0.4, push=False)
                 if 'popcorn bucket' not in cls.unlocked_entites: cls.unlocked_entites.append('popcorn bucket')
                 World.entities.append(popcornb_entity)
 
@@ -126,12 +129,11 @@ class GameManager:
                         if aic.plan[0] != 'sleep':
                             aic.plan.append('move')
                             aic.target_setted = True
-                            aic.target_x = popcornb_entity.pos.x
+                            aic.target_x = popcornb_entity.pos.x + random.uniform(-100, 100)
+                            aic.plan.append('sit')
                             aic.plan.append('sit')
                             print(f'Added to {e.name}:\t sit --> {aic.plan}')
                         
-                        
-
     # For achievement conditions
     @classmethod
     def is_unlocked(cls, name):
