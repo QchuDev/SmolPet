@@ -3,7 +3,7 @@ from essentials.gm import GameManager
 
 if __name__ == '__main__':
     import pygame
-
+    
     # Import Setup constants
     from essentials.window_setup import RENDERER, TRANSPARENT_COLOR, FPS, SCREEN_CENTER
     # Setup scripts
@@ -21,6 +21,8 @@ if __name__ == '__main__':
     accumulator = 0.0
     scan_timer=0
 
+    pygame.mixer.init()
+
     ## MAIN LOOP ======================================================
     while GameManager.running:
         # Update delta_time
@@ -37,6 +39,7 @@ if __name__ == '__main__':
 
         # Update mouse inputs
         MouseInput.update()
+
         
         # To clean the request queue
         for event in pygame.event.get():
@@ -47,6 +50,12 @@ if __name__ == '__main__':
             # Update entities
             for entity in World.entities:
                 entity.update(dt_phys)
+
+            # UI ELEMENTS UPDATE AND DRAW
+            for u in UIManager.ui_elements:
+                u.update(dt)
+            u.pos.x, u.pos.y = SCREEN_CENTER.x, SCREEN_CENTER.y
+
             accumulator -= dt_phys
         
         # DRAWS
@@ -57,12 +66,6 @@ if __name__ == '__main__':
         prts_manager.update(dt)
         prts_manager.draw()
 
-        # UI ELEMENTS UPDATE AND DRAW
-        for u in UIManager.ui_elements:
-            u.update(dt)
-        
-
-        u.pos.x, u.pos.y = SCREEN_CENTER.x, SCREEN_CENTER.y
         for u in UIManager.ui_elements:
             u.draw()
 

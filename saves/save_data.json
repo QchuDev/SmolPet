@@ -1,44 +1,22 @@
 {
-    "entities": [
-        {
-            "name": "pachu"
-        },
-        {
-            "name": "pol"
-        },
-        {
-            "name": "cuchu"
-        },
-        {
-            "name": "dino"
-        },
-        {
-            "name": "squalo"
-        },
-        {
-            "name": "Balloon"
-        },
-        {
-            "name": "Tiramisu"
-        }
-    ],
+    "entities": [],
     "achievements": {
         "UN VIRUS?!?": true,
-        "Lo pario Cuchu?": true,
-        "Tiburon? Perro?": true,
-        "Los hermanitos": true,
-        "Mi novio melo": true,
-        "Soy yo, soy yo": true,
-        "Carboncito": true,
-        "La familia reunida": true,
-        "Donde surgio...?": true,
+        "Lo pario Cuchu?": false,
+        "Tiburon? Perro?": false,
+        "Los hermanitos": false,
+        "Mi novio melo": false,
+        "Soy yo, soy yo": false,
+        "Carboncito": false,
+        "La familia reunida": false,
+        "Donde surgio...?": false,
         "Dulce o Salado?": false,
         "Diu": false,
-        "FIESTAA": true,
+        "FIESTAA": false,
         "Aprendiendo juntos": false,
         "Hora de la siesta": false,
-        "ABSOLUTE CINEMA": true,
-        "KUCHAU!": true,
+        "ABSOLUTE CINEMA": false,
+        "KUCHAU!": false,
         "BOOOM!": false
     }
 }

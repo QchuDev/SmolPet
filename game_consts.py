@@ -11,7 +11,7 @@ SLIDE_STOP:float = 10
 SPLAT_VELOCITY:Vector2D = Vector2D(200, 200)   # the speed where it splats hitting the floor
 
 # MOUSE DRAG
-USER_PULL_STRENGTH:float = 1000.0
+USER_PULL_STRENGTH:float = 250.0
 USER_PULL_DAMPING:float = 2.0
 
 # AICONTROLLER

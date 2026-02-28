@@ -92,7 +92,7 @@ ALL_ACHIEVEMENTS = {
     ],
     'ABSOLUTE CINEMA':      [
         False, 
-        lambda: GameManager.is_unlocked('cuchu') and user_activity.shared_state['is_watching_video'], 
+        lambda: GameManager.is_unlocked('cuchu') and (user_activity.shared_state['is_watching_ytvideo'] or user_activity.shared_state['is_watching_movie']), 
         'Mira un video, pelicula o serie con Cuchu',
         (32,48)
     ],

@@ -1,5 +1,5 @@
 from essentials import components
-from essentials.basics import ParticlesManager, World
+from essentials.basics import ParticlesManager, SFXManager, World
 from essentials.components import AchievementCycle, create_paragraph_texture
 from essentials.window_setup import RENDERER, SCREEN_H, SCREEN_W
 from pygame._sdl2 import Texture
@@ -68,14 +68,19 @@ class GameManager:
             new_popup = [
                 10.0,            # time_left
                 SCREEN_W + 50,   # x actual
-                SCREEN_H*0.8,    # y actual (el update lo bajará si hay otros)
+                SCREEN_H*0.8,    # y actual
                 target_x,        # target_x
                 SCREEN_H*0.8,    # target_y
                 a[3],            # source_pos (x, y) del icono
                 name_tex,        # textura del Nombre
-                desc_tex         # textura de la Descripción
+                desc_tex,        # textura de la Descripción
+                True             # first time
             ]
             cls.achievements_displayer.showed_img.append(new_popup)
+
+            # Play sound effect
+            SFXManager.play('unlock2')
+
         else:
             print('No existing achievements displayer')
 
@@ -100,6 +105,8 @@ class GameManager:
                 new_entity = prefabs.create_entity(n, SCREEN_W*0.144, SCREEN_H*0.141)
                 cls.unlocked_entites.append(n)
                 World.entities.append(new_entity)
+        
+
 
     # For achievement conditions
     @classmethod
@@ -121,6 +128,7 @@ class GameManager:
                 count += 1
 
         return count == len(CHARACTERS)   # HORRIBLE
+    
     @classmethod
     def top_speed(cls) -> float:
         top_speed: float= 0

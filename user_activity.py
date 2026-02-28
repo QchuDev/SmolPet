@@ -15,8 +15,9 @@ def monitor_system(state):
 
             if active_window:
                 title = active_window.title.lower()
-                video_kw = ['youtube', 'netflix', 'vlc', 'disney', 'prime', 'twitch']
-                state['is_watching_video'] = any(k in title for k in video_kw)
+                video_kw = ['netflix', 'vlc', 'disney', 'prime']
+                state['is_watching_movie']      = any(k in title for k in video_kw)
+                state['is_watching_ytvideo']    = '- Youtube' in title
 
                 if 'google search' in title or 'buscar con google' in title:
                     state['last_search'] = title.split('-')[0].strip()
@@ -29,6 +30,7 @@ def monitor_system(state):
 
 shared_state = {
     "is_watching_video": False,
+    "is_watching_ytvideo": False,
     "is_afk": False,
     "last_search": ""
 }

@@ -1,13 +1,14 @@
 import pygame
-from pygame import Rect
+from pygame import Color, Rect
 import random
 from typing import Type
 from pygame._sdl2 import Texture
+from sympy import Point2D
 
 from essentials.basics import UIElement
 
 # Custom
-from .basics import UIComponent, Listener, Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
+from .basics import SFXManager, UIComponent, Listener, Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
 from .window_setup import RENDERER, SCREEN_W, SCREEN_H, SCREEN_CENTER
 
 from game_consts import GRAVITY, BOUNCE_STOP, SIT_TIME, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
@@ -223,6 +224,11 @@ class MouseDrag(Component):
             damp = (self.phys.vel * USER_PULL_DAMPING)
             self.phys.applyForce(pull - damp)
 
+    def draw(self):
+        if self.is_pulling:
+            RENDERER.draw_color = Color(255,255,255)
+            RENDERER.draw_line(tuple(self.parent.pos), tuple(MouseInput.pos))
+        
 # Component who decides the current animation to be played
 class StatesManager(Component):
     def __init__(self, states:list[State]) :
@@ -651,7 +657,7 @@ base_achievement: Texture = Texture.from_surface(RENDERER, pygame.image.load('re
 
 class AchievementCycle(UIComponent):
     def __init__(self, scale:int = 3) -> None:
-        # [time_left, x, y, target_x, target_y, source_pos(16x16 icon)]
+        # [time_left, x, y, target_x, target_y, source_pos(16x16 icon), name_text, desc_text, first_time]
         self.showed_img = []
         self.n = len(self.showed_img)
         self.popups_offet = 120
@@ -669,6 +675,8 @@ class AchievementCycle(UIComponent):
             delta_y = 0
             
             if im[0] > 9:   # startin or leaving
+                
+
                 delta_x = (im[3]-im[1])*pow(im[0]-9, 2)*0.2
             elif im[0] < 1:   # startin or leaving
                 delta_x = (im[3]+400-im[1])*pow(im[0], 2)*0.2
@@ -676,6 +684,11 @@ class AchievementCycle(UIComponent):
             # delta y
             target_y = im[4]-self.popups_offet*i
             delta_y = (target_y-im[2])*pow((im[0]-1)/8, 2)
+
+            if im[8]: 
+                ParticlesManager.emit(SCREEN_W, target_y+32, 'spark', 3, 10, 3, 0, -1)
+            
+            im[8] = False
 
             im[1] += delta_x
             im[2] += delta_y
@@ -699,7 +712,6 @@ class AchievementCycle(UIComponent):
             RENDERER.blit(name_text, dest=Rect(im[1]+offset_x, im[2]+12, name_text.width, name_text.height))
             RENDERER.blit(desc_text, dest=Rect(im[1]+offset_x, im[2]+30, desc_text.width, desc_text.height))
             
-
 # =====================================================================================
 #                                 LISTENERS
 # =====================================================================================
@@ -749,16 +761,27 @@ class EntityEraser(Component):
                 e.active = False        # Inactives the entity it touches
 
 class ParticlesEmitter(Component):
-    def __init__(self, particle_prefab, frequency=1.0, offset: tuple[float,float] = (0,0)):
+    def __init__(self, particle_prefab, condition_name:str, offset: tuple[float,float] = (0,0)):
         self.particle_prefab = particle_prefab
-        self.frequency = frequency
-        self.timer = 0
         self.offset = offset
+        self.condition_name = condition_name
+        self.condition = lambda: False
         
+
+    # setting up the condition to be met for spawning particles
+    def start(self, entity: Entity):
+        super().start(entity)
+        match self.condition_name:
+            case 'in_hit':
+                phys = self.parent.get_component(PhysicalBall)
+                if phys:
+                    self.condition = lambda: phys.is_hitting_floor or phys.is_hitting_wall
+    
+    # Check for the condition and spawn particles if met
     def update(self, dt:float):
-        self.timer += dt
-        if self.timer > self.frequency:
+        if self.condition():
             x= self.parent.pos.x + self.offset[0]
             y= self.parent.pos.y + self.offset[1]
             ParticlesManager.emit(x,y,*self.particle_prefab)
             self.timer = 0
+            

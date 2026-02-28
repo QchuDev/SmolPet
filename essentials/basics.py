@@ -252,14 +252,18 @@ class ParticlesManager:
         'spark': temp_texture[0:4],
         'popcorn': temp_texture[4:8],
         'heart': temp_texture[8:12],
+        'chocolate': temp_texture[12:16]
     }
 
     # add to the particles array the new particles to be rendered by the draw()
     @classmethod
-    def emit(cls, x,y, particle_type:str, mid_lifetime=1.0, ammount:int=1, force=2.0, accy=0):
+    def emit(cls, x,y, particle_type:str, mid_lifetime=1.0, ammount:int=1, force=2.0, accy=0, dir:int = 0):
         for _ in range(ammount):
             vx=random.uniform(-force, force)
             vy=random.uniform(-force, force)
+
+            if dir != 0:
+                vx = abs(vx) * dir
 
             # Some randomness for variation
             lifetime = mid_lifetime*random.uniform(0.8, 1.2)
@@ -295,6 +299,19 @@ class ParticlesManager:
             texture = cls.uvs[p[5]][p[6]]
             rect = Rect(p[0]-cls.w*0.5, p[1]-cls.h*0.5, cls.w, cls.h)
             RENDERER.blit(texture, rect)
+
+# Class in charge of the sound effects
+class SFXManager:
+    
+    sounds: dict[str, pygame.mixer.Sound] = {
+        'unlock':           pygame.mixer.Sound('resources/sounds/achievement_unlock.wav'),
+        'unlock2':          pygame.mixer.Sound('resources/sounds/achievement_unlock_2.wav')
+    }
+
+    @classmethod
+    def play(cls, sound:str):
+        if sound in cls.sounds:
+            cls.sounds[sound].play()
 
 # Animation: has name, a sequence of indexes, frame duration and if its a loop
 class Animation():
@@ -439,3 +456,4 @@ class PersistenceManager:
                 return json.load(f)
         except:
             return None
+

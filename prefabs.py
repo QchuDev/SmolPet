@@ -12,6 +12,7 @@ from states_graph import NPC_STATES, PROP_STATES
 POPCORN_PRTS =  ['popcorn', 0.8,    8,      3,      0.2     ]
 SPARK_PRTS =    ['spark',   2,    8,      3,      0       ]
 HEART_PRTS =    ['heart',   0.8,    8,      3,      -0.05   ]
+CHOCOLATE_PRTS =['chocolate',  0.8,    8,      3,      0.2 ]
 
 # ENTITY PREFABS ================================================================================================================================================================
 # NPC ANIMATIONS
@@ -111,22 +112,25 @@ POPCORN_PREFAB = Entity(
     components= [
         PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.3, directed=False),
         MouseDrag(),
-        ParticlesEmitter(POPCORN_PRTS, frequency=3, offset= (0, -2)),
+        ParticlesEmitter(POPCORN_PRTS, 'in_hit', offset= (0, -2)),
         Animator(SpriteSheet('resources/images/popcorn_bucket_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES)
     ]
 )
+
 TIRAMISU_PREFAB = Entity( 
     name='Tiramisu',
     components= [
         PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.2, directed=False),
         MouseDrag(),
+        ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -2)),
         Animator(SpriteSheet('resources/images/tiramisu_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES)
     ]
 )
+
 RED_BALLOON_PREFAB = Entity( 
-    name='Balloon',
+    name='Balloon red',
     components= [
         PhysicalBall(radius=15, air_resist=0.005, mass=1, retention_y=0.6, grav_scale=0.1, directed=False),
         MouseDrag(),
@@ -135,7 +139,7 @@ RED_BALLOON_PREFAB = Entity(
     ]
 )
 BLUE_BALLOON_PREFAB = Entity( 
-    name='Balloon',
+    name='Balloon blue',
     components= [
         PhysicalBall(radius=15, air_resist=0.005, mass=1, retention_y=0.6, grav_scale=0.1, directed=False),
         MouseDrag(),
@@ -144,7 +148,7 @@ BLUE_BALLOON_PREFAB = Entity(
     ]
 )
 YELLOW_BALLOON_PREFAB = Entity( 
-    name='Balloon',
+    name='Balloon yellow',
     components= [
         PhysicalBall(radius=15, air_resist=0.005, mass=1, retention_y=0.6, grav_scale=0.1, directed=False),
         MouseDrag(),
@@ -153,7 +157,7 @@ YELLOW_BALLOON_PREFAB = Entity(
     ]
 )
 GREEN_BALLOON_PREFAB = Entity( 
-    name='Balloon',
+    name='Balloon green',
     components= [
         PhysicalBall(radius=15, air_resist=0.005, mass=1, retention_y=0.6, grav_scale=0.1, directed=False),
         MouseDrag(),
@@ -172,10 +176,10 @@ ALL_PREFABS = {
     'dino': DINO_PREFAB,
     'popcorn bucket': POPCORN_PREFAB,
     'tiramisu': TIRAMISU_PREFAB,
-    'red balloon': RED_BALLOON_PREFAB,
-    'blue balloon': BLUE_BALLOON_PREFAB,
-    'yellow balloon': YELLOW_BALLOON_PREFAB,
-    'green balloon': GREEN_BALLOON_PREFAB,
+    'balloon red': RED_BALLOON_PREFAB,
+    'balloon blue': BLUE_BALLOON_PREFAB,
+    'balloon yellow': YELLOW_BALLOON_PREFAB,
+    'balloon green': GREEN_BALLOON_PREFAB,
 }
 
 # Creates the entity at posistion x,y with a vfx
