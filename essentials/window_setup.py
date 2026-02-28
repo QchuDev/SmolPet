@@ -7,10 +7,10 @@ from pygame._sdl2 import Window, Renderer
 from essentials.math_custom import Vector2D
 pygame.init()
 
-proyect_name = 'smol pet'
+project_name = 'smol pet'
 # SETUP
 # If setted to fullscreen then pass the real sizes 
-WINDOW = Window(title=proyect_name, borderless=False, size=(1920,1080))
+WINDOW = Window(title=project_name, borderless=False, size=(1920,1080))
 SCREEN_W, SCREEN_H = WINDOW.size
 
 # Renderer (we use the GPU for better performance)
@@ -33,8 +33,8 @@ import time
 # 1. Esperar un instante para que Windows registre la creación de la ventana
 time.sleep(0.2) 
 # 2. Buscar la ventana por su título exacto
-# IMPORTANTE: El título debe ser exactamente el mismo que pusiste en Window(title=proyect_name)
-hwnd = win32gui.FindWindow(None, proyect_name)
+# IMPORTANTE: El título debe ser exactamente el mismo que pusiste en Window(title=project_name)
+hwnd = win32gui.FindWindow(None, project_name)
 if hwnd != 0:
     # 3. Aplicar estilos de capa (Layered) y ToolWindow (para que no salga en la barra de tareas)
     ex_style = win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)

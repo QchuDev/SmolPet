@@ -87,7 +87,7 @@ class GameManager:
         'cuchu': ['cuchu', 'novio', 'autista', 'lindo' 'ñoño'],
         'pol' : ['pol', 'perro', 'bebe', 'carboncito', 'coquito'],
         'tiramisu': ['tiramisu', 'torta', 'postre'],
-        'balloon' : ['globos', 'fiesta']
+        'balloon' : ['globo', 'globos', 'fiesta']
     }
 
     @classmethod

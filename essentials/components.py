@@ -658,12 +658,6 @@ class AchievementCycle(UIComponent):
         self.scale = scale
 
     def update(self, dt:float):
-        # if added an img
-        if self.n != len(self.showed_img):
-            self.n = len(self.showed_img)
-            for im in self.showed_img:
-                im[4] -= self.popups_offet
-        
         # Move the animations
         for i, im in enumerate(self.showed_img):
             im[0] -= dt
@@ -679,7 +673,9 @@ class AchievementCycle(UIComponent):
             elif im[0] < 1:   # startin or leaving
                 delta_x = (im[3]+400-im[1])*pow(im[0], 2)*0.2
             
-            delta_y = (im[4]-im[2])*pow((im[0]-1)/8, 2)
+            # delta y
+            target_y = im[4]-self.popups_offet*i
+            delta_y = (target_y-im[2])*pow((im[0]-1)/8, 2)
 
             im[1] += delta_x
             im[2] += delta_y
