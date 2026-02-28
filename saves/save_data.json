@@ -1,22 +1,32 @@
 {
-    "entities": [],
+    "entities": [
+        {
+            "name": "dino"
+        },
+        {
+            "name": "squalo"
+        },
+        {
+            "name": "popcorn bucket"
+        }
+    ],
     "achievements": {
         "UN VIRUS?!?": true,
-        "Lo pario Cuchu?": false,
-        "Tiburon? Perro?": false,
-        "Los hermanitos": false,
-        "Mi novio melo": false,
+        "Lo pario Cuchu?": true,
+        "Tiburon? Perro?": true,
+        "Los hermanitos": true,
+        "Mi novio melo": true,
         "Soy yo, soy yo": false,
-        "Carboncito": false,
+        "Carboncito": true,
         "La familia reunida": false,
         "Donde surgio...?": false,
-        "Dulce o Salado?": false,
+        "Dulce o Salado?": true,
         "Diu": false,
         "FIESTAA": false,
         "Aprendiendo juntos": false,
         "Hora de la siesta": false,
         "ABSOLUTE CINEMA": false,
-        "KUCHAU!": false,
+        "KUCHAU!": true,
         "BOOOM!": false
     }
 }

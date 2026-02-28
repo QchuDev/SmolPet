@@ -465,8 +465,7 @@ class AIController(Component):
         self.timer: float = 0.0
 
         # All the possible actions and the current one 
-        self.actions: list[str] = ['move', 'talk', 'wait', 'sleep', 'sit']
-        self.curr_action: str = 'wait'
+        self.plan: list[str] = ['wait']
 
         # Target zone (for 'intelligent' movement)
         self.target_x:      float = 0
@@ -503,7 +502,7 @@ class AIController(Component):
     def update(self, dt:float):
         # Handle the timer     
         self.interruptAction()
-        if self.curr_action != 'talk': self.bubb.show = False
+        if self.plan[0] != 'talk': self.bubb.show = False
 
         self.timer += dt
         if self.timer > self.max_time:
@@ -513,27 +512,22 @@ class AIController(Component):
     # A function to interrupt actions when meeting certain conditions
     def interruptAction(self):
         interrputed_from_lifting: list[str] = ['sleep', 'sit']
-        if self.curr_action in interrputed_from_lifting and not self.phys.is_grounded: 
-            self.curr_action = 'wait'
+        if self.plan[0] in interrputed_from_lifting and not self.phys.is_grounded: 
+            self.plan[0] = 'wait'
 
     # its a hard-coded method for the decision of NPCS
     def decide(self):
-
-        # Dont show
-        if self.curr_action != 'talk': self.bubb.show = False
-
-        if self.curr_action != 'move': self.randomize_action()
         
-        #print(f'Now bobby will: {self.curr_action}')
-        match self.curr_action:
-
+        self.next_action()
+        match self.plan[0]:
             case 'move':
+                
                 # Push the entity
                 if self.phys.is_grounded:
                     dir = 1 if (self.target_x > self.parent.pos.x) else -1
                     self.phys.applyForce(Vector2D(dir*JUMP_FORCE.x, JUMP_FORCE.y))
 
-                # Timer reset
+                # Setting the 
                 dist_from_target = abs(self.target_x - self.parent.pos.x)
                 if not self.target_setted: 
                     self.target_x = random.randrange(0, SCREEN_W)
@@ -543,11 +537,12 @@ class AIController(Component):
                 if dist_from_target < TARGET_STOP :
                     self.randomize_action()
                     self.target_setted = False
+                else:
+                    # if not reached, then append a new move action
+                    self.plan.insert(0, 'move')
 
                 self.max_time = self.timer_range[0] + random.random()*(self.timer_range[1] - self.timer_range[0])
                 
-                #print(f'Distance: {int(dist_from_target)}\tTargetted: {self.target_setted}')
-
             case 'wait':
                 # Timer reset
                 if self.phys.is_grounded: self.max_time = random.uniform(0.8, 1.2)*WAIT_TIME
@@ -591,6 +586,17 @@ class AIController(Component):
                 # Timer reset
                 if self.phys.is_grounded: self.max_time = random.uniform(0.8, 1.2)*SIT_TIME   # wait for (28 - 32) seconds
                 else: self.max_time = random.uniform(*self.timer_range)
+        
+        # we consume the first element of the list, we already did that
+        print(f'Plan list of {self.parent.name}:  {self.plan}')
+        
+
+    def next_action(self):
+        ## When there is no other aciton than de current one , then randomize
+        if len(self.plan) == 1:
+            self.randomize_action()
+        if len(self.plan) > 1: 
+            self.plan.pop(0)
 
     def randomize_action(self):
         rand = random.randrange(0, self.total_weight+1)
@@ -602,7 +608,7 @@ class AIController(Component):
             action = w[0]
             accum += w[1]
         
-        self.curr_action = action
+        self.plan.append(action)
 
 # =====================================================================================
 #                               UI COMPONENTS
@@ -675,8 +681,6 @@ class AchievementCycle(UIComponent):
             delta_y = 0
             
             if im[0] > 9:   # startin or leaving
-                
-
                 delta_x = (im[3]-im[1])*pow(im[0]-9, 2)*0.2
             elif im[0] < 1:   # startin or leaving
                 delta_x = (im[3]+400-im[1])*pow(im[0], 2)*0.2

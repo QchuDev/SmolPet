@@ -12,9 +12,9 @@ IDLE_STATE = State('idle',
         Transition('air', lambda e: not phys(e).is_grounded),
         Transition('hit_floor', lambda e: phys(e).is_hitting_floor),
         Transition('hit_wall', lambda e: phys(e).is_hitting_wall),
-        Transition('talk', lambda e: aic(e).curr_action == 'talk'),
-        Transition('go_sleep', lambda e: aic(e).curr_action == 'sleep'),
-        Transition('go_sit', lambda e: aic(e).curr_action == 'sit')
+        Transition('talk', lambda e: aic(e).plan[0] == 'talk'),
+        Transition('go_sleep', lambda e: aic(e).plan[0] == 'sleep'),
+        Transition('go_sit', lambda e: aic(e).plan[0] == 'sit')
     ]
 )
 AIR_STATE = State('air',
@@ -26,14 +26,14 @@ AIR_STATE = State('air',
 )
 HIT_FLOOR_STATE = State('hit_floor',
     [
-        Transition('talk', lambda e: anim(e).is_finished() and aic(e).curr_action == 'talk'),
+        Transition('talk', lambda e: anim(e).is_finished() and aic(e).plan[0] == 'talk'),
         Transition('hit_wall', lambda e: anim(e).is_finished() and phys(e).is_hitting_wall), 
         Transition('idle', lambda e: anim(e).is_finished())
     ]
 )
 HIT_WALL_STATE = State('hit_wall',
     [
-        Transition('talk', lambda e: anim(e).is_finished() and aic(e).curr_action == 'talk'),
+        Transition('talk', lambda e: anim(e).is_finished() and aic(e).plan[0] == 'talk'),
         Transition('hit_floor', lambda e: anim(e).is_finished() and phys(e).is_hitting_floor),
         Transition('air', lambda e: anim(e).is_finished()) 
     ]
@@ -41,7 +41,7 @@ HIT_WALL_STATE = State('hit_wall',
 TALK_STATE = State('talk',
     [
         Transition('air', lambda e: not phys(e).is_grounded),
-        Transition('idle', lambda e: aic(e).curr_action != 'talk')
+        Transition('idle', lambda e: aic(e).plan[0] != 'talk')
     ]
 )
 GO_SLEEP_STATE = State('go_sleep',
@@ -52,7 +52,7 @@ GO_SLEEP_STATE = State('go_sleep',
 SLEEPING_STATE = State('sleeping',
     [
         Transition('air', lambda e: not phys(e).is_grounded),
-        Transition('idle', lambda e: aic(e).curr_action != 'sleep')
+        Transition('idle', lambda e: aic(e).plan[0] != 'sleep')
     ]
 )
 GO_SIT_STATE = State('go_sit',
@@ -63,7 +63,7 @@ GO_SIT_STATE = State('go_sit',
 SIT_STATE = State('sit',
     [
         Transition('air', lambda e: not phys(e).is_grounded),
-        Transition('idle', lambda e: aic(e).curr_action != 'sit')
+        Transition('idle', lambda e: aic(e).plan[0] != 'sit')
     ]
 )
 

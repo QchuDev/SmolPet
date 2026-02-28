@@ -1,6 +1,6 @@
 from essentials import components
 from essentials.basics import ParticlesManager, SFXManager, World
-from essentials.components import AchievementCycle, create_paragraph_texture
+from essentials.components import AIController, AchievementCycle, create_paragraph_texture
 from essentials.window_setup import RENDERER, SCREEN_H, SCREEN_W
 from pygame._sdl2 import Texture
 
@@ -106,7 +106,31 @@ class GameManager:
                 cls.unlocked_entites.append(n)
                 World.entities.append(new_entity)
         
+        # when watching a movie or somethin
+        if shared_state['is_watching_ytvideo'] or shared_state['is_watching_movie']:
+            # Search for popcorn bucket
+            is_missing_bucket = True
+            for e in World.entities:
+                if e.name == 'popcorn bucket':
+                    is_missing_bucket = False
+            
+            # if missing bucket of popcorn, then spawn it
+            if is_missing_bucket:
+                popcornb_entity = prefabs.create_entity('popcorn bucket', SCREEN_W*0.5, SCREEN_H*0.4)
+                if 'popcorn bucket' not in cls.unlocked_entites: cls.unlocked_entites.append('popcorn bucket')
+                World.entities.append(popcornb_entity)
 
+                for e in World.entities:
+                    aic = e.get_component(AIController)
+                    if aic:
+                        if aic.plan[0] != 'sleep':
+                            aic.plan.append('move')
+                            aic.target_setted = True
+                            aic.target_x = popcornb_entity.pos.x
+                            aic.plan.append('sit')
+                            print(f'Added to {e.name}:\t sit --> {aic.plan}')
+                        
+                        
 
     # For achievement conditions
     @classmethod
@@ -123,7 +147,7 @@ class GameManager:
         for e in ents:
             aic = e.get_component(AIController)
             if aic:
-                if aic.curr_action != 'sleep':
+                if aic.plan[0] != 'sleep':
                     return False
                 count += 1
 

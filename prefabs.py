@@ -108,7 +108,7 @@ DINO_PREFAB = Entity(
 
 # PROPS
 POPCORN_PREFAB = Entity( 
-    name='Popcorn Bucket',
+    name='popcorn bucket',
     components= [
         PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.3, directed=False),
         MouseDrag(),
