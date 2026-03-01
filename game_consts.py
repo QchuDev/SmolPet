@@ -18,7 +18,7 @@ USER_PULL_DAMPING:float = 2.0
 JUMP_FORCE: Vector2D = Vector2D(4000, -15000)
 WAIT_TIME:  float = 10
 SIT_TIME:  float = 30
-SLEEP_TIME: float = 120
+SLEEP_TIME: float = 10*60 # X*60 -> X minutes
 TARGET_STOP:float = 100
 
 # WEIGHTS for AIController actions

@@ -240,78 +240,6 @@ class SpriteSheet():
     def get_texture(self, index:int, flipped:bool=False) -> Texture: 
         return self.right_textures[index] if not flipped else self.left_textures[index]
 
-# The one in charge of all Particles
-class ParticlesManager:
-    # The states of each particle is represented by: [x,y, vx,vy, lifetime, id, state, accy]
-    particles = []
-    textures = Texture.from_surface(RENDERER, pygame.image.load('resources/images/particles_8.png'))
-    ss = SpriteSheet('resources/images/particles_8.png', cell_size=(8,8), scale_factor=4)
-    temp_texture: list[Texture] = ss.right_textures
-    w, h = ss.sprite_w, ss.sprite_h
-    uvs = {
-        'spark': temp_texture[0:4],
-        'popcorn': temp_texture[4:8],
-        'heart': temp_texture[8:12],
-        'chocolate': temp_texture[12:16]
-    }
-
-    # add to the particles array the new particles to be rendered by the draw()
-    @classmethod
-    def emit(cls, x,y, particle_type:str, mid_lifetime=1.0, ammount:int=1, force=2.0, accy=0, dir:int = 0):
-        for _ in range(ammount):
-            vx=random.uniform(-force, force)
-            vy=random.uniform(-force, force)
-
-            if dir != 0:
-                vx = abs(vx) * dir
-
-            # Some randomness for variation
-            lifetime = mid_lifetime*random.uniform(0.8, 1.2)
-
-            cls.particles.append([x,y ,vx,vy, lifetime, particle_type, 0, mid_lifetime, accy])
-
-    # update the state of each particle
-    @classmethod
-    def update(cls, dt):
-        for i in range(len(cls.particles)-1, -1, -1):
-            p = cls.particles[i]
-            p[0]+= p[2] # x += vx
-            p[1]+= p[3] # y += vy
-
-            # Acceleration in y axis
-            p[3] += p[8]
-            
-            # Update state 
-            if      p[4]>0.8*p[7]:   p[6] = 0
-            elif    p[4]>0.6*p[7]:   p[6] = 1
-            elif    p[4]>0.4*p[7]:   p[6] = 2
-            else:                    p[6] = 3
-
-            p[4] -= dt  # lifetime -= dt
-            if p[4]<0:
-                cls.particles.pop(i)   # remove particle if its time is over
-
-    
-    # draws all the particles at once 
-    @classmethod
-    def draw(cls):
-        for p in cls.particles:
-            texture = cls.uvs[p[5]][p[6]]
-            rect = Rect(p[0]-cls.w*0.5, p[1]-cls.h*0.5, cls.w, cls.h)
-            RENDERER.blit(texture, rect)
-
-# Class in charge of the sound effects
-class SFXManager:
-    
-    sounds: dict[str, pygame.mixer.Sound] = {
-        'unlock':           pygame.mixer.Sound('resources/sounds/achievement_unlock.wav'),
-        'unlock2':          pygame.mixer.Sound('resources/sounds/achievement_unlock_2.wav')
-    }
-
-    @classmethod
-    def play(cls, sound:str):
-        if sound in cls.sounds:
-            cls.sounds[sound].play()
 
 # Animation: has name, a sequence of indexes, frame duration and if its a loop
 class Animation():
@@ -469,3 +397,76 @@ class PersistenceManager:
         except:
             return None
 
+# Class in charge of the sound effects
+class SFXManager:
+    
+    sounds: dict[str, pygame.mixer.Sound] = {
+        'unlock':           pygame.mixer.Sound('resources/sounds/achievement_unlock.wav'),
+        'unlock2':          pygame.mixer.Sound('resources/sounds/achievement_unlock_2.wav'),
+        'sparks':          pygame.mixer.Sound('resources/sounds/sparks.wav'),
+    }
+
+    @classmethod
+    def play(cls, sound:str):
+        if sound in cls.sounds:
+            cls.sounds[sound].play()
+
+# The one in charge of all Particles
+class ParticlesManager:
+    # The states of each particle is represented by: [x,y, vx,vy, lifetime, id, state, accy]
+    particles = []
+    textures = Texture.from_surface(RENDERER, pygame.image.load('resources/images/particles_8.png'))
+    ss = SpriteSheet('resources/images/particles_8.png', cell_size=(8,8), scale_factor=4)
+    temp_texture: list[Texture] = ss.right_textures
+    w, h = ss.sprite_w, ss.sprite_h
+    uvs = {
+        'spark': temp_texture[0:4],
+        'popcorn': temp_texture[4:8],
+        'heart': temp_texture[8:12],
+        'chocolate': temp_texture[12:16]
+    }
+
+    # add to the particles array the new particles to be rendered by the draw()
+    @classmethod
+    def emit(cls, x,y, particle_type:str, mid_lifetime=1.0, ammount:int=1, force=2.0, accy=0, dir:int = 0):
+        for _ in range(ammount):
+            vx=random.uniform(-force, force)
+            vy=random.uniform(-force, force)
+
+            if dir != 0:
+                vx = abs(vx) * dir
+
+            # Some randomness for variation
+            lifetime = mid_lifetime*random.uniform(0.8, 1.2)
+
+            cls.particles.append([x,y ,vx,vy, lifetime, particle_type, 0, mid_lifetime, accy])
+
+    # update the state of each particle
+    @classmethod
+    def update(cls, dt):
+        for i in range(len(cls.particles)-1, -1, -1):
+            p = cls.particles[i]
+            p[0]+= p[2] # x += vx
+            p[1]+= p[3] # y += vy
+
+            # Acceleration in y axis
+            p[3] += p[8]
+            
+            # Update state 
+            if      p[4]>0.8*p[7]:   p[6] = 0
+            elif    p[4]>0.6*p[7]:   p[6] = 1
+            elif    p[4]>0.4*p[7]:   p[6] = 2
+            else:                    p[6] = 3
+
+            p[4] -= dt  # lifetime -= dt
+            if p[4]<0:
+                cls.particles.pop(i)   # remove particle if its time is over
+
+    
+    # draws all the particles at once 
+    @classmethod
+    def draw(cls):
+        for p in cls.particles:
+            texture = cls.uvs[p[5]][p[6]]
+            rect = Rect(p[0]-cls.w*0.5, p[1]-cls.h*0.5, cls.w, cls.h)
+            RENDERER.blit(texture, rect)
