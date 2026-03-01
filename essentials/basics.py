@@ -404,6 +404,7 @@ class SFXManager:
         'unlock':           pygame.mixer.Sound('resources/sounds/achievement_unlock.wav'),
         'unlock2':          pygame.mixer.Sound('resources/sounds/achievement_unlock_2.wav'),
         'sparks':          pygame.mixer.Sound('resources/sounds/sparks.wav'),
+        'hit':          pygame.mixer.Sound('resources/sounds/hit.wav'),
     }
 
     @classmethod

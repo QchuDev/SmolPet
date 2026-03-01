@@ -617,6 +617,44 @@ class AIController(Component):
         
         self.plan.append(chosen_action)
 
+
+# Component to give an fixed ammount of health to props
+class PropDuration(Component):
+    def __init__(self, durability:int, breaking_particle:list) -> None:
+        self.durability = durability
+        self.breaking_particle = breaking_particle
+        self.phys: PhysicalBall = PhysicalBall()    # to start with something
+
+    def start(self, entity: Entity):
+        super().start(entity)
+        e_phys = self.parent.get_component(PhysicalBall)
+
+        if e_phys: self.phys = e_phys
+        else: raise Exception(f"{self.parent.name}: Has not a PhysicalBall Component. It's required if using {self.__class__.__name__}")
+
+    def update(self, dt:float):
+        if self.phys.is_hitting_floor or self.phys.is_hitting_wall:
+            self.durability -= 1
+
+        if self.durability < 1:
+            self.parent.active = False
+            ParticlesManager.emit(self.parent.pos.x, self.parent.pos.y,*self.breaking_particle)
+
+class PlayOnHit(Component):
+    def __init__(self) -> None:
+        self.phys = PhysicalBall()
+
+    def start(self, entity: Entity):
+        super().start(entity)
+        e_phys = self.parent.get_component(PhysicalBall)
+
+        if e_phys: self.phys = e_phys
+        else: raise Exception(f"{self.parent.name}: Has not a PhysicalBall Component. It's required if using {self.__class__.__name__}")
+
+    def update(self, dt:float):
+        if self.phys.is_hitting_floor or self.phys.is_hitting_wall:
+            SFXManager.play('hit')
+
 # =====================================================================================
 #                               UI COMPONENTS
 # =====================================================================================
@@ -722,7 +760,7 @@ class AchievementCycle(UIComponent):
             offset_x = 70
             RENDERER.blit(name_text, dest=Rect(im[1]+offset_x, im[2]+12, name_text.width, name_text.height))
             RENDERER.blit(desc_text, dest=Rect(im[1]+offset_x, im[2]+30, desc_text.width, desc_text.height))
-            
+
 # =====================================================================================
 #                                 LISTENERS
 # =====================================================================================
@@ -778,7 +816,6 @@ class ParticlesEmitter(Component):
         self.condition_name = condition_name
         self.condition = lambda: False
         
-
     # setting up the condition to be met for spawning particles
     def start(self, entity: Entity):
         super().start(entity)

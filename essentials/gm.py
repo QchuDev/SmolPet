@@ -28,6 +28,10 @@ class GameManager:
 
         if cls._tick == 60:
             cls.check_user_activity()
+        elif cls._tick == 80:
+            for i, e in enumerate(World.entities):
+                if not e.active:
+                    World.entities.pop(i)
         elif cls._tick >= 120:
             cls.check_for_unlocks()
             cls._tick = 0
@@ -135,7 +139,6 @@ class GameManager:
                             aic.plan.append('sit')
         else:
             cls.start_video = False
-       
 
     # For achievement conditions
     @classmethod
