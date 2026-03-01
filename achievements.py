@@ -80,7 +80,7 @@ ALL_ACHIEVEMENTS = {
     ],
     'Aprendiendo juntos':   [
         False, 
-        lambda: all(GameManager.is_unlocked(name) for name in ['cuchu', 'pachu']) and user_activity.shared_state['is_watching_ytvideo'], 
+        lambda: all(GameManager.is_unlocked(name) for name in ['cuchu', 'pachu']) and user_activity.shared_state['is_watching_javierledesma'], 
         'Mira Javier Ledesma con Pachu y Cuchu',
         (0,48)
     ],
@@ -98,7 +98,7 @@ ALL_ACHIEVEMENTS = {
     ],
     'KUCHAU!':              [
         False,
-        lambda: GameManager.top_speed() > 10000,
+        lambda: GameManager.top_speed() > 8000,
         'Supera los limites de velocidad, veloz como el rayo',
         (48,48)
     ],

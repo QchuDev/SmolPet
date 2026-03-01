@@ -1,7 +1,13 @@
 {
     "entities": [
         {
+            "name": "pol"
+        },
+        {
             "name": "cuchu"
+        },
+        {
+            "name": "pachu"
         }
     ],
     "achievements": {
@@ -10,17 +16,17 @@
         "Tiburon? Perro?": false,
         "Los hermanitos": false,
         "Mi novio melo": true,
-        "Soy yo, soy yo": false,
-        "Carboncito": false,
+        "Soy yo, soy yo": true,
+        "Carboncito": true,
         "La familia reunida": false,
         "Donde surgio...?": false,
         "Dulce o Salado?": true,
         "Diu": false,
         "FIESTAA": false,
-        "Aprendiendo juntos": false,
+        "Aprendiendo juntos": true,
         "Hora de la siesta": false,
-        "ABSOLUTE CINEMA": false,
-        "KUCHAU!": true,
+        "ABSOLUTE CINEMA": true,
+        "KUCHAU!": false,
         "BOOOM!": false
     }
 }

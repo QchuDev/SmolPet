@@ -140,10 +140,12 @@ POOP_PREFAB = Entity(
     ]
 )
 
+balloon_phys = PhysicalBall(radius=15, air_resist=0.005, mass=1, retention_y=0.6, grav_scale=0.02, directed=False)
+
 RED_BALLOON_PREFAB = Entity( 
     name='red balloon',
     components= [
-        PhysicalBall(radius=15, air_resist=0.005, mass=1, retention_y=0.6, grav_scale=0.1, directed=False),
+        balloon_phys,
         MouseDrag(),
         Animator(SpriteSheet(f'resources/images/balloons/balloon0_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES)
@@ -152,7 +154,7 @@ RED_BALLOON_PREFAB = Entity(
 BLUE_BALLOON_PREFAB = Entity( 
     name='blue balloon',
     components= [
-        PhysicalBall(radius=15, air_resist=0.005, mass=1, retention_y=0.6, grav_scale=0.1, directed=False),
+        balloon_phys,
         MouseDrag(),
         Animator(SpriteSheet(f'resources/images/balloons/balloon1_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES)
@@ -161,7 +163,7 @@ BLUE_BALLOON_PREFAB = Entity(
 YELLOW_BALLOON_PREFAB = Entity( 
     name='yellow balloon',
     components= [
-        PhysicalBall(radius=15, air_resist=0.005, mass=1, retention_y=0.6, grav_scale=0.1, directed=False),
+        balloon_phys,
         MouseDrag(),
         Animator(SpriteSheet(f'resources/images/balloons/balloon2_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES)
@@ -170,7 +172,7 @@ YELLOW_BALLOON_PREFAB = Entity(
 GREEN_BALLOON_PREFAB = Entity( 
     name='green balloon',
     components= [
-        PhysicalBall(radius=15, air_resist=0.005, mass=1, retention_y=0.6, grav_scale=0.1, directed=False),
+        balloon_phys,
         MouseDrag(),
         Animator(SpriteSheet(f'resources/images/balloons/balloon3_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES)
@@ -214,5 +216,5 @@ def create_entity(prefab_name:str, x,y, push:bool = True) -> Entity:
         
         ParticlesManager.emit(new_ent.pos.x, new_ent.pos.y, *SPARK_PRTS)
         SFXManager.play('sparks')
-        
+
         return new_ent
