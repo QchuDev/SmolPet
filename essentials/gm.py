@@ -2,7 +2,7 @@ import random
 
 from essentials import components
 from essentials.basics import ParticlesManager, SFXManager, World
-from essentials.components import AIController, AchievementCycle, create_paragraph_texture
+from essentials.components import AIController, AchievementCycle, MouseDrag, create_paragraph_texture
 from essentials.window_setup import RENDERER, SCREEN_H, SCREEN_W
 from pygame._sdl2 import Texture
 
@@ -99,7 +99,6 @@ class GameManager:
     }
 
     start_video = True
-
     @classmethod
     def check_user_activity(cls):
         # Retrieve the shared_state from the user_activity
@@ -113,33 +112,31 @@ class GameManager:
         
         
         # when watching a movie or somethin
-        if shared_state['is_watching_ytvideo'] or shared_state['is_watching_movie'] and not cls.start_video:
+        if shared_state['is_watching_ytvideo'] or shared_state['is_watching_movie']:
+            if not cls.start_video:
+                cls.start_video = True
+                # if missing bucket of popcorn, then spawn it
+                r = random.uniform(0.2, 0.8)
+                popcornb_entity = prefabs.create_entity('popcorn bucket', SCREEN_W*r, SCREEN_H*0.4, push=False)
 
-            cls.start_video = True
+                if 'popcorn bucket' not in cls.unlocked_entites: 
+                    cls.unlocked_entites.append('popcorn bucket')
 
-            # if missing bucket of popcorn, then spawn it
-            r = random.uniform(0.2, 0.8)
-            popcornb_entity = prefabs.create_entity('popcorn bucket', SCREEN_W*r, SCREEN_H*0.4, push=False)
+                World.entities.append(popcornb_entity)
 
-            if 'popcorn bucket' not in cls.unlocked_entites: 
-                cls.unlocked_entites.append('popcorn bucket')
-
-            World.entities.append(popcornb_entity)
-
-            for e in World.entities:
-                aic = e.get_component(AIController)
-                if aic:
-                    if aic.plan[0] != 'sleep':
-                        aic.plan.append('move')
-                        aic.target_setted = True
-                        aic.target_x = popcornb_entity.pos.x + random.uniform(-100, 100)
-                        aic.plan.append('sit')
-                        aic.plan.append('sit')
-                            
-
+                for e in World.entities:
+                    aic = e.get_component(AIController)
+                    if aic:
+                        if aic.plan[0] != 'sleep':
+                            aic.plan.append('move')
+                            aic.target_setted = True
+                            aic.target_x = popcornb_entity.pos.x + random.uniform(-100, 100)
+                            aic.plan.append('sit')
+                            aic.plan.append('sit')
         else:
             cls.start_video = False
        
+
     # For achievement conditions
     @classmethod
     def is_unlocked(cls, name):
@@ -172,4 +169,13 @@ class GameManager:
                 top_speed = max(top_speed, phys.vel.magnitude())
                 
         return top_speed
-  
+    
+    @classmethod
+    def lifting_a_mini(cls) -> bool:
+        for e in World.entities:
+            md = e.get_component(MouseDrag)
+            if md:
+                if md.is_pulling:
+                    return True
+
+        return False

@@ -107,7 +107,22 @@ ALL_ACHIEVEMENTS = {
         lambda: GameManager.game_completed == True, 
         'Termina el juego, una genia <3',
         (0,64)
-    ]
+    ],
+    'Gran Maestra':               [
+        False, 
+        lambda: user_activity.shared_state['is_playing_chess'] == True, 
+        'Juega al ajedrez :3',
+        (16,64)
+    ],
+    'No me revolees':               [
+        False, 
+        lambda: GameManager.lifting_a_mini() == True, 
+        'Levanta a un mini',
+        (32,64)
+    ],
+
+
+
 }
 
 # Getting the state of the achievements

@@ -1,32 +1,40 @@
 {
     "entities": [
         {
-            "name": "pol"
+            "name": "pachu"
         },
         {
             "name": "cuchu"
         },
         {
-            "name": "pachu"
+            "name": "pol"
+        },
+        {
+            "name": "squalo"
+        },
+        {
+            "name": "dino"
         }
     ],
     "achievements": {
         "UN VIRUS?!?": true,
-        "Lo pario Cuchu?": false,
-        "Tiburon? Perro?": false,
-        "Los hermanitos": false,
+        "Lo pario Cuchu?": true,
+        "Tiburon? Perro?": true,
+        "Los hermanitos": true,
         "Mi novio melo": true,
         "Soy yo, soy yo": true,
         "Carboncito": true,
-        "La familia reunida": false,
+        "La familia reunida": true,
         "Donde surgio...?": false,
         "Dulce o Salado?": true,
-        "Diu": false,
+        "Diu": true,
         "FIESTAA": false,
         "Aprendiendo juntos": true,
         "Hora de la siesta": false,
         "ABSOLUTE CINEMA": true,
-        "KUCHAU!": false,
-        "BOOOM!": false
+        "KUCHAU!": true,
+        "BOOOM!": false,
+        "Gran Maestra": true,
+        "No me revolees": true
     }
 }

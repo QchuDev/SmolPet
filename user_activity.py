@@ -20,21 +20,23 @@ def monitor_system(state):
                 state['is_watching_movie']      = any(k in title for k in video_kw)
                 state['is_watching_ytvideo']    = '- youtube' in title
                 state['is_watching_javierledesma'] = '#bizelaneas' in title
+                state['is_playing_chess'] = 'ajedrez' in title
+                
                 if 'google search' in title or 'buscar con google' in title:
                     state['last_search'] = title.split('-')[0].strip()
-                
-                
 
         except Exception:
             pass
-
+        
+        print(shared_state)
+        print()
         time.sleep(2)   # wait 2 seconds 
 
 shared_state = {
     "is_watching_video": False,
     "is_watching_ytvideo": False,
     "is_watching_javierledesma" : False,
-    "is_afk": False,
+    "is_playing_chess": False,
     "last_search": ""
 }
 

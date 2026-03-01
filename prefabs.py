@@ -192,7 +192,7 @@ ALL_PREFABS = {
     'blue balloon': BLUE_BALLOON_PREFAB,
     'yellow balloon': YELLOW_BALLOON_PREFAB,
     'green balloon': GREEN_BALLOON_PREFAB,
-    'poop': POOP_PREFAB,
+    'poop': POOP_PREFAB
 }
 
 # Creates the entity at posistion x,y with a vfx
