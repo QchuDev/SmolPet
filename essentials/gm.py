@@ -9,8 +9,8 @@ from pygame._sdl2 import Texture
 import prefabs
 
 class GameManager:
-    # Starting value should be true, if want to play ofc
     first_time = False
+    # Starting value should be true, if want to play ofc
     running = True
     unlocked_entites = []
     game_completed = False
@@ -20,7 +20,9 @@ class GameManager:
 
     # Empty for now, but here goes the achievements_displayer
     achievements_displayer:AchievementCycle = AchievementCycle()
-    
+    total_achievements:int = 0
+    unlocked_achievements:int = 0
+
     # The update method of the class calls funcionts in an interspersed manner
     @classmethod
     def update(cls):
@@ -46,6 +48,7 @@ class GameManager:
             if n != 'BOOOM!': achievement_left = True   # CHECK FOR EVERY ACHIEVEMENT, but not itself
             condition_met = a[1]()
             if condition_met:
+                cls.unlocked_achievements += 1
                 a[0] = True
                 cls.trigger_achievement_unlock(n,a)
         

@@ -414,6 +414,7 @@ class SFXManager:
             from game_consts import SFX_VOLUME
             s = cls.sounds[sound]
             s.set_volume(SFX_VOLUME*volume_mult)
+            print(f'Sonido con : {SFX_VOLUME*volume_mult} de volumen')
             s.play()
 
 # The one in charge of all Particles
@@ -428,7 +429,8 @@ class ParticlesManager:
         'spark': temp_texture[0:4],
         'popcorn': temp_texture[4:8],
         'heart': temp_texture[8:12],
-        'chocolate': temp_texture[12:16]
+        'chocolate': temp_texture[12:16],
+        'popcorn_break': temp_texture[16:20]
     }
 
     # add to the particles array the new particles to be rendered by the draw()

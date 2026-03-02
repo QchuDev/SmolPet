@@ -18,57 +18,61 @@ today = datetime.date.today()
 pachus_bd = datetime.date(datetime.datetime.now().year, 3, 6)
 if pachus_bd < datetime.date.today(): pachus_bd = datetime.date(datetime.datetime.now().year+1, 3, 6)
 days_left = (pachus_bd - today).days
+
 CUCHU_PHRASES = [
-        'Te amo <3',
-        'Estas ocupada amor?',
-        'Me encantas jsjsjs',
-        'Mandame un mensaje a whatsapp',
-        'Te puedo ayudar?',
-        'Soy tu principe jeje',
-        f'Faltan {days_left} dias para tu cumple!' if days_left > 0 else 'FELIZ CUMPLE AMOR!',
-        'aiiiiiiiiiii',
-        ':V',
-        'OMG',
-        'XD',
-        'ñam ñam',
-        'Vemos Javier Ledesma?',
-        'Quiero refrescos...',
-        'Te quiero mucho mucho <3',
-        'Mi loquitaaAaAa',
-        'Sos perfecta <3',
-        'Mi bombonita <3',
-        'Its showtime',
-        'PaachUUuU PaAchUuuUu',
-        'Te morfo <3',
-        'Tirameee',
-        'Quiero tiramisu'
+    'Te amo <3',
+    'Estas ocupada amor?',
+    'Me encantas jsjsjs',
+    'Mandame un mensaje a whatsapp',
+    'Te puedo ayudar?',
+    'Soy tu principe jeje',
+    f'Faltan {days_left} dias para tu cumple!' if days_left > 0 else 'FELIZ CUMPLE AMOR!',
+    'aiiiiiiiiiii',
+    ':V',
+    'OMG',
+    'XD',
+    'ñam ñam',
+    'Vemos Javier Ledesma?',
+    'Quiero refrescos...',
+    'Te quiero mucho mucho <3',
+    'Mi loquitaaAaAa',
+    'Sos perfecta <3',
+    'Mi bombonita <3',
+    'Its showtime',
+    'PaachUUuU PaAchUuuUu',
+    'Te morfo <3',
+    'Tirameee',
+    'Quiero tiramisu'
 ]
 
 BOBBY_PHRASES = [
     'Im a little piece of art', 
     'I cant feel a thing', 
-    'My flesh is pixels'
+    'My flesh is pixels',
 ]
 
 POL_PHRASES = [
     'Guau', 
     'Guau Guau', 
     'GUAU', 
-    'grr'
+    'grr',
+    'guau (soy tu pulguita)'
 ]
 
 SQUALO_PHRASES = [
     'glu glu glu', 
     'ñam ñam ñam', 
     'mamiii', 
-    '?'
+    '?',
+    'gracias por curar mi brazito'
 ]
 
 DINO_PHRASES = [
     'rawr', 
-    'ñam ñam ñam', 
+    'nam nam nam', 
     'grrr', 
-    'y papi?'
+    'y papi?',
+    'no me gusta el chicle'
 ]
 
 PACHU_PHRASES = [
@@ -77,7 +81,8 @@ PACHU_PHRASES = [
     'Tengo que trabajar', 
     'Mi piojito jsjs',
     'BOOM',
-    'Quiero sushi'
+    'Quiero sushi',
+    'Exijo mimos y besos'
 ]
 
 CUCHU_CHAR_DATA = CharacterData(cuchu_ss, 'cuchu', CUCHU_PHRASES)

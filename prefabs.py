@@ -13,8 +13,10 @@ POPCORN_PRTS =  ['popcorn', 0.8,    8,      3,      0.2     ]
 SPARK_PRTS =    ['spark',   2,    8,      3,      0       ]
 HEART_PRTS =    ['heart',   0.8,    8,      3,      -0.05   ]
 CHOCOLATE_PRTS =['chocolate',  0.8,    8,      3,      0.2 ]
+EXTRA_CHOCOLATE_PRTS =['chocolate',  0.8,    20,      4,      0.2 ]
 
-EXTRA_CHOCOLATE_PRTS = ['chocolate',  1.0,    16,      4,      0.1 ]
+POPCORN_BREAK_PRTS = ['popcorn_break', 0.8,    8,      3,      0.2     ]
+CHOCOLATE_BREAK_PRTS = ['popcorn_break', 0.8,    8,      3,      0.2     ]
 
 # ENTITY PREFABS ================================================================================================================================================================
 # NPC ANIMATIONS
@@ -127,7 +129,7 @@ POPCORN_PREFAB = Entity(
         ParticlesEmitter(POPCORN_PRTS, 'in_hit', offset= (0, -2)),
         Animator(SpriteSheet('resources/images/popcorn_bucket_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES),
-        PropDuration(5,POPCORN_PRTS),
+        PropDuration(7, POPCORN_BREAK_PRTS),
         play_on_hit_comp
     ]
 )
@@ -140,7 +142,7 @@ TIRAMISU_PREFAB = Entity(
         ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -2)),
         Animator(SpriteSheet('resources/images/tiramisu_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES),
-        PropDuration(5,CHOCOLATE_PRTS),
+        PropDuration(6,CHOCOLATE_BREAK_PRTS),
         play_on_hit_comp
     ]
 )
@@ -153,7 +155,7 @@ POOP_PREFAB = Entity(
         ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -1)),
         Animator(SpriteSheet('resources/images/poop_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES),
-        PropDuration(5,EXTRA_CHOCOLATE_PRTS),
+        PropDuration(3,EXTRA_CHOCOLATE_PRTS),
         play_on_hit_comp
     ]
 )

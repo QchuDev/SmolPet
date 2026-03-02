@@ -749,7 +749,7 @@ class AchievementCycle(UIComponent):
             icon_offset = 12
             RENDERER.blit(
                 achievements_icons, 
-                dest=Rect(int(im[1]+icon_offset), int(im[2]+icon_offset), 16*self.scale, 16*self.scale), 
+                dest=Rect(int(im[1]+icon_offset), int(im[2]+icon_offset+6), 16*self.scale, 16*self.scale), 
                 area=Rect(int(im[5][0]), int(im[5][1]), 16, 16)
             )
 
@@ -758,8 +758,8 @@ class AchievementCycle(UIComponent):
 
             # Here goes the logic for text showing
             offset_x = 70
-            RENDERER.blit(name_text, dest=Rect(im[1]+offset_x, im[2]+12, name_text.width, name_text.height))
-            RENDERER.blit(desc_text, dest=Rect(im[1]+offset_x, im[2]+30, desc_text.width, desc_text.height))
+            RENDERER.blit(name_text, dest=Rect(im[1]+offset_x, im[2]+18, name_text.width, name_text.height))
+            RENDERER.blit(desc_text, dest=Rect(im[1]+offset_x, im[2]+36, desc_text.width, desc_text.height))
 
 # =====================================================================================
 #                                 LISTENERS

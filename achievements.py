@@ -9,7 +9,7 @@ ALL_ACHIEVEMENTS = {
     'UN VIRUS?!?':          [
         False, 
         lambda: GameManager.first_time == True, 
-        'Que descargaste? un regalo...?',
+        'Que descargaste? es un regalo...?',
         (0,0)
     ],
     'Lo pario Cuchu?':      [
@@ -124,6 +124,8 @@ ALL_ACHIEVEMENTS = {
 
 
 }
+
+GameManager.total_achievements = len(ALL_ACHIEVEMENTS)
 
 # Getting the state of the achievements
 def get_save_data():
