@@ -5,7 +5,6 @@ from pygame import Color, Rect
 import random
 from typing import Type
 from pygame._sdl2 import Texture
-from sympy import Point2D
 
 from essentials.basics import UIElement
 

@@ -6,11 +6,12 @@ from pygame._sdl2 import Window, Renderer
 
 from essentials.math_custom import Vector2D
 pygame.init()
-
 project_name = 'smol pet'
+
 # SETUP
 # If setted to fullscreen then pass the real sizes 
-WINDOW = Window(title=project_name, borderless=False, size=(1920,1080))
+info = pygame.display.Info()
+WINDOW = Window(title=project_name, borderless=False, size=(info.current_w, info.current_h))
 SCREEN_W, SCREEN_H = WINDOW.size
 
 # Renderer (we use the GPU for better performance)
