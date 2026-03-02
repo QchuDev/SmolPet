@@ -10,7 +10,7 @@ from sympy import Point2D
 from essentials.basics import UIElement
 
 # Custom
-from .basics import SFXManager, UIComponent, Listener, Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
+from .basics import EntityContext, SFXManager, UIComponent, Listener, Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
 from .window_setup import RENDERER, SCREEN_W, SCREEN_H, SCREEN_CENTER
 
 from game_consts import GRAVITY, BOUNCE_STOP, JUMP_ACC, SIT_TIME, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
@@ -230,13 +230,15 @@ class MouseDrag(Component):
         if self.is_pulling:
             RENDERER.draw_color = Color(255,255,255)
             RENDERER.draw_line(tuple(self.parent.pos), tuple(MouseInput.pos))
-        
+       
 # Component who decides the current animation to be played
 class StatesManager(Component):
+
     def __init__(self, states:list[State]) :
         self.current_state:     State = states[0]
         self.states:            dict[str,State] = {s.name : s for s in states}
-
+        self.ctx = EntityContext(Entity())
+        
         # Animator to change animations
         self.animator: Animator = Animator(SpriteSheet(''), [])
 
@@ -245,6 +247,7 @@ class StatesManager(Component):
         super().start(entity)
         e_anim = self.parent.get_component(Animator)
         missing_comps: list[Type] = []
+        self.ctx = EntityContext(self.parent)
 
         if e_anim: self.animator = e_anim
         else: missing_comps.append(Animator)
@@ -254,7 +257,7 @@ class StatesManager(Component):
     
     # Updating to the next state (can also stay the same)
     def update(self, dt:float):
-        self.change_state(self.current_state.transition(self.parent))
+        self.change_state(self.current_state.transition(self.ctx))
 
     # Changes the state and plays the corresponding animation        
     def change_state(self, new_state:str):

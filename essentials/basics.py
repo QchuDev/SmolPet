@@ -127,6 +127,7 @@ class Entity():
 
     # Gives the component asked for and if not found -> None
     def get_component(self, component_type: Type[T]) -> Optional[T]:
+        if not self.active: return None
         for c in self.components:
             if isinstance(c, component_type):
                 return c
@@ -257,6 +258,15 @@ class CharacterData():
         self.phrases:   list[str] = phrases
         self.ss:        SpriteSheet = ss
 
+class EntityContext:
+    def __init__(self, entity):
+        from .components import PhysicalBall, Animator, AIController
+        # Cacheamos los componentes una sola vez al inicio del estado
+        self.phys = entity.get_component(PhysicalBall)
+        self.anim = entity.get_component(Animator)
+        self.aic = entity.get_component(AIController)
+        self.entity = entity # Por si acaso
+ 
 # State: a name and has a set of transitions
 class State():
     def __init__(self, name:str = '', trans: list[Transition] = []):
@@ -264,10 +274,10 @@ class State():
         self.transitions:  list[Transition] = trans
     
     # Returns the next states name
-    def transition(self, entity:Entity) -> str:
+    def transition(self, ctx:EntityContext) -> str:
         next_state: str = self.name
         for t in self.transitions:
-            if t.check(entity):
+            if t.check(ctx):
                 next_state = t.to_state
                 break
         return next_state
@@ -278,8 +288,8 @@ class Transition():
         self.to_state = to_state
         self.condition = condition
     
-    def check(self, entity:Entity) -> bool:
-        return self.condition(entity)
+    def check(self, ctx:EntityContext) -> bool:
+        return self.condition(ctx)
 
 # The one in chraged of storing all the UI elements and calling their update methods
 class UIManager:
@@ -357,10 +367,10 @@ class PersistenceManager:
         skipped_ents = [
             'popcorn bucket', 
             'tiramisu', 
-            'balloon red',
-            'balloon blue',
-            'balloon yellow',
-            'balloon green',
+            'red balloon',
+            'blue balloon',
+            'yellow balloon',
+            'green balloon',
             'poop'
         ]
         

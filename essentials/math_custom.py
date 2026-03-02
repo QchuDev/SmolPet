@@ -10,14 +10,11 @@ class Vector2D():
         return self.x*other.x + self.y*other.y    
     
     # Returns the normalized version of the vector 
-    def normalized(self) -> Vector2D:
-        if abs(self.x+self.y) < 0.0001:
-            return Vector2D(0,0)
-        
-        s = 1/math.sqrt(self.x**2 + self.y**2)
-        n_x = self.x * s
-        n_y = self.y * s 
-        return Vector2D(n_x, n_y)
+    def normalized(self):
+        sq_mag = self.x**2 + self.y**2
+        if sq_mag < 0.0001: return Vector2D(0,0) # Avoid calculation if near zero
+        inv_mag = 1.0 / math.sqrt(sq_mag)
+        return Vector2D(self.x * inv_mag, self.y * inv_mag)
     
     def distance(self, other:Vector2D) -> float:
         diff_x = self.x - other.x

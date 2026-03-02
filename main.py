@@ -1,7 +1,6 @@
 from essentials.gm import GameManager
 
-
-if __name__ == '__main__':
+def main():
     import pygame
     
     # Import Setup constants
@@ -39,7 +38,6 @@ if __name__ == '__main__':
 
         # Update mouse inputs
         MouseInput.update()
-
         
         # To clean the request queue
         for event in pygame.event.get():
@@ -79,3 +77,17 @@ if __name__ == '__main__':
 
     persist_manager.save(World.entities)
     pygame.quit()
+
+import cProfile
+import pstats
+
+if __name__ == "__main__":
+    # Ejecuta el juego bajo el microscopio
+    profiler = cProfile.Profile()
+    profiler.enable()
+    
+    main()
+    
+    profiler.disable()
+    stats = pstats.Stats(profiler).sort_stats('cumtime') # Ordenar por tiempo acumulado
+    stats.print_stats(20) # Mostrar las 20 funciones más pesadas
