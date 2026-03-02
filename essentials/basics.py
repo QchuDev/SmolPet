@@ -414,7 +414,6 @@ class SFXManager:
             from game_consts import SFX_VOLUME
             s = cls.sounds[sound]
             s.set_volume(SFX_VOLUME*volume_mult)
-            print(f'Sonido con : {SFX_VOLUME*volume_mult} de volumen')
             s.play()
 
 # The one in charge of all Particles

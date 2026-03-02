@@ -670,7 +670,8 @@ class Button(UIComponent):
 
     def update(self, dt:float):
         is_click_held = MouseInput.left_clicked
-        is_close = self.parent.pos.distance(MouseInput.pos) < self.click_radius
+        center:Vector2D = self.parent.pos + Vector2D(16,16)
+        is_close = center.distance(MouseInput.pos) < self.click_radius
 
         # If close and held... change texture
         if is_close and is_click_held:

@@ -59,11 +59,11 @@ def initial_ui():
         texture=Texture.from_surface(RENDERER, qbutton_surface),
         rect=Rect(0,0,32,32),
         ui_components=[
-            Button(click_radius=38),
+            Button(click_radius=20),
             QuitOnClick()
         ]
     )
-    quit_button.pos.x, quit_button.pos.y  = SCREEN_W - 42, 16
+    quit_button.pos.x, quit_button.pos.y  = SCREEN_W - 42, 42
     ui_elems.append(quit_button)
 
 
