@@ -13,8 +13,8 @@ from essentials.basics import UIElement
 from .basics import SFXManager, UIComponent, Listener, Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
 from .window_setup import RENDERER, SCREEN_W, SCREEN_H, SCREEN_CENTER
 
-from game_consts import GRAVITY, BOUNCE_STOP, SIT_TIME, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
-from game_consts import WAIT_TIME, SLEEP_TIME, JUMP_FORCE, TARGET_STOP, ACTION_WEIGHTS
+from game_consts import GRAVITY, BOUNCE_STOP, JUMP_ACC, SIT_TIME, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
+from game_consts import WAIT_TIME, SLEEP_TIME, TARGET_STOP, ACTION_WEIGHTS
 
 from .math_custom import Vector2D
 
@@ -537,7 +537,7 @@ class AIController(Component):
                 # Push the entity
                 if self.phys.is_grounded:
                     dir = 1 if (self.target_x > self.parent.pos.x) else -1
-                    self.phys.applyForce(Vector2D(dir*JUMP_FORCE.x, JUMP_FORCE.y))
+                    self.phys.applyForce(Vector2D(dir*JUMP_ACC.x, JUMP_ACC.y)*self.phys.mass)
 
                 # Setting the 
                 dist_from_target = abs(self.target_x - self.parent.pos.x)
@@ -653,7 +653,7 @@ class PlayOnHit(Component):
 
     def update(self, dt:float):
         if self.phys.is_hitting_floor or self.phys.is_hitting_wall:
-            SFXManager.play('hit')
+            SFXManager.play('hit', self.phys.vel.magnitude()/1000)
 
 # =====================================================================================
 #                               UI COMPONENTS

@@ -4,6 +4,9 @@ import datetime
 from essentials.basics import CharacterData, SpriteSheet, State, Transition
 from essentials.math_custom import Vector2D
 
+# SOUND SETTINGS
+SFX_VOLUME = 1
+
 # PHYSICAL CONSTANTS
 GRAVITY:Vector2D = Vector2D(0, 980)
 BOUNCE_STOP:float = 60
@@ -15,7 +18,7 @@ USER_PULL_STRENGTH:float = 250.0
 USER_PULL_DAMPING:float = 2.0
 
 # AICONTROLLER
-JUMP_FORCE: Vector2D = Vector2D(4000, -15000)
+JUMP_ACC: Vector2D = Vector2D(4000, -15000)
 WAIT_TIME:  float = 10
 SIT_TIME:  float = 30
 SLEEP_TIME: float = 10*60 # X*60 -> X minutes

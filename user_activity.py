@@ -28,8 +28,6 @@ def monitor_system(state):
         except Exception:
             pass
         
-        print(shared_state)
-        print()
         time.sleep(2)   # wait 2 seconds 
 
 shared_state = {

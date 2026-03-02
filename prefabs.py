@@ -34,7 +34,7 @@ PROP_ANIMATIONS = [
     Animation('bounce',     [3, 4, 5],      frame_duration=0.08,    loop=False),
 ]
 
-on_hit_comp = PlayOnHit()
+play_on_hit_comp = PlayOnHit()
 animator_comp = Animator(anims = NPC_ANIMATIONS)
 aic_comp = AIController(timer_range=(0.5, 2))
 
@@ -49,46 +49,46 @@ BOBBY_PREFAB = Entity(
         StatesManager(NPC_STATES),
         TextBubble(),
         CharactersHandler([BOBBY_CHAR_DATA]),
-        on_hit_comp
+        play_on_hit_comp
     ]
 )
 CUCHU_PREFAB = Entity(
     name=f'cuchu',
     components= [
-        PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
+        PhysicalBall(radius=30, air_resist=0.0005, mass=1.4, retention_y=0.45),
         MouseDrag(),
         animator_comp,  # sleeping WIP
         aic_comp,
         StatesManager(NPC_STATES),
         TextBubble(),
         CharactersHandler([CUCHU_CHAR_DATA]),
-        on_hit_comp
+        play_on_hit_comp
     ]
 )
 PACHU_PREFAB = Entity(
     name=f'pachu',
     components= [
-        PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
+        PhysicalBall(radius=30, air_resist=0.0005, mass=1.3, retention_y=0.45),
         MouseDrag(),
         animator_comp,  # sleeping WIP
         aic_comp,
         StatesManager(NPC_STATES),
         TextBubble(),
         CharactersHandler([PACHU_CHAR_DATA]),
-        on_hit_comp
+        play_on_hit_comp
     ]
 )
 POL_PREFAB = Entity(
     name=f'pol',
     components= [
-        PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
+        PhysicalBall(radius=30, air_resist=0.0005, mass=1.1, retention_y=0.45),
         MouseDrag(),
         animator_comp,  # sleeping WIP
         aic_comp,
         StatesManager(NPC_STATES),
         TextBubble(),
         CharactersHandler([POL_CHAR_DATA]),
-        on_hit_comp
+        play_on_hit_comp
     ]
 )
 SQUALO_PREFAB = Entity(
@@ -101,7 +101,7 @@ SQUALO_PREFAB = Entity(
         StatesManager(NPC_STATES),
         TextBubble(),
         CharactersHandler([SQUALO_CHAR_DATA]),
-        on_hit_comp
+        play_on_hit_comp
     ]
 )
 DINO_PREFAB = Entity(
@@ -114,7 +114,7 @@ DINO_PREFAB = Entity(
         StatesManager(NPC_STATES),
         TextBubble(),
         CharactersHandler([DINO_CHAR_DATA]),
-        on_hit_comp
+        play_on_hit_comp
     ]
 )
 
@@ -128,7 +128,7 @@ POPCORN_PREFAB = Entity(
         Animator(SpriteSheet('resources/images/popcorn_bucket_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES),
         PropDuration(5,POPCORN_PRTS),
-        on_hit_comp
+        play_on_hit_comp
     ]
 )
 
@@ -141,7 +141,7 @@ TIRAMISU_PREFAB = Entity(
         Animator(SpriteSheet('resources/images/tiramisu_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES),
         PropDuration(5,CHOCOLATE_PRTS),
-        on_hit_comp
+        play_on_hit_comp
     ]
 )
 
@@ -154,7 +154,7 @@ POOP_PREFAB = Entity(
         Animator(SpriteSheet('resources/images/poop_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES),
         PropDuration(5,EXTRA_CHOCOLATE_PRTS),
-        on_hit_comp
+        play_on_hit_comp
     ]
 )
 
@@ -233,6 +233,6 @@ def create_entity(prefab_name:str, x,y, push:bool = True) -> Entity:
             if phys: phys.applyForce(Vector2D(random.uniform(-8000, 8000), -8000))
         
         ParticlesManager.emit(new_ent.pos.x, new_ent.pos.y, *SPARK_PRTS)
-        SFXManager.play('sparks')
+        SFXManager.play('sparks', 0.6)
 
         return new_ent

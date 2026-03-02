@@ -12,6 +12,7 @@ from typing import TypeVar, Type, Optional
 from pygame._sdl2 import Texture
 
 
+
 # Custom
 from .math_custom import Vector2D
 from .window_setup import RENDERER, SCREEN_W, WINDOW
@@ -408,9 +409,12 @@ class SFXManager:
     }
 
     @classmethod
-    def play(cls, sound:str):
+    def play(cls, sound:str, volume_mult:float = 1):
         if sound in cls.sounds:
-            cls.sounds[sound].play()
+            from game_consts import SFX_VOLUME
+            s = cls.sounds[sound]
+            s.set_volume(SFX_VOLUME*volume_mult)
+            s.play()
 
 # The one in charge of all Particles
 class ParticlesManager:
