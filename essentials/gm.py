@@ -54,6 +54,7 @@ class GameManager:
         
         cls.game_completed = not achievement_left
     
+    
     @classmethod
     def trigger_achievement_unlock(cls, name:str, a: list):
 
@@ -72,6 +73,7 @@ class GameManager:
             # im = [lifetime, x, y, target_x, target_y, icono, nombre, desc, tex_nombre, tex_desc]
             name_tex = create_text_texture(name, (255, 215, 0)) # Dorado para el título
             desc_tex = create_paragraph_texture(a[2], (255, 255, 255)) # Blanco para la descripción
+            progress = create_text_texture(f'{cls.unlocked_achievements}/{cls.total_achievements} achievements')
 
             target_x = SCREEN_W - 270 # Ajusta según el ancho de tu sprite
             new_popup = [
@@ -83,7 +85,8 @@ class GameManager:
                 a[3],            # source_pos (x, y) del icono
                 name_tex,        # textura del Nombre
                 desc_tex,        # textura de la Descripción
-                True             # first time
+                True,            # first time
+                progress         # progress u/t
             ]
             cls.achievements_displayer.showed_img.append(new_popup)
 

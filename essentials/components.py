@@ -758,11 +758,13 @@ class AchievementCycle(UIComponent):
 
             name_text: Texture = im[6]
             desc_text: Texture = im[7]
-
+            progress_text: Texture = im[9]
             # Here goes the logic for text showing
             offset_x = 70
             RENDERER.blit(name_text, dest=Rect(im[1]+offset_x, im[2]+18, name_text.width, name_text.height))
             RENDERER.blit(desc_text, dest=Rect(im[1]+offset_x, im[2]+36, desc_text.width, desc_text.height))
+
+            RENDERER.blit(progress_text, dest=Rect(im[1]+offset_x, im[2]+100, progress_text.width, progress_text.height))
 
 # =====================================================================================
 #                                 LISTENERS
