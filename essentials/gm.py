@@ -23,6 +23,13 @@ class GameManager:
     total_achievements:int = 0
     unlocked_achievements:int = 0
 
+    @classmethod
+    def start(cls):
+        from achievements import ALL_ACHIEVEMENTS
+        for n, a in ALL_ACHIEVEMENTS.items():
+            if a[0]:
+                cls.unlocked_achievements += 1 
+
     # The update method of the class calls funcionts in an interspersed manner
     @classmethod
     def update(cls):
@@ -102,7 +109,8 @@ class GameManager:
         'squalo':   ['squalo', 'tiburon', 'shark', 'pez', 'fish'],
         'pachu':    ['pachu', 'yo', 'bombonita', 'sexy'],
         'cuchu':    ['cuchu', 'novio', 'autista', 'lindo' 'ñoño', 'melo', 'bombon', 'piojito'],
-        'pol' :     ['pol', 'perro', 'bebe', 'carboncito', 'coquito', 'pulguita'],
+        'pol' :     ['pol', 'cachorro', 'bebe', 'carboncito', 'coquito', 'pulguita'],
+        'doki' :     ['doki', 'perro', 'gordito', 'fofo'],
         'tiramisu': ['tiramisu', 'torta', 'postre'],
         'balloon' : ['globo', 'globos', 'fiesta'],
         'poop':     ['caca', 'popo', 'sorete']

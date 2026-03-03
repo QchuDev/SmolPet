@@ -18,11 +18,11 @@ def main():
     dt = 0.01
     dt_phys = 1/60  # once per 60FPS
     accumulator = 0.0
-    scan_timer=0
 
     pygame.mixer.init()
 
     ## MAIN LOOP ======================================================
+    GameManager.start()
     while GameManager.running:
         # Update delta_time
         dt = clock.tick(FPS) / 1000

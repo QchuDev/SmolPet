@@ -120,6 +120,18 @@ ALL_ACHIEVEMENTS = {
         'Levanta a un mini',
         (32,64)
     ],
+    'Mi pulguita OG':               [
+        False, 
+        lambda: GameManager.is_unlocked('doki'), 
+        'Desbloquea a Doki <3',
+        (48,64)
+    ],
+    'Paw Patrol':               [
+        False, 
+        lambda: all(GameManager.is_unlocked(name) for name in ['pol', 'doki']), 
+        'Desbloquea a tus cachorros',
+        (0,80)
+    ],
 
 
 

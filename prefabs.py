@@ -1,7 +1,7 @@
 import random
 
 
-from characters_setup import BOBBY_CHAR_DATA, CHARACTERS, CUCHU_CHAR_DATA, DINO_CHAR_DATA, PACHU_CHAR_DATA, POL_CHAR_DATA, SQUALO_CHAR_DATA
+from characters_setup import BOBBY_CHAR_DATA, CHARACTERS, CUCHU_CHAR_DATA, DINO_CHAR_DATA, DOKI_CHAR_DATA, PACHU_CHAR_DATA, POL_CHAR_DATA, SQUALO_CHAR_DATA
 from essentials.basics import Animation, Entity, ParticlesManager, SFXManager, SpriteSheet
 from essentials.components import AIController, Animator, CharactersHandler, MouseDrag, ParticlesEmitter, PhysicalBall, PlayOnHit, PropDuration, StatesManager, TextBubble
 from essentials.math_custom import Vector2D
@@ -92,6 +92,19 @@ POL_PREFAB = Entity(
         npc_state_manager,
         text_bubble,
         CharactersHandler([POL_CHAR_DATA]),
+        play_on_hit_comp
+    ]
+)
+DOKI_PREFAB = Entity(
+    name=f'doki',
+    components= [
+        PhysicalBall(radius=30, air_resist=0.0005, mass=1.1, retention_y=0.45),
+        mouse_drag,
+        animator_comp,  # sleeping WIP
+        aic_comp,
+        npc_state_manager,
+        text_bubble,
+        CharactersHandler([DOKI_CHAR_DATA]),
         play_on_hit_comp
     ]
 )
@@ -206,6 +219,7 @@ ALL_PREFABS = {
     'cuchu': CUCHU_PREFAB,
     'pachu': PACHU_PREFAB,
     'pol': POL_PREFAB,
+    'doki': DOKI_PREFAB,
     'squalo': SQUALO_PREFAB,
     'dino': DINO_PREFAB,
     'popcorn bucket': POPCORN_PREFAB,
