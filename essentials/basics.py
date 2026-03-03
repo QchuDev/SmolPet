@@ -439,7 +439,8 @@ class ParticlesManager:
         'popcorn': temp_texture[4:8],
         'heart': temp_texture[8:12],
         'chocolate': temp_texture[12:16],
-        'popcorn_break': temp_texture[16:20]
+        'popcorn_break': temp_texture[16:20],
+        'tiramisu_break': temp_texture[20:24]
     }
 
     # add to the particles array the new particles to be rendered by the draw()

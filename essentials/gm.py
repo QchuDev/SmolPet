@@ -116,10 +116,18 @@ class GameManager:
 
         for n, a in cls.SEARCH_KEYWORDS.items():
             if shared_state['last_search'] in a and n not in cls.unlocked_entites:
-                new_entity = prefabs.create_entity(n, SCREEN_W*0.144, SCREEN_H*0.141)
-                cls.unlocked_entites.append(n)
-                World.entities.append(new_entity)
-        
+                if n == 'balloon':
+                    ammount = 10
+                    balloons = [prefabs.create_entity(n, SCREEN_W*random.uniform(0.2, 0.8), SCREEN_H*random.uniform(0.14, 0.5)) for i in range(ammount)]
+                    cls.unlocked_entites.append(n)
+                    for b in balloons:
+                        World.entities.append(b) 
+
+                else:
+                    new_entity = prefabs.create_entity(n, SCREEN_W*0.144, SCREEN_H*0.141)
+
+                    cls.unlocked_entites.append(n)
+                    World.entities.append(new_entity)
         
         # when watching a movie or somethin
         if shared_state['is_watching_ytvideo'] or shared_state['is_watching_movie']:

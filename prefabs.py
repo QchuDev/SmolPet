@@ -13,10 +13,10 @@ POPCORN_PRTS =  ['popcorn', 0.8,    8,      3,      0.2     ]
 SPARK_PRTS =    ['spark',   2,    8,      3,      0       ]
 HEART_PRTS =    ['heart',   0.8,    8,      3,      -0.05   ]
 CHOCOLATE_PRTS =['chocolate',  0.8,    8,      3,      0.2 ]
-EXTRA_CHOCOLATE_PRTS =['chocolate',  0.8,    20,      4,      0.2 ]
 
-POPCORN_BREAK_PRTS = ['popcorn_break', 0.8,    8,      3,      0.2     ]
-CHOCOLATE_BREAK_PRTS = ['popcorn_break', 0.8,    8,      3,      0.2     ]
+EXTRA_CHOCOLATE_PRTS =['chocolate',  0.8,    20,      4,       0.05 ]
+POPCORN_BREAK_PRTS = ['popcorn_break', 0.8,    8,      3,       0.05     ]
+CHOCOLATE_BREAK_PRTS = ['tiramisu_break', 0.8,    8,      4,      0.05     ]
 
 # ENTITY PREFABS ================================================================================================================================================================
 # NPC ANIMATIONS
@@ -39,17 +39,19 @@ PROP_ANIMATIONS = [
 play_on_hit_comp = PlayOnHit()
 animator_comp = Animator(anims = NPC_ANIMATIONS)
 aic_comp = AIController(timer_range=(0.5, 2))
-
+mouse_drag = MouseDrag()
+npc_state_manager = StatesManager(NPC_STATES)
+text_bubble =  TextBubble()
 # CHARACTERS
 BOBBY_PREFAB = Entity(
     name=f'bobby',
     components= [
         PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
-        MouseDrag(),
+        mouse_drag,
         animator_comp,  # sleeping WIP
         aic_comp,
-        StatesManager(NPC_STATES),
-        TextBubble(),
+        npc_state_manager,
+        text_bubble,
         CharactersHandler([BOBBY_CHAR_DATA]),
         play_on_hit_comp
     ]
@@ -58,11 +60,11 @@ CUCHU_PREFAB = Entity(
     name=f'cuchu',
     components= [
         PhysicalBall(radius=30, air_resist=0.0005, mass=1.4, retention_y=0.45),
-        MouseDrag(),
+        mouse_drag,
         animator_comp,  # sleeping WIP
         aic_comp,
-        StatesManager(NPC_STATES),
-        TextBubble(),
+        npc_state_manager,
+        text_bubble,
         CharactersHandler([CUCHU_CHAR_DATA]),
         play_on_hit_comp
     ]
@@ -71,11 +73,11 @@ PACHU_PREFAB = Entity(
     name=f'pachu',
     components= [
         PhysicalBall(radius=30, air_resist=0.0005, mass=1.3, retention_y=0.45),
-        MouseDrag(),
+        mouse_drag,
         animator_comp,  # sleeping WIP
         aic_comp,
-        StatesManager(NPC_STATES),
-        TextBubble(),
+        npc_state_manager,
+        text_bubble,
         CharactersHandler([PACHU_CHAR_DATA]),
         play_on_hit_comp
     ]
@@ -84,11 +86,11 @@ POL_PREFAB = Entity(
     name=f'pol',
     components= [
         PhysicalBall(radius=30, air_resist=0.0005, mass=1.1, retention_y=0.45),
-        MouseDrag(),
+        mouse_drag,
         animator_comp,  # sleeping WIP
         aic_comp,
-        StatesManager(NPC_STATES),
-        TextBubble(),
+        npc_state_manager,
+        text_bubble,
         CharactersHandler([POL_CHAR_DATA]),
         play_on_hit_comp
     ]
@@ -97,11 +99,11 @@ SQUALO_PREFAB = Entity(
     name=f'squalo',
     components= [
         PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
-        MouseDrag(),
+        mouse_drag,
         animator_comp,  # sleeping WIP
         aic_comp,
-        StatesManager(NPC_STATES),
-        TextBubble(),
+        npc_state_manager,
+        text_bubble,
         CharactersHandler([SQUALO_CHAR_DATA]),
         play_on_hit_comp
     ]
@@ -110,11 +112,11 @@ DINO_PREFAB = Entity(
     name=f'dino',
     components= [
         PhysicalBall(radius=30, air_resist=0.0005, mass=1, retention_y=0.45),
-        MouseDrag(),
+        mouse_drag,
         animator_comp,  # sleeping WIP
         aic_comp,
-        StatesManager(NPC_STATES),
-        TextBubble(),
+        npc_state_manager,
+        text_bubble,
         CharactersHandler([DINO_CHAR_DATA]),
         play_on_hit_comp
     ]
@@ -125,7 +127,7 @@ POPCORN_PREFAB = Entity(
     name='popcorn bucket',
     components= [
         PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.3, directed=False),
-        MouseDrag(),
+        mouse_drag,
         ParticlesEmitter(POPCORN_PRTS, 'in_hit', offset= (0, -2)),
         Animator(SpriteSheet('resources/images/popcorn_bucket_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES),
@@ -138,7 +140,7 @@ TIRAMISU_PREFAB = Entity(
     name='tiramisu',
     components= [
         PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.2, directed=False),
-        MouseDrag(),
+        mouse_drag,
         ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -2)),
         Animator(SpriteSheet('resources/images/tiramisu_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES),
@@ -151,7 +153,7 @@ POOP_PREFAB = Entity(
     name='poop',
     components= [
         PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.2, directed=False),
-        MouseDrag(),
+        mouse_drag,
         ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -1)),
         Animator(SpriteSheet('resources/images/poop_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES),
@@ -166,7 +168,7 @@ RED_BALLOON_PREFAB = Entity(
     name='red balloon',
     components= [
         balloon_phys,
-        MouseDrag(),
+        mouse_drag,
         Animator(SpriteSheet(f'resources/images/balloons/balloon0_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES)
     ]
@@ -175,7 +177,7 @@ BLUE_BALLOON_PREFAB = Entity(
     name='blue balloon',
     components= [
         balloon_phys,
-        MouseDrag(),
+        mouse_drag,
         Animator(SpriteSheet(f'resources/images/balloons/balloon1_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES)
     ]
@@ -184,7 +186,7 @@ YELLOW_BALLOON_PREFAB = Entity(
     name='yellow balloon',
     components= [
         balloon_phys,
-        MouseDrag(),
+        mouse_drag,
         Animator(SpriteSheet(f'resources/images/balloons/balloon2_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES)
     ]
@@ -193,7 +195,7 @@ GREEN_BALLOON_PREFAB = Entity(
     name='green balloon',
     components= [
         balloon_phys,
-        MouseDrag(),
+        mouse_drag,
         Animator(SpriteSheet(f'resources/images/balloons/balloon3_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES)
     ]
