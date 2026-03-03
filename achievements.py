@@ -50,7 +50,7 @@ ALL_ACHIEVEMENTS = {
     ],
     'La familia reunida':   [
         False, 
-        lambda: all(GameManager.is_unlocked(a) for a in ['dino', 'squalo', 'cuchu', 'pachu', 'pol']), 
+        lambda: all(GameManager.is_unlocked(a) for a in ['dino', 'squalo', 'cuchu', 'pachu', 'pol', 'doki']), 
         'Desbloquea todos los Minis',
         (48,16)
     ],
@@ -131,6 +131,12 @@ ALL_ACHIEVEMENTS = {
         lambda: all(GameManager.is_unlocked(name) for name in ['pol', 'doki']), 
         'Desbloquea a tus cachorros',
         (0,80)
+    ],
+    'De 3 kilos':               [
+        False, 
+        lambda: GameManager.is_unlocked('coke'), 
+        'Desbloquea la coca obesa',
+        (16,80)
     ],
 
 

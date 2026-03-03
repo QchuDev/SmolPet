@@ -111,9 +111,10 @@ class GameManager:
         'cuchu':    ['cuchu', 'novio', 'autista', 'lindo' 'ñoño', 'melo', 'bombon', 'piojito'],
         'pol' :     ['pol', 'cachorro', 'bebe', 'carboncito', 'coquito', 'pulguita'],
         'doki' :     ['doki', 'perro', 'gordito', 'fofo'],
-        'tiramisu': ['tiramisu', 'torta', 'postre'],
+        'tiramisu': ['tiramisu', 'torta', 'postre', 'rico'],
         'balloon' : ['globo', 'globos', 'fiesta'],
-        'poop':     ['caca', 'popo', 'sorete']
+        'poop':     ['caca', 'popo', 'sorete'],
+        'coke':     ['coca', 'coca cola', 'gaseosa', 'delicia', 'manjar']
     }
 
     start_video = True

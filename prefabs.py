@@ -142,7 +142,7 @@ POPCORN_PREFAB = Entity(
         PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.3, directed=False),
         mouse_drag,
         ParticlesEmitter(POPCORN_PRTS, 'in_hit', offset= (0, -2)),
-        Animator(SpriteSheet('resources/images/popcorn_bucket_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
+        Animator(SpriteSheet('resources/images/props/popcorn_bucket_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES),
         PropDuration(7, POPCORN_BREAK_PRTS),
         play_on_hit_comp
@@ -155,7 +155,7 @@ TIRAMISU_PREFAB = Entity(
         PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.2, directed=False),
         mouse_drag,
         ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -2)),
-        Animator(SpriteSheet('resources/images/tiramisu_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
+        Animator(SpriteSheet('resources/images/props/tiramisu_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES),
         PropDuration(6,CHOCOLATE_BREAK_PRTS),
         play_on_hit_comp
@@ -168,15 +168,27 @@ POOP_PREFAB = Entity(
         PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.2, directed=False),
         mouse_drag,
         ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -1)),
-        Animator(SpriteSheet('resources/images/poop_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
+        Animator(SpriteSheet('resources/images/props/poop_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES),
         PropDuration(3,EXTRA_CHOCOLATE_PRTS),
         play_on_hit_comp
     ]
 )
 
-balloon_phys = PhysicalBall(radius=15, air_resist=0.005, mass=1, retention_y=0.6, grav_scale=0.02, directed=False)
+COKE_PREFAB = Entity( 
+    name='coke',
+    components= [
+        PhysicalBall(radius=30, air_resist=0.0005, mass=1.1, retention_y=0.3, directed=False),
+        mouse_drag,
+        ParticlesEmitter(POPCORN_PRTS, 'in_hit', offset= (0, -2)),
+        Animator(SpriteSheet('resources/images/props/coke_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
+        StatesManager(PROP_STATES),
+        PropDuration(12, POPCORN_BREAK_PRTS),
+        play_on_hit_comp
+    ]
+)
 
+balloon_phys = PhysicalBall(radius=15, air_resist=0.005, mass=1, retention_y=0.6, grav_scale=0.02, directed=False)
 RED_BALLOON_PREFAB = Entity( 
     name='red balloon',
     components= [
@@ -228,7 +240,8 @@ ALL_PREFABS = {
     'blue balloon': BLUE_BALLOON_PREFAB,
     'yellow balloon': YELLOW_BALLOON_PREFAB,
     'green balloon': GREEN_BALLOON_PREFAB,
-    'poop': POOP_PREFAB
+    'poop': POOP_PREFAB,
+    'coke': COKE_PREFAB
 }
 
 # Creates the entity at posistion x,y with a vfx
