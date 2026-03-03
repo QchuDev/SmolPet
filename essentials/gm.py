@@ -100,9 +100,9 @@ class GameManager:
     SEARCH_KEYWORDS = {
         'dino':     ['dino', 'dinosaurio', 't-rex'],
         'squalo':   ['squalo', 'tiburon', 'shark', 'pez', 'fish'],
-        'pachu':    ['pachu', 'yo', 'bombon'],
-        'cuchu':    ['cuchu', 'novio', 'autista', 'lindo' 'ñoño'],
-        'pol' :     ['pol', 'perro', 'bebe', 'carboncito', 'coquito'],
+        'pachu':    ['pachu', 'yo', 'bombonita', 'sexy'],
+        'cuchu':    ['cuchu', 'novio', 'autista', 'lindo' 'ñoño', 'melo', 'bombon', 'piojito'],
+        'pol' :     ['pol', 'perro', 'bebe', 'carboncito', 'coquito', 'pulguita'],
         'tiramisu': ['tiramisu', 'torta', 'postre'],
         'balloon' : ['globo', 'globos', 'fiesta'],
         'poop':     ['caca', 'popo', 'sorete']

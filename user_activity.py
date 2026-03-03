@@ -42,7 +42,7 @@ def monitor_system(state):
         
         # Aumentamos el tiempo a 3 segundos. 
         # Para una mascota virtual, no necesitas precisión de milisegundos.
-        time.sleep(10)
+        time.sleep(5)
         
 shared_state = {
     "is_watching_video": False,
