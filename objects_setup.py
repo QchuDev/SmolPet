@@ -3,7 +3,7 @@ import pygame
 from pygame import Rect
 from pygame._sdl2 import Texture
 from essentials.basics import PersistenceManager, UIElement, ParticlesManager, UIManager, World
-from essentials.components import AchievementCycle, Animator, Button, QuitOnClick, StatesManager
+from essentials.components import AchievementCycle, Animator, Button, QuitOnClick, StatesManager, ToggleMuteOnClick
 from essentials.gm import GameManager
 from essentials.math_custom import Vector2D
 from essentials.window_setup import RENDERER,SCREEN_W,SCREEN_H
@@ -38,7 +38,6 @@ def initial_entities() -> None:
             World.entities.append(new_ent)
             GameManager.unlocked_entites.append(prefab_name)
         GameManager.t_played = save_data['time_played']
-        print(f'Tiempo jugado: {GameManager.t_played}')
 
     else:
         # Because we dont have save data is our first time
@@ -54,21 +53,46 @@ def initial_ui():
     # entities array
     ui_elems = []
 
+    
+
+    buttons_surface = pygame.image.load('resources/images/ui/buttons_16.png')
+    button_texture  = Texture.from_surface(RENDERER, buttons_surface)
     # quit button
-    qbutton_surface = pygame.image.load('resources/images/ui/buttons_16.png')
     quit_button = UIElement(
         name='quit button',
-        texture=Texture.from_surface(RENDERER, qbutton_surface),
+        texture=button_texture,
+        source_area=Rect(0,0,16,16),
         rect=Rect(0,0,32,32),
         ui_components=[
             Button(click_radius=20),
             QuitOnClick()
         ]
     )
-    quit_button.pos.x, quit_button.pos.y  = SCREEN_W - 42, 42
     ui_elems.append(quit_button)
+    
+    # mute button
+    mute_button = UIElement(
+        name='mute button',
+        texture=button_texture,
+        source_area=Rect(0, 32, 16, 16),
+        rect=Rect(0,0,32,32),
+        ui_components=[
+            Button(click_radius=20, pressed_rect=Rect(16,32,16,16), not_pressed_rect=Rect(0,32,16,16)),
+            ToggleMuteOnClick()
+        ]
+    )
+    ui_elems.append(mute_button)
+
+    mx,my = 0.98, 0.1
+
+    quit_button.pos =Vector2D(SCREEN_W*mx, SCREEN_H*my)
+    mute_button.pos =Vector2D(SCREEN_W*(mx-0.02), SCREEN_H*my)
 
 
+    # the UIElement which is in charge of showing the buttons inside it
+    slide_panel = UIElement(
+        name='slide panel'
+    )
 
     # The UIElement in charge of showing the achievements
     achievements_displayer = AchievementCycle(scale=3)

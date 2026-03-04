@@ -789,6 +789,48 @@ class QuitOnClick(UIComponent, Listener):
         from essentials.gm import GameManager
         GameManager.running = False
 
+class ToggleMuteOnClick(UIComponent, Listener):
+    def __init__(self) -> None:
+        self.button:Button|None = None
+
+    def start(self, ui_element: UIElement):
+        super().start(ui_element)
+        e_button = self.parent.get_component(Button)
+        if not e_button:
+            raise Exception(f"{self.parent.name}: Has not a Button Component. It's required if using {self.__class__.__name__}")
+        self.button = e_button
+
+        self.button.listeners.append(self)
+
+    def hear(self):
+        import game_consts
+        game_consts.SFX_VOLUME = 1 if game_consts.SFX_VOLUME == 0 else 0
+        if self.button:
+            if game_consts.SFX_VOLUME == 1:
+                self.button.pressed_rect = Rect(16,32,16,16)
+                self.button.not_pressed_rect = Rect(0,32,16,16)
+            else:
+                self.button.pressed_rect = Rect(16,48,16,16)
+                self.button.not_pressed_rect = Rect(0,48,16,16)
+
+class ToggleAchievementsOnClick(UIComponent, Listener):
+    def __init__(self, progress_panel) -> None:
+        self.button:Button|None = None
+        self.progress_panel = UIElement()
+
+    def start(self, ui_element: UIElement):
+        super().start(ui_element)
+        e_button = self.parent.get_component(Button)
+        if not e_button:
+            raise Exception(f"{self.parent.name}: Has not a Button Component. It's required if using {self.__class__.__name__}")
+        self.button = e_button
+
+        self.button.listeners.append(self)
+
+    def hear(self):
+        from game_consts import SFX_VOLUME
+        SFX_VOLUME = 1 if SFX_VOLUME == 0 else 0
+
 # =====================================================================================
 #                                   W.I.P                                
 # =====================================================================================

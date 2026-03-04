@@ -152,7 +152,6 @@ ALL_ACHIEVEMENTS = {
     ],
 
 
-
 }
 
 GameManager.total_achievements = len(ALL_ACHIEVEMENTS)

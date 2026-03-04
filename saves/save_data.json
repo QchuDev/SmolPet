@@ -11,7 +11,7 @@
         "La familia reunida": false,
         "Donde surgio...?": false,
         "Dulce o Salado?": false,
-        "Diu": false,
+        "Diu": true,
         "FIESTAA": false,
         "Aprendiendo juntos": false,
         "Hora de la siesta": false,
@@ -22,9 +22,9 @@
         "No me revolees": false,
         "Mi pulguita OG": false,
         "Paw Patrol": false,
-        "De 3 kilos": false,
+        "De 3 kilos": true,
         "Elixir de vida": false,
         "Viejita": false
     },
-    "time_played": 12
+    "time_played": 90
 }

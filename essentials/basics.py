@@ -315,10 +315,12 @@ class UIElement():
             ui_c.start(self)
 
     def update(self, dt:float):
+        if not self.show: return
         for ui_c in self.components:
             ui_c.update(dt)
 
     def draw(self):
+        if not self.show: return
         if self.texture: 
             dest_rect = Rect(*self.pos, *self.size)
             RENDERER.blit(self.texture, dest_rect, self.source_area)
