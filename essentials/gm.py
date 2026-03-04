@@ -1,11 +1,9 @@
 import random
-
 from essentials import components
 from essentials.basics import ParticlesManager, SFXManager, World
 from essentials.components import AIController, AchievementCycle, CharactersHandler, MouseDrag, create_paragraph_texture
 from essentials.window_setup import RENDERER, SCREEN_H, SCREEN_W
 from pygame._sdl2 import Texture
-
 import prefabs
 
 class GameManager:
@@ -14,7 +12,6 @@ class GameManager:
     running = True
     unlocked_entites = []
     game_completed = False
-
     _tick = 0
     _tick_speed = 120  # _tick_speed = 60 ticks/sec * (wait ammount)
 
@@ -35,7 +32,7 @@ class GameManager:
     def update(cls):
         cls._tick += 1
 
-        if cls._tick == 60:
+        if cls._tick == 40:
             cls.check_user_activity()
         elif cls._tick == 80:
             for i, e in enumerate(World.entities):

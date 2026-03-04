@@ -1,0 +1,32 @@
+{
+    "entities": [
+        {
+            "name": "pol"
+        }
+    ],
+    "achievements": {
+        "UN VIRUS?!?": true,
+        "Lo pario Cuchu?": false,
+        "Tiburon? Perro?": false,
+        "Los hermanitos": false,
+        "Mi novio melo": false,
+        "Soy yo, soy yo": false,
+        "Carboncito": true,
+        "La familia reunida": false,
+        "Donde surgio...?": false,
+        "Dulce o Salado?": false,
+        "Diu": false,
+        "FIESTAA": false,
+        "Aprendiendo juntos": false,
+        "Hora de la siesta": false,
+        "ABSOLUTE CINEMA": false,
+        "KUCHAU!": false,
+        "BOOOM!": false,
+        "Gran Maestra": false,
+        "No me revolees": true,
+        "Mi pulguita OG": false,
+        "Paw Patrol": false,
+        "De 3 kilos": false,
+        "Elixir de vida": false
+    }
+}
