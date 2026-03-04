@@ -705,6 +705,48 @@ class Button(UIComponent):
         if not is_click_held:
             self.click_down = False
 
+class HoverDetect(UIComponent):
+    
+    def __init__(self, hover_radius:float=128) -> None:
+        self.hover_radius:float = max(1, hover_radius)
+        self.is_on_top: bool = False
+        self.just_left: bool = True
+        self.listeners: list[Listener] = []
+
+    def update(self, dt:float):
+        center:Vector2D = self.parent.pos + Vector2D(16,16) # offset to center the radius
+        is_close = center.distance(MouseInput.pos) < self.hover_radius
+
+        # If pressed while inside
+        if is_close:
+            if not self.is_on_top:
+                for l in self.listeners:
+                    l.hear()
+            self.just_left = False
+            self.is_on_top = True
+        else:
+            if not self.just_left:
+                for l in self.listeners:
+                    l.hear()
+            self.is_on_top = False
+            self.just_left = True
+
+class SlideWith(UIComponent):
+    def __init__(self, attached_elements:list[UIElement]) -> None:
+        super().__init__()
+        self.att_ee: list[UIElement] = attached_elements
+        self.dist_ee: list[Vector2D] = []
+
+    def start(self, ui_element: UIElement):
+        super().start(ui_element)
+        self.dist_ee: list[Vector2D] = [a.pos-self.parent.pos for a in self.att_ee]
+
+    
+    def update(self, dt: float):
+        for i in range(min(len(self.att_ee), len(self.dist_ee))):
+            self.att_ee[i].pos = self.parent.pos + self.dist_ee[i]
+
+
 global achievements_icons
 achievements_icons: Texture = Texture.from_surface(RENDERER, pygame.image.load('resources/images/ui/achievement_icons.png'))
 global base_achievement
@@ -815,7 +857,6 @@ class ToggleMuteOnClick(UIComponent, Listener):
 
 class ToggleAchievementsOnClick(UIComponent, Listener):
     def __init__(self, progress_panel) -> None:
-        self.button:Button|None = None
         self.progress_panel = UIElement()
 
     def start(self, ui_element: UIElement):
@@ -823,13 +864,37 @@ class ToggleAchievementsOnClick(UIComponent, Listener):
         e_button = self.parent.get_component(Button)
         if not e_button:
             raise Exception(f"{self.parent.name}: Has not a Button Component. It's required if using {self.__class__.__name__}")
-        self.button = e_button
-
-        self.button.listeners.append(self)
+        e_button.listeners.append(self)
 
     def hear(self):
-        from game_consts import SFX_VOLUME
-        SFX_VOLUME = 1 if SFX_VOLUME == 0 else 0
+        self.progress_panel.show = False if self.progress_panel.show else True
+        print(f'Showing: {self.progress_panel.show}')
+
+class SlideOut(UIComponent, Listener):
+    def __init__(self, pos_a:Vector2D, pos_b:Vector2D, slide_time:float = 1.6) -> None:
+        self.pos_a = pos_a
+        self.pos_b = pos_b
+        self.next_pos = pos_a
+        self.slide_time = slide_time
+        self.t = 0 
+
+    # append to listeners
+    def start(self, ui_element: UIElement):
+        super().start(ui_element)
+        e_hoverD = self.parent.get_component(HoverDetect)
+        if not e_hoverD:
+            raise Exception(f"{self.parent.name}: Has not a HoverDetector Component. It's required if using {self.__class__.__name__}")
+        e_hoverD.listeners.append(self)
+
+    def hear(self):
+        self.next_pos = self.pos_a if self.next_pos != self.pos_a else self.pos_b
+        self.t = 0
+
+    def update(self, dt: float):
+        if self.slide_time > self.t:
+            self.parent.pos += (self.next_pos - self.parent.pos)*(self.t)**2
+            self.t += dt
+
 
 # =====================================================================================
 #                                   W.I.P                                

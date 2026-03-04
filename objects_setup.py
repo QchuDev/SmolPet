@@ -3,7 +3,7 @@ import pygame
 from pygame import Rect
 from pygame._sdl2 import Texture
 from essentials.basics import PersistenceManager, UIElement, ParticlesManager, UIManager, World
-from essentials.components import AchievementCycle, Animator, Button, QuitOnClick, StatesManager, ToggleMuteOnClick
+from essentials.components import AchievementCycle, Animator, Button, HoverDetect, QuitOnClick, SlideOut, SlideWith, StatesManager, ToggleAchievementsOnClick, ToggleMuteOnClick
 from essentials.gm import GameManager
 from essentials.math_custom import Vector2D
 from essentials.window_setup import RENDERER,SCREEN_W,SCREEN_H
@@ -53,8 +53,6 @@ def initial_ui():
     # entities array
     ui_elems = []
 
-    
-
     buttons_surface = pygame.image.load('resources/images/ui/buttons_16.png')
     button_texture  = Texture.from_surface(RENDERER, buttons_surface)
     # quit button
@@ -68,7 +66,6 @@ def initial_ui():
             QuitOnClick()
         ]
     )
-    ui_elems.append(quit_button)
     
     # mute button
     mute_button = UIElement(
@@ -81,18 +78,54 @@ def initial_ui():
             ToggleMuteOnClick()
         ]
     )
-    ui_elems.append(mute_button)
 
+    progress_panel = UIElement(
+        name='progress panel'
+    )
+    # progress button toggles -> ON and OFF the progress panel
+    progress_button = UIElement(
+        name='progress button',
+        texture=button_texture,
+        source_area=Rect(0, 16, 16, 16),
+        rect=Rect(0,0,32,32),
+        ui_components=[
+            Button(click_radius=20, pressed_rect=Rect(16,16,16,16), not_pressed_rect=Rect(0,16,16,16)),
+            ToggleAchievementsOnClick(progress_panel)
+        ]
+    )
+
+    
     mx,my = 0.98, 0.1
-
     quit_button.pos =Vector2D(SCREEN_W*mx, SCREEN_H*my)
     mute_button.pos =Vector2D(SCREEN_W*(mx-0.02), SCREEN_H*my)
+    progress_button.pos =Vector2D(SCREEN_W*(mx-0.04), SCREEN_H*my)
 
-
+    slider_surface = pygame.image.load('resources/images/ui/slide_panel.png')
+    slider_texture  = Texture.from_surface(RENDERER, slider_surface)
     # the UIElement which is in charge of showing the buttons inside it
-    slide_panel = UIElement(
-        name='slide panel'
+    buttons_slider = UIElement(
+        name='buttons slider',
+        texture=slider_texture,
+        rect=Rect(0,0,slider_texture.width*2,slider_texture.height*2),
+        source_area=Rect(0,0,slider_texture.width,slider_texture.height),
+        ui_components=[
+            SlideWith([quit_button, mute_button, progress_button]),
+            HoverDetect(),
+            SlideOut(pos_a=Vector2D(SCREEN_W*(mx+0.01), SCREEN_H*my), pos_b=Vector2D(SCREEN_W*(mx-0.05), SCREEN_H*my))
+        ]
     )
+    buttons_slider.pos = Vector2D(SCREEN_W*(mx-0.05), SCREEN_H*my)
+
+    # order of draw, remember
+    ui_elems.append(buttons_slider)
+    ui_elems.append(quit_button)
+    ui_elems.append(mute_button)
+    ui_elems.append(progress_button)
+
+
+    
+
+
 
     # The UIElement in charge of showing the achievements
     achievements_displayer = AchievementCycle(scale=3)
