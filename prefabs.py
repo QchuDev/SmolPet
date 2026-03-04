@@ -191,7 +191,7 @@ COKE_PREFAB = Entity(
 COFFEE_PREFAB = Entity( 
     name='coffee',
     components= [
-        PhysicalBall(radius=30, air_resist=0.0005, mass=1.1, retention_y=0.3, directed=False),
+        PhysicalBall(radius=30, air_resist=0.0005, mass=1.1, retention_y=0.3),
         mouse_drag,
         ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -16)),
         Animator(SpriteSheet('resources/images/props/coffee_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
