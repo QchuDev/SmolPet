@@ -37,6 +37,8 @@ def initial_entities() -> None:
             # Insert it to the main loop
             World.entities.append(new_ent)
             GameManager.unlocked_entites.append(prefab_name)
+        GameManager.t_played = save_data['time_played']
+        print(f'Tiempo jugado: {GameManager.t_played}')
 
     else:
         # Because we dont have save data is our first time

@@ -144,6 +144,12 @@ ALL_ACHIEVEMENTS = {
         'Desbloquea la taza sexi',
         (32,80)
     ],
+    'Viejita':               [
+        False, 
+        lambda: GameManager.t_played > 3600, 
+        'Juega por 1h',
+        (48,80)
+    ],
 
 
 

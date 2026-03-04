@@ -388,9 +388,11 @@ class PersistenceManager:
         from achievements import get_save_data
         achievement_data = get_save_data()
 
+        from .gm import GameManager
         full_data = {
             'entities': entity_data,
-            'achievements': achievement_data
+            'achievements': achievement_data,
+            'time_played': int(GameManager.t_played)
         }
 
         with open(cls.SAVE_FILE, 'w') as f:

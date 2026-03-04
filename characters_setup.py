@@ -18,7 +18,14 @@ pachu_ss = SpriteSheet('resources/images/characters/pachu_16.png', (16,16), scal
 today = datetime.date.today()
 pachus_bd = datetime.date(datetime.datetime.now().year, 3, 6)
 if pachus_bd < datetime.date.today(): pachus_bd = datetime.date(datetime.datetime.now().year+1, 3, 6)
-days_left = (pachus_bd - today).days
+lucas_wedding = datetime.date(datetime.datetime.now().year, 12, 12)
+if lucas_wedding < datetime.date.today(): pachus_bd = datetime.date(datetime.datetime.now().year+1, 3, 6)
+anniversary = datetime.date(datetime.datetime.now().year, 8, 8)
+if anniversary < datetime.date.today(): pachus_bd = datetime.date(datetime.datetime.now().year+1, 3, 6)
+
+days_left_bd = (pachus_bd - today).days
+days_left_wedding = (lucas_wedding - today).days
+days_left_anniversary = (anniversary - today).days
 
 CUCHU_PHRASES = [
     'Te amo <3',
@@ -27,7 +34,7 @@ CUCHU_PHRASES = [
     'Mandame un mensaje a whatsapp',
     'Te puedo ayudar?',
     'Soy tu principe jeje',
-    f'Faltan {days_left} dias para tu cumple!' if days_left > 0 else 'FELIZ CUMPLE AMOR!',
+    f'Faltan {days_left_bd} dias para tu cumple!' if days_left_bd > 0 else 'FELIZ CUMPLE AMOR!',
     'aiiiiiiiiiii',
     ':V',
     'OMG',
@@ -43,7 +50,8 @@ CUCHU_PHRASES = [
     'PaachUUuU PaAchUuuUu',
     'Te morfo <3',
     'Tirameee',
-    'Quiero tiramisu'
+    'Quiero tiramisu',
+    f'Faltan {days_left_anniversary} dias para mi aniversario con Pachu <3'
 ]
 
 BOBBY_PHRASES = [
@@ -65,15 +73,16 @@ DOKI_PHRASES = [
     'Guau Guau', 
     'GUAU', 
     'grr',
-    'guau guaUu (te amo)'
+    'guau guaUu (te amo)',
+    'rawr (soy una masita)'
 ]
 
 SQUALO_PHRASES = [
     'glu glu glu', 
-    'ñam ñam ñam', 
+    'nam nam nam', 
     'mamiii', 
     '?',
-    'gracias por curar mi brazito'
+    'glu glu (gracias por curar mi brazito)'
 ]
 
 DINO_PHRASES = [
@@ -81,17 +90,23 @@ DINO_PHRASES = [
     'nam nam nam', 
     'grrr', 
     'y papi?',
-    'no me gusta el chicle'
+    'rawr (no me gusta el chicle)',
+    'no busques popo jiji',
+    'globos! globos! globos!'
 ]
 
 PACHU_PHRASES = [
-    'Siempre tengo la razón', 
+    'Siempre tengo la razon', 
     'Mmmm... faltan tildes', 
     'Tengo que trabajar', 
     'Mi piojito jsjs',
     'BOOM',
     'Quiero sushi',
-    'Exijo mimos y besos'
+    'Exijo mimos y besos',
+    f'Recorda! Luca y Cami se casan en {days_left_wedding} dias',
+    f'Faltan {days_left_anniversary} dias para mi aniversario con Cuchu <3',
+    'Sexi quien lea esto'
+
 ]
 
 CUCHU_CHAR_DATA = CharacterData(cuchu_ss, 'cuchu', CUCHU_PHRASES)

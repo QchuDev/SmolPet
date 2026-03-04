@@ -7,6 +7,7 @@ from pygame._sdl2 import Texture
 import prefabs
 
 class GameManager:
+    t_played = 0.0
     first_time = False
     # Starting value should be true, if want to play ofc
     running = True
@@ -29,9 +30,10 @@ class GameManager:
 
     # The update method of the class calls funcionts in an interspersed manner
     @classmethod
-    def update(cls):
+    def update(cls, dt:float):
+        cls.t_played += dt
         cls._tick += 1
-
+        
         if cls._tick == 40:
             cls.check_user_activity()
         elif cls._tick == 80:

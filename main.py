@@ -18,6 +18,7 @@ def main():
     dt = 0.01
     dt_phys = 1/60  # once per 60FPS
     accumulator = 0.0
+    time_playing = 0
 
     pygame.mixer.init()
 
@@ -30,7 +31,7 @@ def main():
         dt = max(0.001, min(0.1, dt))
         
         # Update the GameManager
-        GameManager.update()
+        GameManager.update(dt)
 
         # Draw the background
         RENDERER.draw_color = TRANSPARENT_COLOR
@@ -55,7 +56,9 @@ def main():
             u.pos.x, u.pos.y = SCREEN_CENTER.x, SCREEN_CENTER.y
 
             accumulator -= dt_phys
-        
+            
+        time_playing += dt
+
         # DRAWS
         for entity in World.entities:
             entity.draw()       # Draw entities
