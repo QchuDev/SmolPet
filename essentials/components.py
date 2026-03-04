@@ -641,6 +641,7 @@ class PropDuration(Component):
         if self.durability < 1:
             self.parent.active = False
             ParticlesManager.emit(self.parent.pos.x, self.parent.pos.y,*self.breaking_particle)
+            SFXManager.play('break', self.phys.vel.magnitude()/1000)
 
 class PlayOnHit(Component):
     def __init__(self) -> None:

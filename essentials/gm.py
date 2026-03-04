@@ -2,7 +2,7 @@ import random
 
 from essentials import components
 from essentials.basics import ParticlesManager, SFXManager, World
-from essentials.components import AIController, AchievementCycle, MouseDrag, create_paragraph_texture
+from essentials.components import AIController, AchievementCycle, CharactersHandler, MouseDrag, create_paragraph_texture
 from essentials.window_setup import RENDERER, SCREEN_H, SCREEN_W
 from pygame._sdl2 import Texture
 
@@ -110,11 +110,12 @@ class GameManager:
         'pachu':    ['pachu', 'yo', 'bombonita', 'sexy'],
         'cuchu':    ['cuchu', 'novio', 'autista', 'lindo' 'ñoño', 'melo', 'bombon', 'piojito'],
         'pol' :     ['pol', 'cachorro', 'bebe', 'carboncito', 'coquito', 'pulguita'],
-        'doki' :     ['doki', 'perro', 'gordito', 'fofo'],
+        'doki' :    ['doki', 'perro', 'gordito', 'fofo'],
         'tiramisu': ['tiramisu', 'torta', 'postre', 'rico'],
         'balloon' : ['globo', 'globos', 'fiesta'],
         'poop':     ['caca', 'popo', 'sorete'],
-        'coke':     ['coca', 'coca cola', 'gaseosa', 'delicia', 'manjar']
+        'coke':     ['coca', 'coca cola', 'gaseosa', 'delicia', 'manjar'],
+        'coffee':   ['cafe', 'submarino', 'te', 'rico']
     }
 
     start_video = True
@@ -200,7 +201,8 @@ class GameManager:
     def lifting_a_mini(cls) -> bool:
         for e in World.entities:
             md = e.get_component(MouseDrag)
-            if md:
+            ch = e.get_component(CharactersHandler)
+            if md and ch:
                 if md.is_pulling:
                     return True
 

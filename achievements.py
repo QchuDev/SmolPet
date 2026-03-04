@@ -138,6 +138,12 @@ ALL_ACHIEVEMENTS = {
         'Desbloquea la coca obesa',
         (16,80)
     ],
+    'Elixir de vida':               [
+        False, 
+        lambda: GameManager.is_unlocked('coffee'), 
+        'Desbloquea la taza sexi',
+        (32,80)
+    ],
 
 
 

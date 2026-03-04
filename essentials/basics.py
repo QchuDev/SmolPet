@@ -371,7 +371,8 @@ class PersistenceManager:
             'blue balloon',
             'yellow balloon',
             'green balloon',
-            'poop'
+            'poop',
+            'coke'
         ]
         
         for ent in entities:
@@ -416,6 +417,7 @@ class SFXManager:
         'unlock2':          pygame.mixer.Sound('resources/sounds/achievement_unlock_2.wav'),
         'sparks':          pygame.mixer.Sound('resources/sounds/sparks.wav'),
         'hit':          pygame.mixer.Sound('resources/sounds/hit.wav'),
+        'break':          pygame.mixer.Sound('resources/sounds/break.wav'),
     }
 
     @classmethod

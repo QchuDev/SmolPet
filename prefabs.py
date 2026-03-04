@@ -16,7 +16,7 @@ CHOCOLATE_PRTS =['chocolate',  0.8,    8,      3,      0.2 ]
 
 EXTRA_CHOCOLATE_PRTS =['chocolate',  0.8,    20,      4,       0.05 ]
 POPCORN_BREAK_PRTS = ['popcorn_break', 0.8,    8,      3,       0.05     ]
-CHOCOLATE_BREAK_PRTS = ['tiramisu_break', 0.8,    8,      4,      0.05     ]
+TIRAMISU_BREAK_PRTS = ['tiramisu_break', 0.8,    8,      4,      0.05     ]
 
 # ENTITY PREFABS ================================================================================================================================================================
 # NPC ANIMATIONS
@@ -157,7 +157,7 @@ TIRAMISU_PREFAB = Entity(
         ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -2)),
         Animator(SpriteSheet('resources/images/props/tiramisu_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES),
-        PropDuration(6,CHOCOLATE_BREAK_PRTS),
+        PropDuration(6,TIRAMISU_BREAK_PRTS),
         play_on_hit_comp
     ]
 )
@@ -180,10 +180,23 @@ COKE_PREFAB = Entity(
     components= [
         PhysicalBall(radius=30, air_resist=0.0005, mass=1.1, retention_y=0.3, directed=False),
         mouse_drag,
-        ParticlesEmitter(POPCORN_PRTS, 'in_hit', offset= (0, -2)),
+        ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -32)),
         Animator(SpriteSheet('resources/images/props/coke_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
         StatesManager(PROP_STATES),
         PropDuration(12, POPCORN_BREAK_PRTS),
+        play_on_hit_comp
+    ]
+)
+
+COFFEE_PREFAB = Entity( 
+    name='coffee',
+    components= [
+        PhysicalBall(radius=30, air_resist=0.0005, mass=1.1, retention_y=0.3, directed=False),
+        mouse_drag,
+        ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -16)),
+        Animator(SpriteSheet('resources/images/props/coffee_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
+        StatesManager(PROP_STATES),
+        PropDuration(12, TIRAMISU_BREAK_PRTS),
         play_on_hit_comp
     ]
 )
@@ -241,7 +254,8 @@ ALL_PREFABS = {
     'yellow balloon': YELLOW_BALLOON_PREFAB,
     'green balloon': GREEN_BALLOON_PREFAB,
     'poop': POOP_PREFAB,
-    'coke': COKE_PREFAB
+    'coke': COKE_PREFAB,
+    'coffee': COFFEE_PREFAB
 }
 
 # Creates the entity at posistion x,y with a vfx
