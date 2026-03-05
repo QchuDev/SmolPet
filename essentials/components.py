@@ -765,7 +765,7 @@ class ProgressGrid(UIComponent):
         self.h = len(achievements.ALL_ACHIEVEMENTS)//self.w + 1  # always one space more
         self.timer = 0
         self.size = 64
-        self.m_margin = 1.3
+        self.m_margin = 1.12
 
     def start(self, ui_element: UIElement):
         super().start(ui_element)
@@ -793,7 +793,6 @@ class ProgressGrid(UIComponent):
         for n, a in achievements.ALL_ACHIEVEMENTS.items():
             # name, unlocked?, description, uv_icon
             self.cells.append([n, a[0], a[2], a[3]])
-
 
 class AchievementCycle(UIComponent):
     def __init__(self, scale:int = 3) -> None:
