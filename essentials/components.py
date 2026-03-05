@@ -9,11 +9,11 @@ from pygame._sdl2 import Texture
 from essentials.basics import UIElement
 
 # Custom
-from .basics import EntityContext, SFXManager, UIComponent, Listener, Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
+from .basics import EntityContext, SFXManager, UIComponent, Listener, Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager, resource_path
 from .window_setup import RENDERER, SCREEN_W, SCREEN_H, SCREEN_CENTER
 
-from game_consts import GRAVITY, BOUNCE_STOP, JUMP_ACC, SIT_TIME, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
-from game_consts import WAIT_TIME, SLEEP_TIME, TARGET_STOP, ACTION_WEIGHTS
+from game_config.game_consts import GRAVITY, BOUNCE_STOP, JUMP_ACC, SIT_TIME, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
+from game_config.game_consts import WAIT_TIME, SLEEP_TIME, TARGET_STOP, ACTION_WEIGHTS
 
 from .math_custom import Vector2D
 
@@ -313,12 +313,40 @@ class CharactersHandler(Component):
             self.animator.ss = character.ss
             self.ai_controller.phrases = character.phrases           
 
-global pixel_font
-pixel_font = pygame.font.Font("resources/fonts/Minecraft.ttf", 16)
+# Variables globales inicialmente vacías
+# 1. Definimos las variables como None (sin cargarlas aún)
+pixel_font = None
+bubble_sheet = None
+achievement_frames_texture = None
+achievements_icons = None
+achievements_icons_hidden = None
+base_achievement = None
 
-global bubble_sheet
-bubble_sheet: SpriteSheet = SpriteSheet('resources/images/text_bubble.png', (4,4), 4)
+def init_components_resources():
+    """Carga los recursos globales. Llamar después de iniciar el RENDERER en main.py"""
+    global pixel_font, bubble_sheet, achievement_frames_texture
+    global achievements_icons, achievements_icons_hidden, base_achievement
+    
+    # Fuente
+    if pixel_font is None:
+        pixel_font = pygame.font.Font(resource_path("resources/fonts/Minecraft.ttf"), 16)
+    
+    # SpriteSheet
+    if bubble_sheet is None:
+        bubble_sheet = SpriteSheet(resource_path('resources/images/text_bubble.png'))
 
+    # Texturas (Requieren que RENDERER ya exista)
+    if achievement_frames_texture is None:
+        achievement_frames_texture = Texture.from_surface(RENDERER, pygame.image.load(resource_path('resources/images/ui/achievement_frames.png')))
+    
+    if achievements_icons is None:
+        achievements_icons = Texture.from_surface(RENDERER, pygame.image.load(resource_path('resources/images/ui/achievement_icons.png')))
+        
+    if achievements_icons_hidden is None:
+        achievements_icons_hidden = Texture.from_surface(RENDERER, pygame.image.load(resource_path('resources/images/ui/achievement_icons_hidden.png')))
+        
+    if base_achievement is None:
+        base_achievement = Texture.from_surface(RENDERER, pygame.image.load(resource_path('resources/images/ui/achievements_popup.png')))
     
 def text_info(text: str) -> tuple[list[str], str]:
     max_chars = 18 # Aumentado un poco para mejor lectura
@@ -352,13 +380,15 @@ def text_info(text: str) -> tuple[list[str], str]:
 def create_paragraph_texture(text, color=(255, 255, 255)):
     font = pixel_font
     lines, _ = text_info(text)
-    line_surfaces = [font.render(l, False, color) for l in lines]
+    if font:
+        line_surfaces = [font.render(l, False, color) for l in lines]
     
     if not line_surfaces: return None
 
     # Calculamos el tamaño total del párrafo
     w = max(s.get_width() for s in line_surfaces)
-    line_height = font.get_linesize()
+    if font:
+        line_height = font.get_linesize()
     h = line_height * len(line_surfaces)
 
     # Creamos una superficie transparente para "pegar" las líneas
@@ -402,10 +432,12 @@ class TextBubble(Component):
         if not lines: return pygame.Surface((0, 0), pygame.SRCALPHA)
 
         # 1. Render nitido (Sin suavizado para estilo Minecraft)
-        line_surfs = [pixel_font.render(l, False, (0, 0, 0)) for l in lines]
-        max_w = max(s.get_width() for s in line_surfs)
-        line_h = pixel_font.get_linesize()
-        total_h = line_h * len(lines)
+        max_w, total_h = 0, 0
+        if pixel_font:
+            line_surfs = [pixel_font.render(l, False, (0, 0, 0)) for l in lines]
+            max_w = max(s.get_width() for s in line_surfs)
+            line_h = pixel_font.get_linesize()
+            total_h = line_h * len(lines)
 
         s = self.c 
         # Forzamos enteros para evitar el "bleeding" de píxeles
@@ -417,41 +449,42 @@ class TextBubble(Component):
         # PRE-ESCALADO DE PIEZAS: 
         # Escalamos las piezas de 4x4 originales a piezas de SxS (8x8)
         # Esto evita que el 9-slice intente estirar y mover al mismo tiempo
-        p = [pygame.transform.scale(surf, (s, s)) for surf in bubble_sheet.surfaces]
+        if bubble_sheet:
+            p = [pygame.transform.scale(surf, (s, s)) for surf in bubble_sheet.surfaces]
 
-        mid_w = bw - (s * 2)
-        mid_h = bh - (s * 2)
+            mid_w = bw - (s * 2)
+            mid_h = bh - (s * 2)
 
-        # --- ESQUINAS ---
-        bubble_surf.blit(p[0], (0, 0))          # TL
-        bubble_surf.blit(p[2], (bw - s, 0))     # TR
-        bubble_surf.blit(p[6], (0, bh - s))     # BL
-        bubble_surf.blit(p[8], (bw - s, bh - s))# BR
+            # --- ESQUINAS ---
+            bubble_surf.blit(p[0], (0, 0))          # TL
+            bubble_surf.blit(p[2], (bw - s, 0))     # TR
+            bubble_surf.blit(p[6], (0, bh - s))     # BL
+            bubble_surf.blit(p[8], (bw - s, bh - s))# BR
 
-        # --- BORDES ---
-        if mid_w > 0:
-            top = pygame.transform.scale(p[1], (mid_w, s))
-            bottom = pygame.transform.scale(p[7], (mid_w, s))
-            bubble_surf.blit(top, (s, 0))
-            bubble_surf.blit(bottom, (s, bh - s))
+            # --- BORDES ---
+            if mid_w > 0:
+                top = pygame.transform.scale(p[1], (mid_w, s))
+                bottom = pygame.transform.scale(p[7], (mid_w, s))
+                bubble_surf.blit(top, (s, 0))
+                bubble_surf.blit(bottom, (s, bh - s))
 
-        if mid_h > 0:
-            left = pygame.transform.scale(p[3], (s, mid_h))
-            right = pygame.transform.scale(p[5], (s, mid_h))
-            bubble_surf.blit(left, (0, s))
-            bubble_surf.blit(right, (bw - s, s))
+            if mid_h > 0:
+                left = pygame.transform.scale(p[3], (s, mid_h))
+                right = pygame.transform.scale(p[5], (s, mid_h))
+                bubble_surf.blit(left, (0, s))
+                bubble_surf.blit(right, (bw - s, s))
 
-        # --- CENTRO ---
-        if mid_w > 0 and mid_h > 0:
-            center = pygame.transform.scale(p[4], (mid_w, mid_h))
-            bubble_surf.blit(center, (s, s))
+            # --- CENTRO ---
+            if mid_w > 0 and mid_h > 0:
+                center = pygame.transform.scale(p[4], (mid_w, mid_h))
+                bubble_surf.blit(center, (s, s))
 
-        # --- TEXTO (Centrado con corrección visual) ---
-        current_y = (bh - total_h) // 2
-        for surf in line_surfs:
-            text_x = (bw - surf.get_width()) // 2
-            bubble_surf.blit(surf, (text_x, current_y))
-            current_y += line_h
+            # --- TEXTO (Centrado con corrección visual) ---
+            current_y = (bh - total_h) // 2
+            for surf in line_surfs:
+                text_x = (bw - surf.get_width()) // 2
+                bubble_surf.blit(surf, (text_x, current_y))
+                current_y += line_h
 
         return bubble_surf
     
@@ -578,22 +611,6 @@ class AIController(Component):
                     self.parent.facing = 1
                 else: 
                     self.max_time = random.uniform(*self.timer_range)
-
-            case 'open_img':
-                
-                if not self.target_setted:
-                    print('LETS OPEN AN IMAGE!!!')
-                    self.target_x = SCREEN_W-10
-                    self.target_setted = True
-                    self.going_to_open = True
-
-                if self.target_x < self.parent.pos.x:
-                    # Logic to open the image at the corner of the screen 
-                    # 1. Choose an image from the prev list, load it and show it on screen as an Entity
-                    # 2. Activate animation
-                    # 3. Apply a knockback force to the entity
-                    print(f'OPENING IMAGE!!!')
-                    pass
 
             case 'sit':
                 # Timer reset
@@ -747,22 +764,15 @@ class SlideWith(UIComponent):
         for i in range(min(len(self.att_ee), len(self.dist_ee))):
             self.att_ee[i].pos = self.parent.pos + self.dist_ee[i]
 
-achievement_frames_texture = Texture.from_surface(RENDERER, pygame.image.load('resources/images/ui/achievement_frames.png'))
-
-global achievements_icons
-achievements_icons: Texture = Texture.from_surface(RENDERER, pygame.image.load('resources/images/ui/achievement_icons.png'))
-achievements_icons_hidden: Texture = Texture.from_surface(RENDERER, pygame.image.load('resources/images/ui/achievement_icons_hidden.png'))
-global base_achievement
-base_achievement: Texture = Texture.from_surface(RENDERER, pygame.image.load('resources/images/ui/achievements_popup.png'))
 
 
 class ProgressGrid(UIComponent):
     
     def __init__(self) -> None:
-        import achievements
-        self.cells: list[list] = [[n, a[0], a[2], a[3]] for n,a in achievements.ALL_ACHIEVEMENTS.items()]
+        import game_config.achievements
+        self.cells: list[list] = [[n, a[0], a[2], a[3]] for n,a in game_config.achievements.ALL_ACHIEVEMENTS.items()]
         self.w = 3
-        self.h = len(achievements.ALL_ACHIEVEMENTS)//self.w + 1  # always one space more
+        self.h = len(game_config.achievements.ALL_ACHIEVEMENTS)//self.w + 1  # always one space more
         self.timer = 0
         self.size = 64
         self.m_margin = 1.12
@@ -784,11 +794,12 @@ class ProgressGrid(UIComponent):
 
             icons = achievements_icons if c[1] else achievements_icons_hidden
 
-            RENDERER.blit(icons, dest=rect, area=Rect(c[3][0], c[3][1], 16, 16))
-            RENDERER.blit(achievement_frames_texture, dest=rect, area=Rect(18 if c[1] else 0, 0, 18, 18))
+            if icons and achievement_frames_texture:
+                RENDERER.blit(icons, dest=rect, area=Rect(c[3][0], c[3][1], 16, 16))
+                RENDERER.blit(achievement_frames_texture, dest=rect, area=Rect(18 if c[1] else 0, 0, 18, 18))
 
     def update_cells(self):
-        import achievements
+        from game_config import achievements
         self.cells.clear()
         for n, a in achievements.ALL_ACHIEVEMENTS.items():
             # name, unlocked?, description, uv_icon
@@ -833,13 +844,14 @@ class AchievementCycle(UIComponent):
     def draw(self):
         # draws using the data in self.showed_img and achievement_icons
         for im in self.showed_img:
-            RENDERER.blit(base_achievement, dest=Rect(int(im[1]), int(im[2]), base_achievement.width*self.scale, base_achievement.height*self.scale))
-            icon_offset = 12
-            RENDERER.blit(
-                achievements_icons, 
-                dest=Rect(int(im[1]+icon_offset), int(im[2]+icon_offset+6), 16*self.scale, 16*self.scale), 
-                area=Rect(int(im[5][0]), int(im[5][1]), 16, 16)
-            )
+            if base_achievement and achievements_icons:
+                RENDERER.blit(base_achievement, dest=Rect(int(im[1]), int(im[2]), base_achievement.width*self.scale, base_achievement.height*self.scale))
+                icon_offset = 12
+                RENDERER.blit(
+                    achievements_icons, 
+                    dest=Rect(int(im[1]+icon_offset), int(im[2]+icon_offset+6), 16*self.scale, 16*self.scale), 
+                    area=Rect(int(im[5][0]), int(im[5][1]), 16, 16)
+                )
 
             name_text: Texture = im[6]
             desc_text: Texture = im[7]
@@ -887,7 +899,7 @@ class ToggleMuteOnClick(UIComponent, Listener):
         self.button.listeners.append(self)
 
     def hear(self):
-        import game_consts
+        from game_config import game_consts
         game_consts.SFX_VOLUME = 1 if game_consts.SFX_VOLUME == 0 else 0
         if self.button:
             if game_consts.SFX_VOLUME == 1:

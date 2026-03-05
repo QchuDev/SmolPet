@@ -1,5 +1,4 @@
 import ctypes
-from ctypes import wintypes
 import threading
 import time
 

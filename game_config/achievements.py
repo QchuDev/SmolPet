@@ -1,6 +1,6 @@
 
 from essentials.gm import GameManager
-import user_activity
+from . import user_activity
 
 ALL_ACHIEVEMENTS = {
     # REMEMBER TO ADD THE ACHIEVEMENTS AT THE BOTTOM OF THE DICT

@@ -4,7 +4,7 @@ from essentials.basics import ParticlesManager, SFXManager, World
 from essentials.components import AIController, AchievementCycle, CharactersHandler, MouseDrag, create_paragraph_texture
 from essentials.window_setup import RENDERER, SCREEN_H, SCREEN_W
 from pygame._sdl2 import Texture
-import prefabs
+import game_config.prefabs
 
 class GameManager:
     t_played = 0.0
@@ -23,7 +23,7 @@ class GameManager:
 
     @classmethod
     def start(cls):
-        from achievements import ALL_ACHIEVEMENTS
+        from game_config.achievements import ALL_ACHIEVEMENTS
         for n, a in ALL_ACHIEVEMENTS.items():
             if a[0]:
                 cls.unlocked_achievements += 1 
@@ -48,7 +48,7 @@ class GameManager:
     @classmethod
     def check_for_unlocks(cls):
         achievement_left = False
-        from achievements import ALL_ACHIEVEMENTS
+        from game_config.achievements import ALL_ACHIEVEMENTS
         for n, a in ALL_ACHIEVEMENTS.items():
             if a[0]: continue
             if n != 'BOOOM!': achievement_left = True   # CHECK FOR EVERY ACHIEVEMENT, but not itself
@@ -65,7 +65,6 @@ class GameManager:
     def trigger_achievement_unlock(cls, name:str, a: list):
 
         # 1. Feedback en consola (opcional)
-        print(f"DEBUG: Desbloqueado {name}")
         # 2. Si el displayer está vinculado, agregamos la lista de datos
         if cls.achievements_displayer:
             # im = [time_left, x, y, target_x, target_y, (src_x, src_y), name, desc]
@@ -121,19 +120,19 @@ class GameManager:
     @classmethod
     def check_user_activity(cls):
         # Retrieve the shared_state from the user_activity
-        from user_activity import shared_state
+        from game_config.user_activity import shared_state
 
         for n, a in cls.SEARCH_KEYWORDS.items():
             if shared_state['last_search'] in a and n not in cls.unlocked_entites:
                 if n == 'balloon':
                     ammount = 10
-                    balloons = [prefabs.create_entity(n, SCREEN_W*random.uniform(0.2, 0.8), SCREEN_H*random.uniform(0.14, 0.5)) for i in range(ammount)]
+                    balloons = [game_config.prefabs.create_entity(n, SCREEN_W*random.uniform(0.2, 0.8), SCREEN_H*random.uniform(0.14, 0.5)) for i in range(ammount)]
                     cls.unlocked_entites.append(n)
                     for b in balloons:
                         World.entities.append(b) 
 
                 else:
-                    new_entity = prefabs.create_entity(n, SCREEN_W*0.144, SCREEN_H*0.141)
+                    new_entity = game_config.prefabs.create_entity(n, SCREEN_W*0.144, SCREEN_H*0.141)
 
                     cls.unlocked_entites.append(n)
                     World.entities.append(new_entity)
@@ -144,7 +143,7 @@ class GameManager:
                 cls.start_video = True
                 # if missing bucket of popcorn, then spawn it
                 r = random.uniform(0.2, 0.8)
-                popcornb_entity = prefabs.create_entity('popcorn bucket', SCREEN_W*r, SCREEN_H*0.4, push=False)
+                popcornb_entity = game_config.prefabs.create_entity('popcorn bucket', SCREEN_W*r, SCREEN_H*0.4, push=False)
 
                 if 'popcorn bucket' not in cls.unlocked_entites: 
                     cls.unlocked_entites.append('popcorn bucket')
@@ -173,7 +172,7 @@ class GameManager:
         ents = World.entities
 
         from .components import AIController    # imports can be used inside methods to avoid weird dependency loops
-        from characters_setup import CHARACTERS
+        from game_config.characters_setup import CHARACTERS
         count = 0
         for e in ents:
             aic = e.get_component(AIController)

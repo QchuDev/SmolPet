@@ -1,6 +1,4 @@
 from essentials.basics import Transition, State
-from essentials.components import AIController, PhysicalBall, Animator
-from game_consts import SLIDE_STOP, BOUNCE_STOP
 
 
 # Creating the states for the NPCS

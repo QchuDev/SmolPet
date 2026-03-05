@@ -43,6 +43,15 @@ try:
 except:
     pass
 
+
+def resource_path(relative_path):
+    """ Obtiene la ruta absoluta de los recursos, compatible con PyInstaller """
+    try:
+        base_path = sys._MEIPASS # type: ignore
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 # =====================================================================================
 #                               BASIC MANAGERS AND CLASSES
 # =====================================================================================
@@ -360,12 +369,36 @@ class Listener(ABC):
         pass
 
 # Class in charge of saving and loading the data from and to the json file save_data
+import os
+import json
 class PersistenceManager:
-    SAVE_FILE = 'saves/save_data.json'
+    # --- CONFIGURACIÓN DE RUTAS ---
+    # Usamos APPDATA para asegurar permisos de escritura en Windows
+    _appdata_path = os.getenv('APPDATA')
+    if _appdata_path:
+        _game_folder = os.path.join(_appdata_path, 'SmolPet')
+    else:
+        # Plan B: Si no hay AppData, crea una carpeta 'saves' local
+        _game_folder = os.path.join(os.path.abspath("."), 'saves')
+    
+    # Ruta final: C:\Users\Nombre\AppData\Roaming\SmolPet\save_data.json
+    SAVE_FILE = os.path.join(_game_folder, 'save_data.json')
 
     @classmethod
-    def save(cls, entities: list[Entity]):
-        entity_data=[]
+    def _ensure_dir(cls):
+        """Crea la carpeta en AppData si no existe."""
+        if not os.path.exists(cls._game_folder):
+            try:
+                os.makedirs(cls._game_folder)
+            except Exception as e:
+                print(f"Error crítico creando carpeta de guardado: {e}")
+
+    @classmethod
+    def save(cls, entities: list): # Usamos list para evitar errores de importación circular
+        # Nos aseguramos de tener donde escribir
+        cls._ensure_dir()
+            
+        entity_data = []
         skipped_ents = [
             'popcorn bucket', 
             'tiramisu', 
@@ -378,56 +411,78 @@ class PersistenceManager:
         ]
         
         for ent in entities:
-            if ent.name in skipped_ents: continue
+            if ent.name in skipped_ents: 
+                continue
 
-            # We only save the name of the entity for now
-            entity_data.append(
-                {
-                    'name':ent.name
-                }
-            )
+            # Guardamos el estado básico (nombre)
+            entity_data.append({
+                'name': ent.name
+            })
         
-        from achievements import get_save_data
-        achievement_data = get_save_data()
+        # Importaciones locales para evitar dependencias circulares al inicio
+        try:
+            from game_config.achievements import get_save_data
+            achievement_data = get_save_data()
+        except ImportError:
+            achievement_data = {}
 
-        from .gm import GameManager
+        try:
+            from essentials.gm import GameManager
+            t_played = int(GameManager.t_played)
+        except (ImportError, AttributeError):
+            t_played = 0
+
         full_data = {
             'entities': entity_data,
             'achievements': achievement_data,
-            'time_played': int(GameManager.t_played)
+            'time_played': t_played
         }
 
-        with open(cls.SAVE_FILE, 'w') as f:
-            json.dump(full_data, f, indent=4)
-        print(full_data)
-        print()
-        print('Changes saved')
+        # Escritura segura
+        try:
+            with open(cls.SAVE_FILE, 'w') as f:
+                json.dump(full_data, f, indent=4)
+            print(f'--- Cambios guardados en: {cls.SAVE_FILE} ---')
+        except Exception as e:
+            print(f"Error al intentar escribir el archivo de guardado: {e}")
 
     @classmethod
     def load(cls):
+        """Carga los datos desde AppData."""
         if not os.path.exists(cls.SAVE_FILE):
+            print("No existe archivo de guardado previo.")
             return None
+            
         try:
-            with open(cls.SAVE_FILE,'r') as f:
-                return json.load(f)
-        except:
+            with open(cls.SAVE_FILE, 'r') as f:
+                data = json.load(f)
+                print("--- Partida cargada con éxito ---")
+                return data
+        except json.JSONDecodeError:
+            print("Error: El archivo de guardado está corrupto.")
+            return None
+        except Exception as e:
+            print(f"Error inesperado cargando partida: {e}")
             return None
 
 # Class in charge of the sound effects
 class SFXManager:
-    
-    sounds: dict[str, pygame.mixer.Sound] = {
-        'unlock':           pygame.mixer.Sound('resources/sounds/achievement_unlock.wav'),
-        'unlock2':          pygame.mixer.Sound('resources/sounds/achievement_unlock_2.wav'),
-        'sparks':          pygame.mixer.Sound('resources/sounds/sparks.wav'),
-        'hit':          pygame.mixer.Sound('resources/sounds/hit.wav'),
-        'break':          pygame.mixer.Sound('resources/sounds/break.wav'),
-    }
+    sounds: dict[str, pygame.mixer.Sound] = {}
+
+    @classmethod
+    def start(cls):
+        cls.sounds: dict[str, pygame.mixer.Sound] = {
+            'unlock':           pygame.mixer.Sound(resource_path('resources/sounds/achievement_unlock.wav')),
+            'unlock2':          pygame.mixer.Sound(resource_path('resources/sounds/achievement_unlock_2.wav')),
+            'sparks':          pygame.mixer.Sound(resource_path('resources/sounds/sparks.wav')),
+            'hit':          pygame.mixer.Sound(resource_path('resources/sounds/hit.wav')),
+            'break':          pygame.mixer.Sound(resource_path('resources/sounds/break.wav')),
+        }
 
     @classmethod
     def play(cls, sound:str, volume_mult:float = 1):
         if sound in cls.sounds:
-            from game_consts import SFX_VOLUME
+            from game_config.game_consts import SFX_VOLUME
             s = cls.sounds[sound]
             s.set_volume(SFX_VOLUME*volume_mult)
             s.play()
@@ -436,19 +491,26 @@ class SFXManager:
 class ParticlesManager:
     # The states of each particle is represented by: [x,y, vx,vy, lifetime, id, state, accy]
     particles = []
-    textures = Texture.from_surface(RENDERER, pygame.image.load('resources/images/particles_8.png'))
-    ss = SpriteSheet('resources/images/particles_8.png', cell_size=(8,8), scale_factor=4)
-    temp_texture: list[Texture] = ss.right_textures
-    w, h = ss.sprite_w, ss.sprite_h
-    uvs = {
-        'spark': temp_texture[0:4],
-        'popcorn': temp_texture[4:8],
-        'heart': temp_texture[8:12],
-        'chocolate': temp_texture[12:16],
-        'popcorn_break': temp_texture[16:20],
-        'tiramisu_break': temp_texture[20:24]
-    }
+    textures = Texture(RENDERER, [1,1])
+    temp_texture: list[Texture] = []
+    w,h = 0,0
+    uvs = {}
 
+    @classmethod
+    def start(cls):
+        cls.textures = Texture.from_surface(RENDERER, pygame.image.load(resource_path('resources/images/particles_8.png')))
+        ss = SpriteSheet(resource_path('resources/images/particles_8.png'), cell_size=(8,8), scale_factor=4)
+        cls.temp_texture: list[Texture] = ss.right_textures
+        cls.w, cls.h = ss.sprite_w, ss.sprite_h
+        cls.uvs = {
+            'spark': cls.temp_texture[0:4],
+            'popcorn': cls.temp_texture[4:8],
+            'heart': cls.temp_texture[8:12],
+            'chocolate': cls.temp_texture[12:16],
+            'popcorn_break': cls.temp_texture[16:20],
+            'tiramisu_break': cls.temp_texture[20:24]
+        }
+        
     # add to the particles array the new particles to be rendered by the draw()
     @classmethod
     def emit(cls, x,y, particle_type:str, mid_lifetime=1.0, ammount:int=1, force=2.0, accy=0, dir:int = 0):

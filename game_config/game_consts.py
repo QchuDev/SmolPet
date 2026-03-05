@@ -30,6 +30,5 @@ ACTION_WEIGHTS  :dict[str,int] = {
     'move': 40, 
     'wait': 60, 
     'talk': 8, 
-    'open_image': 1,
     'sit': 15
 }

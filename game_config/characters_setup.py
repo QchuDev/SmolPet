@@ -1,18 +1,10 @@
 import datetime
-from essentials.basics import SpriteSheet, CharacterData
+from essentials.basics import SpriteSheet, CharacterData, resource_path
 
 # ===================================================================================================================================
 #                                ALL CHARACTER DATAS
 # ===================================================================================================================================
 
-# Spritesheets
-bobby_ss = SpriteSheet('resources/images/characters/bobby_16.png', (16,16), scale_factor=4)
-cuchu_ss = SpriteSheet('resources/images/characters/cuchu_16.png', (16,16), scale_factor=4)
-pol_ss = SpriteSheet('resources/images/characters/pol_16.png', (16,16), scale_factor=4)
-doki_ss = SpriteSheet('resources/images/characters/doki_16.png', (16,16), scale_factor=4)
-squalo_ss = SpriteSheet('resources/images/characters/squalo_16.png', (16,16), scale_factor=4)
-dino_ss = SpriteSheet('resources/images/characters/dino_16.png', (16,16), scale_factor=4)
-pachu_ss = SpriteSheet('resources/images/characters/pachu_16.png', (16,16), scale_factor=4)
 
 # Phrases 
 today = datetime.date.today()
@@ -109,21 +101,44 @@ PACHU_PHRASES = [
 
 ]
 
-CUCHU_CHAR_DATA = CharacterData(cuchu_ss, 'cuchu', CUCHU_PHRASES)
-BOBBY_CHAR_DATA = CharacterData(bobby_ss, 'bobby', BOBBY_PHRASES)
-PACHU_CHAR_DATA = CharacterData(pachu_ss, 'pachu', PACHU_PHRASES)
-POL_CHAR_DATA = CharacterData(pol_ss, 'pol', POL_PHRASES)
-DOKI_CHAR_DATA = CharacterData(doki_ss, 'doki', DOKI_PHRASES)
-SQUALO_CHAR_DATA = CharacterData(squalo_ss, 'squalo', SQUALO_PHRASES)
-DINO_CHAR_DATA = CharacterData(dino_ss, 'dino', DINO_PHRASES)
 
-# Character DATA
-CHARACTERS: list[CharacterData] = [
-    #BOBBY_CHAR_DATA,
-    CUCHU_CHAR_DATA,
-    POL_CHAR_DATA,
-    SQUALO_CHAR_DATA,
-    DINO_CHAR_DATA,
-    PACHU_CHAR_DATA,
-    DOKI_CHAR_DATA
-]
+CHARACTERS = []
+BOBBY_CHAR_DATA = None
+CUCHU_CHAR_DATA = None
+PACHU_CHAR_DATA = None
+POL_CHAR_DATA = None
+DOKI_CHAR_DATA = None
+SQUALO_CHAR_DATA = None
+DINO_CHAR_DATA = None
+
+def init_characters():
+    global CHARACTERS, BOBBY_CHAR_DATA, CUCHU_CHAR_DATA, PACHU_CHAR_DATA, POL_CHAR_DATA, DOKI_CHAR_DATA, SQUALO_CHAR_DATA, DINO_CHAR_DATA
+    
+    # Spritesheets
+    bobby_ss = SpriteSheet(resource_path('resources/images/characters/bobby_16.png'), (16,16), scale_factor=4)
+    cuchu_ss = SpriteSheet(resource_path('resources/images/characters/cuchu_16.png'), (16,16), scale_factor=4)
+    pol_ss = SpriteSheet(resource_path('resources/images/characters/pol_16.png'), (16,16), scale_factor=4)
+    doki_ss = SpriteSheet(resource_path('resources/images/characters/doki_16.png'), (16,16), scale_factor=4)
+    squalo_ss = SpriteSheet(resource_path('resources/images/characters/squalo_16.png'), (16,16), scale_factor=4)
+    dino_ss = SpriteSheet(resource_path('resources/images/characters/dino_16.png'), (16,16), scale_factor=4)
+    pachu_ss = SpriteSheet(resource_path('resources/images/characters/pachu_16.png'), (16,16), scale_factor=4)
+    
+
+    CUCHU_CHAR_DATA = CharacterData(cuchu_ss, 'cuchu', CUCHU_PHRASES)
+    BOBBY_CHAR_DATA = CharacterData(bobby_ss, 'bobby', BOBBY_PHRASES)
+    PACHU_CHAR_DATA = CharacterData(pachu_ss, 'pachu', PACHU_PHRASES)
+    POL_CHAR_DATA = CharacterData(pol_ss, 'pol', POL_PHRASES)
+    DOKI_CHAR_DATA = CharacterData(doki_ss, 'doki', DOKI_PHRASES)
+    SQUALO_CHAR_DATA = CharacterData(squalo_ss, 'squalo', SQUALO_PHRASES)
+    DINO_CHAR_DATA = CharacterData(dino_ss, 'dino', DINO_PHRASES)
+
+    # Character DATA
+    CHARACTERS = [
+        #BOBBY_CHAR_DATA,
+        CUCHU_CHAR_DATA,
+        POL_CHAR_DATA,
+        SQUALO_CHAR_DATA,
+        DINO_CHAR_DATA,
+        PACHU_CHAR_DATA,
+        DOKI_CHAR_DATA
+    ]

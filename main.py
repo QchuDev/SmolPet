@@ -1,4 +1,8 @@
+from essentials.basics import ParticlesManager, SFXManager
+from essentials.components import init_components_resources
 from essentials.gm import GameManager
+from game_config.characters_setup import init_characters
+from game_config.prefabs import init_prefabs
 
 def main():
     import pygame
@@ -7,10 +11,10 @@ def main():
     from essentials.window_setup import RENDERER, TRANSPARENT_COLOR, FPS, SCREEN_CENTER
     # Setup scripts
     from essentials.debug_tools import monitor
-    import user_activity
+    import game_config.user_activity
 
     # Execute the entities_setup before reading World
-    from objects_setup import prts_manager, persist_manager
+    from game_config.objects_setup import prts_manager, persist_manager
     from essentials.basics import MouseInput, UIManager, World
 
     # Time Variables
@@ -24,6 +28,12 @@ def main():
 
     ## MAIN LOOP ======================================================
     GameManager.start()
+    SFXManager.start()
+    ParticlesManager.start()
+    init_components_resources()
+    init_characters()
+    init_prefabs()
+    
     while GameManager.running:
         # Update delta_time
         dt = clock.tick(FPS) / 1000
@@ -81,16 +91,13 @@ def main():
     persist_manager.save(World.entities)
     pygame.quit()
 
-import cProfile
-import pstats
-
+import traceback
 if __name__ == "__main__":
-    # Ejecuta el juego bajo el microscopio
-    profiler = cProfile.Profile()
-    profiler.enable()
-    
-    main()
-    
-    profiler.disable()
-    stats = pstats.Stats(profiler).sort_stats('cumtime') # Ordenar por tiempo acumulado
-    stats.print_stats(20) # Mostrar las 20 funciones más pesadas
+    try:
+        main()
+    except Exception:
+        # Esto guarda el error en un archivo de texto antes de cerrar
+        with open("ERROR_LOG.txt", "w") as f:
+            f.write(traceback.format_exc())
+        # También lo imprime por si tienes la consola abierta
+        print(traceback.format_exc())

@@ -7,8 +7,7 @@ from essentials.components import AchievementCycle, Animator, Button, HoverDetec
 from essentials.gm import GameManager
 from essentials.math_custom import Vector2D
 from essentials.window_setup import RENDERER,SCREEN_W,SCREEN_H
-from prefabs import ALL_PREFABS
-import prefabs
+from . import prefabs
 
 # Initialize the font
 pygame.font.init()
@@ -125,9 +124,6 @@ def initial_ui():
     ui_elems.append(quit_button)
     ui_elems.append(mute_button)
     ui_elems.append(progress_button)
-
-    
-
 
 
     # The UIElement in charge of showing the achievements
