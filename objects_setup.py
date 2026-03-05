@@ -3,7 +3,7 @@ import pygame
 from pygame import Rect
 from pygame._sdl2 import Texture
 from essentials.basics import PersistenceManager, UIElement, ParticlesManager, UIManager, World
-from essentials.components import AchievementCycle, Animator, Button, HoverDetect, QuitOnClick, SlideOut, SlideWith, StatesManager, ToggleAchievementsOnClick, ToggleMuteOnClick
+from essentials.components import AchievementCycle, Animator, Button, HoverDetect, ProgressGrid, QuitOnClick, SlideOut, SlideWith, StatesManager, ToggleAchievementsOnClick, ToggleMuteOnClick
 from essentials.gm import GameManager
 from essentials.math_custom import Vector2D
 from essentials.window_setup import RENDERER,SCREEN_W,SCREEN_H
@@ -80,7 +80,10 @@ def initial_ui():
     )
 
     progress_panel = UIElement(
-        name='progress panel'
+        name='progress panel',
+        ui_components=[
+            ProgressGrid()
+        ]
     )
     # progress button toggles -> ON and OFF the progress panel
     progress_button = UIElement(
@@ -94,12 +97,8 @@ def initial_ui():
         ]
     )
 
-    
     mx,my = 0.98, 0.1
-    quit_button.pos =Vector2D(SCREEN_W*mx, SCREEN_H*my)
-    mute_button.pos =Vector2D(SCREEN_W*(mx-0.02), SCREEN_H*my)
-    progress_button.pos =Vector2D(SCREEN_W*(mx-0.04), SCREEN_H*my)
-
+    
     slider_surface = pygame.image.load('resources/images/ui/slide_panel.png')
     slider_texture  = Texture.from_surface(RENDERER, slider_surface)
     # the UIElement which is in charge of showing the buttons inside it
@@ -114,14 +113,18 @@ def initial_ui():
             SlideOut(pos_a=Vector2D(SCREEN_W*(mx+0.01), SCREEN_H*my), pos_b=Vector2D(SCREEN_W*(mx-0.05), SCREEN_H*my))
         ]
     )
+    
+    quit_button.pos =Vector2D(SCREEN_W*mx, SCREEN_H*my)
+    mute_button.pos =Vector2D(SCREEN_W*(mx-0.02), SCREEN_H*my)
+    progress_button.pos =Vector2D(SCREEN_W*(mx-0.04), SCREEN_H*my)
     buttons_slider.pos = Vector2D(SCREEN_W*(mx-0.05), SCREEN_H*my)
 
     # order of draw, remember
+    ui_elems.append(progress_panel)
     ui_elems.append(buttons_slider)
     ui_elems.append(quit_button)
     ui_elems.append(mute_button)
     ui_elems.append(progress_button)
-
 
     
 

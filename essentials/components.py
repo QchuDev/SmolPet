@@ -707,15 +707,16 @@ class Button(UIComponent):
 
 class HoverDetect(UIComponent):
     
-    def __init__(self, hover_radius:float=128) -> None:
-        self.hover_radius:float = max(1, hover_radius)
+    def __init__(self, x_detection:float=128, y_detection:float=128) -> None:
+        self.x_detection:float = max(1, x_detection)
+        self.y_detection:float = max(1, y_detection)
         self.is_on_top: bool = False
         self.just_left: bool = True
         self.listeners: list[Listener] = []
 
     def update(self, dt:float):
         center:Vector2D = self.parent.pos + Vector2D(16,16) # offset to center the radius
-        is_close = center.distance(MouseInput.pos) < self.hover_radius
+        is_close = abs(center.y - MouseInput.pos.y) < self.y_detection and abs(center.x - MouseInput.pos.x) < self.x_detection
 
         # If pressed while inside
         if is_close:
@@ -746,11 +747,53 @@ class SlideWith(UIComponent):
         for i in range(min(len(self.att_ee), len(self.dist_ee))):
             self.att_ee[i].pos = self.parent.pos + self.dist_ee[i]
 
+achievement_frames_texture = Texture.from_surface(RENDERER, pygame.image.load('resources/images/ui/achievement_frames.png'))
 
 global achievements_icons
 achievements_icons: Texture = Texture.from_surface(RENDERER, pygame.image.load('resources/images/ui/achievement_icons.png'))
+achievements_icons_hidden: Texture = Texture.from_surface(RENDERER, pygame.image.load('resources/images/ui/achievement_icons_hidden.png'))
 global base_achievement
 base_achievement: Texture = Texture.from_surface(RENDERER, pygame.image.load('resources/images/ui/achievements_popup.png'))
+
+
+class ProgressGrid(UIComponent):
+    
+    def __init__(self) -> None:
+        import achievements
+        self.cells: list[list] = [[n, a[0], a[2], a[3]] for n,a in achievements.ALL_ACHIEVEMENTS.items()]
+        self.w = 3
+        self.h = len(achievements.ALL_ACHIEVEMENTS)//self.w + 1  # always one space more
+        self.timer = 0
+        self.size = 64
+        self.m_margin = 1.3
+
+    def start(self, ui_element: UIElement):
+        super().start(ui_element)
+    
+    def update(self, dt: float):
+        self.timer -= dt
+        if self.timer < 0:
+            self.timer = 3
+            self.update_cells()
+
+    def draw(self):
+        for i, c in enumerate(self.cells):
+            u = i % self.w
+            v = i // self.w
+            rect = Rect(self.parent.pos.x + self.m_margin*u*self.size, self.parent.pos.y + self.m_margin*v*self.size, self.size, self.size)
+
+            icons = achievements_icons if c[1] else achievements_icons_hidden
+
+            RENDERER.blit(icons, dest=rect, area=Rect(c[3][0], c[3][1], 16, 16))
+            RENDERER.blit(achievement_frames_texture, dest=rect, area=Rect(18 if c[1] else 0, 0, 18, 18))
+
+    def update_cells(self):
+        import achievements
+        self.cells.clear()
+        for n, a in achievements.ALL_ACHIEVEMENTS.items():
+            # name, unlocked?, description, uv_icon
+            self.cells.append([n, a[0], a[2], a[3]])
+
 
 class AchievementCycle(UIComponent):
     def __init__(self, scale:int = 3) -> None:
@@ -857,7 +900,16 @@ class ToggleMuteOnClick(UIComponent, Listener):
 
 class ToggleAchievementsOnClick(UIComponent, Listener):
     def __init__(self, progress_panel) -> None:
-        self.progress_panel = UIElement()
+
+        self.pos_a = Vector2D(SCREEN_W*1.05, SCREEN_H*0.15)
+        self.pos_b = Vector2D(SCREEN_W*0.86, SCREEN_H*0.15)
+        
+        self.progress_panel = progress_panel
+        self.next_pos = self.pos_a
+        self.progress_panel.pos = self.pos_a
+        
+        self.slide_time = 1
+        self.t = 0
 
     def start(self, ui_element: UIElement):
         super().start(ui_element)
@@ -865,10 +917,21 @@ class ToggleAchievementsOnClick(UIComponent, Listener):
         if not e_button:
             raise Exception(f"{self.parent.name}: Has not a Button Component. It's required if using {self.__class__.__name__}")
         e_button.listeners.append(self)
+        
 
     def hear(self):
-        self.progress_panel.show = False if self.progress_panel.show else True
-        print(f'Showing: {self.progress_panel.show}')
+        self.next_pos = self.pos_a if self.next_pos != self.pos_a else self.pos_b
+        self.t = 0 
+        
+        
+
+    def update(self, dt: float):
+        if self.slide_time > self.t:
+            self.progress_panel.pos += (self.next_pos - self.progress_panel.pos)*(self.t)**2
+            self.t += dt
+            self.progress_panel.show = True
+
+        
 
 class SlideOut(UIComponent, Listener):
     def __init__(self, pos_a:Vector2D, pos_b:Vector2D, slide_time:float = 1.6) -> None:
