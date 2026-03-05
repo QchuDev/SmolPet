@@ -2,7 +2,7 @@ import random
 import pygame
 from pygame import Rect
 from pygame._sdl2 import Texture
-from essentials.basics import PersistenceManager, UIElement, ParticlesManager, UIManager, World
+from essentials.basics import PersistenceManager, UIElement, ParticlesManager, UIManager, World, resource_path
 from essentials.components import AchievementCycle, Animator, Button, HoverDetect, ProgressGrid, QuitOnClick, SlideOut, SlideWith, StatesManager, ToggleAchievementsOnClick, ToggleMuteOnClick
 from essentials.gm import GameManager
 from essentials.math_custom import Vector2D
@@ -22,7 +22,7 @@ def initial_entities() -> None:
     save_data = persist_manager.load()
     if save_data:
         # Load achievements
-        from achievements import load_save_data
+        from game_config.achievements import load_save_data
         load_save_data(save_data['achievements'])
 
         # Spawn entities
@@ -52,8 +52,9 @@ def initial_ui():
     # entities array
     ui_elems = []
 
-    buttons_surface = pygame.image.load('resources/images/ui/buttons_16.png')
+    buttons_surface = pygame.image.load(resource_path('resources/images/ui/buttons_16.png'))
     button_texture  = Texture.from_surface(RENDERER, buttons_surface)
+    
     # quit button
     quit_button = UIElement(
         name='quit button',
@@ -98,7 +99,7 @@ def initial_ui():
 
     mx,my = 0.98, 0.1
     
-    slider_surface = pygame.image.load('resources/images/ui/slide_panel.png')
+    slider_surface = pygame.image.load(resource_path('resources/images/ui/slide_panel.png'))
     slider_texture  = Texture.from_surface(RENDERER, slider_surface)
     # the UIElement which is in charge of showing the buttons inside it
     buttons_slider = UIElement(
@@ -146,4 +147,5 @@ def initial_ui():
 
 # hand them to World and UIManager
 initial_entities()
-UIManager.ui_elements = initial_ui()
+def init_ui():
+    UIManager.ui_elements = initial_ui()

@@ -1,10 +1,12 @@
-from essentials.basics import ParticlesManager, SFXManager
-from essentials.components import init_components_resources
-from essentials.gm import GameManager
-from game_config.characters_setup import init_characters
-from game_config.prefabs import init_prefabs
+
+
 
 def main():
+    from essentials.basics import ParticlesManager, SFXManager
+    from essentials.gm import GameManager
+    from essentials.components import init_components_resources
+    from game_config.prefabs import init_prefabs
+    from game_config.objects_setup import init_ui
     import pygame
     
     # Import Setup constants
@@ -31,9 +33,9 @@ def main():
     SFXManager.start()
     ParticlesManager.start()
     init_components_resources()
-    init_characters()
     init_prefabs()
-    
+    init_ui()
+
     while GameManager.running:
         # Update delta_time
         dt = clock.tick(FPS) / 1000

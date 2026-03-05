@@ -9,7 +9,7 @@ from pygame._sdl2 import Texture
 from essentials.basics import UIElement
 
 # Custom
-from .basics import EntityContext, SFXManager, UIComponent, Listener, Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager, resource_path
+from .basics import EntityContext, SFXManager, UIComponent, Listener, Component, MouseInput, SpriteSheet, CharacterData, Animation, Entity, State, World, ParticlesManager
 from .window_setup import RENDERER, SCREEN_W, SCREEN_H, SCREEN_CENTER
 
 from game_config.game_consts import GRAVITY, BOUNCE_STOP, JUMP_ACC, SIT_TIME, SLIDE_STOP, USER_PULL_DAMPING, USER_PULL_STRENGTH, SPLAT_VELOCITY
@@ -323,6 +323,8 @@ achievements_icons_hidden = None
 base_achievement = None
 
 def init_components_resources():
+    from essentials.basics import resource_path
+    
     """Carga los recursos globales. Llamar después de iniciar el RENDERER en main.py"""
     global pixel_font, bubble_sheet, achievement_frames_texture
     global achievements_icons, achievements_icons_hidden, base_achievement
@@ -333,7 +335,7 @@ def init_components_resources():
     
     # SpriteSheet
     if bubble_sheet is None:
-        bubble_sheet = SpriteSheet(resource_path('resources/images/text_bubble.png'))
+        bubble_sheet = SpriteSheet(resource_path('resources/images/text_bubble.png'), (4,4))
 
     # Texturas (Requieren que RENDERER ya exista)
     if achievement_frames_texture is None:

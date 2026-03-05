@@ -1,8 +1,7 @@
 import random
-from essentials.basics import Animation, Entity, ParticlesManager, SFXManager, SpriteSheet
+from essentials.basics import Animation, Entity, ParticlesManager, SFXManager, SpriteSheet, resource_path
 from essentials.components import AIController, Animator, CharactersHandler, MouseDrag, ParticlesEmitter, PhysicalBall, PlayOnHit, PropDuration, StatesManager, TextBubble
 from essentials.math_custom import Vector2D
-from .states_graph import NPC_STATES, PROP_STATES
 
 # PARTICLE PREFABS
 # name =        [texture, lifetime,ammount, force, accy]
@@ -17,25 +16,41 @@ TIRAMISU_BREAK_PRTS = ['tiramisu_break', 0.8,    8,      4,      0.05     ]
 
 # ENTITY PREFABS ================================================================================================================================================================
 # NPC ANIMATIONS
-NPC_ANIMATIONS = [
-    Animation('idle',       [0, 1, 2],      frame_duration=0.2),
-    Animation('hit_floor',  [3, 4, 5],      frame_duration=0.08,    loop=False),
-    Animation('air',        [6, 7, 8],      frame_duration=0.2),
-    Animation('talk',       [9, 10, 11],    frame_duration=0.2),
-    Animation('hit_wall',   [12, 13, 14],   frame_duration=0.08,    loop=False),
-    Animation('go_sleep',   [15, 16, 17],   frame_duration=0.2,     loop=False),
-    Animation('sleeping',   [18, 19, 20],   frame_duration=0.3),
-    Animation('go_sit',     [21,22,23],     frame_duration=0.2,     loop=False),
-    Animation('sit',        [24,25,26],     frame_duration=0.3)
-]
-PROP_ANIMATIONS = [
-    Animation('still',      [0, 1, 2],      frame_duration=0.2),
-    Animation('bounce',     [3, 4, 5],      frame_duration=0.08,    loop=False),
-]
 ALL_PREFABS = {}
+
 def init_prefabs():
     global ALL_PREFABS
-    from .characters_setup import BOBBY_CHAR_DATA, CHARACTERS, CUCHU_CHAR_DATA, DINO_CHAR_DATA, DOKI_CHAR_DATA, PACHU_CHAR_DATA, POL_CHAR_DATA, SQUALO_CHAR_DATA
+    from game_config.characters_setup import init_characters
+    init_characters()
+    
+    from game_config.characters_setup import (
+         BOBBY_CHAR_DATA, 
+         CHARACTERS, 
+         CUCHU_CHAR_DATA, 
+         DINO_CHAR_DATA, 
+         DOKI_CHAR_DATA, 
+         PACHU_CHAR_DATA, 
+         POL_CHAR_DATA, 
+         SQUALO_CHAR_DATA
+    )
+
+    from game_config.states_graph import NPC_STATES, PROP_STATES
+
+    NPC_ANIMATIONS = [
+        Animation('idle',       [0, 1, 2],      frame_duration=0.2),
+        Animation('hit_floor',  [3, 4, 5],      frame_duration=0.08,    loop=False),
+        Animation('air',        [6, 7, 8],      frame_duration=0.2),
+        Animation('talk',       [9, 10, 11],    frame_duration=0.2),
+        Animation('hit_wall',   [12, 13, 14],   frame_duration=0.08,    loop=False),
+        Animation('go_sleep',   [15, 16, 17],   frame_duration=0.2,     loop=False),
+        Animation('sleeping',   [18, 19, 20],   frame_duration=0.3),
+        Animation('go_sit',     [21,22,23],     frame_duration=0.2,     loop=False),
+        Animation('sit',        [24,25,26],     frame_duration=0.3)
+    ]
+    PROP_ANIMATIONS = [
+        Animation('still',      [0, 1, 2],      frame_duration=0.2),
+        Animation('bounce',     [3, 4, 5],      frame_duration=0.08,    loop=False),
+    ]
 
     play_on_hit_comp = PlayOnHit()
     animator_comp = Animator(anims = NPC_ANIMATIONS)
@@ -143,7 +158,7 @@ def init_prefabs():
             PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.3, directed=False),
             mouse_drag,
             ParticlesEmitter(POPCORN_PRTS, 'in_hit', offset= (0, -2)),
-            Animator(SpriteSheet('resources/images/props/popcorn_bucket_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
+            Animator(SpriteSheet(resource_path('resources/images/props/popcorn_bucket_16.png'), (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
             StatesManager(PROP_STATES),
             PropDuration(7, POPCORN_BREAK_PRTS),
             play_on_hit_comp
@@ -156,7 +171,7 @@ def init_prefabs():
             PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.2, directed=False),
             mouse_drag,
             ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -2)),
-            Animator(SpriteSheet('resources/images/props/tiramisu_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
+            Animator(SpriteSheet(resource_path('resources/images/props/tiramisu_16.png'), (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
             StatesManager(PROP_STATES),
             PropDuration(6,TIRAMISU_BREAK_PRTS),
             play_on_hit_comp
@@ -169,7 +184,7 @@ def init_prefabs():
             PhysicalBall(radius=30, air_resist=0.001, mass=1, retention_y=0.2, directed=False),
             mouse_drag,
             ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -1)),
-            Animator(SpriteSheet('resources/images/props/poop_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
+            Animator(SpriteSheet(resource_path('resources/images/props/poop_16.png'), (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
             StatesManager(PROP_STATES),
             PropDuration(3,EXTRA_CHOCOLATE_PRTS),
             play_on_hit_comp
@@ -182,7 +197,7 @@ def init_prefabs():
             PhysicalBall(radius=30, air_resist=0.0005, mass=1.1, retention_y=0.3, directed=False),
             mouse_drag,
             ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -32)),
-            Animator(SpriteSheet('resources/images/props/coke_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
+            Animator(SpriteSheet(resource_path('resources/images/props/coke_16.png'), (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
             StatesManager(PROP_STATES),
             PropDuration(12, POPCORN_BREAK_PRTS),
             play_on_hit_comp
@@ -195,7 +210,7 @@ def init_prefabs():
             PhysicalBall(radius=30, air_resist=0.0005, mass=1.1, retention_y=0.3),
             mouse_drag,
             ParticlesEmitter(CHOCOLATE_PRTS, 'in_hit', offset= (0, -16)),
-            Animator(SpriteSheet('resources/images/props/coffee_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
+            Animator(SpriteSheet(resource_path('resources/images/props/coffee_16.png'), (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
             StatesManager(PROP_STATES),
             PropDuration(12, TIRAMISU_BREAK_PRTS),
             play_on_hit_comp
@@ -208,7 +223,7 @@ def init_prefabs():
         components= [
             balloon_phys,
             mouse_drag,
-            Animator(SpriteSheet(f'resources/images/balloons/balloon0_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
+            Animator(SpriteSheet(resource_path('resources/images/balloons/balloon0_16.png'), (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
             StatesManager(PROP_STATES)
         ]
     )
@@ -217,7 +232,7 @@ def init_prefabs():
         components= [
             balloon_phys,
             mouse_drag,
-            Animator(SpriteSheet(f'resources/images/balloons/balloon1_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
+            Animator(SpriteSheet(resource_path('resources/images/balloons/balloon1_16.png'), (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
             StatesManager(PROP_STATES)
         ]
     )
@@ -226,7 +241,7 @@ def init_prefabs():
         components= [
             balloon_phys,
             mouse_drag,
-            Animator(SpriteSheet(f'resources/images/balloons/balloon2_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
+            Animator(SpriteSheet(resource_path('resources/images/balloons/balloon2_16.png'), (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
             StatesManager(PROP_STATES)
         ]
     )
@@ -235,29 +250,29 @@ def init_prefabs():
         components= [
             balloon_phys,
             mouse_drag,
-            Animator(SpriteSheet(f'resources/images/balloons/balloon3_16.png', (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
+            Animator(SpriteSheet(resource_path('resources/images/balloons/balloon3_16.png'), (16,16), scale_factor=4), anims=PROP_ANIMATIONS),
             StatesManager(PROP_STATES)
         ]
     )
 
-    ALL_PREFABS = {
-        'bobby': BOBBY_PREFAB,
-        'cuchu': CUCHU_PREFAB,
-        'pachu': PACHU_PREFAB,
-        'pol': POL_PREFAB,
-        'doki': DOKI_PREFAB,
-        'squalo': SQUALO_PREFAB,
-        'dino': DINO_PREFAB,
-        'popcorn bucket': POPCORN_PREFAB,
-        'tiramisu': TIRAMISU_PREFAB,
-        'red balloon': RED_BALLOON_PREFAB,
-        'blue balloon': BLUE_BALLOON_PREFAB,
-        'yellow balloon': YELLOW_BALLOON_PREFAB,
-        'green balloon': GREEN_BALLOON_PREFAB,
-        'poop': POOP_PREFAB,
-        'coke': COKE_PREFAB,
-        'coffee': COFFEE_PREFAB
-    }
+    ALL_PREFABS = {e.name : e for e in [
+        BOBBY_PREFAB,
+        CUCHU_PREFAB,
+        PACHU_PREFAB,
+        POL_PREFAB,
+        DOKI_PREFAB,
+        SQUALO_PREFAB,
+        DINO_PREFAB,
+        POPCORN_PREFAB,
+        TIRAMISU_PREFAB,
+        POOP_PREFAB,
+        COKE_PREFAB,
+        COFFEE_PREFAB,
+        RED_BALLOON_PREFAB,
+        BLUE_BALLOON_PREFAB,
+        YELLOW_BALLOON_PREFAB,
+        GREEN_BALLOON_PREFAB
+    ]}
 
 # Creates the entity at posistion x,y with a vfx
 def create_entity(prefab_name:str, x,y, push:bool = True) -> Entity:

@@ -1,6 +1,7 @@
 import datetime
 from essentials.basics import SpriteSheet, CharacterData, resource_path
 
+
 # ===================================================================================================================================
 #                                ALL CHARACTER DATAS
 # ===================================================================================================================================
@@ -131,7 +132,8 @@ def init_characters():
     DOKI_CHAR_DATA = CharacterData(doki_ss, 'doki', DOKI_PHRASES)
     SQUALO_CHAR_DATA = CharacterData(squalo_ss, 'squalo', SQUALO_PHRASES)
     DINO_CHAR_DATA = CharacterData(dino_ss, 'dino', DINO_PHRASES)
-
+    
+    
     # Character DATA
     CHARACTERS = [
         #BOBBY_CHAR_DATA,
@@ -142,3 +144,4 @@ def init_characters():
         PACHU_CHAR_DATA,
         DOKI_CHAR_DATA
     ]
+

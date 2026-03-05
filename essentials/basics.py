@@ -44,14 +44,20 @@ except:
     pass
 
 
+import os
+import sys
+
 def resource_path(relative_path):
     """ Obtiene la ruta absoluta de los recursos, compatible con PyInstaller """
-    try:
-        base_path = sys._MEIPASS # type: ignore
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
+    # Si el juego corre como un .exe, usa la carpeta temporal _MEIPASS
+    # Si corre como script, usa la carpeta del proyecto
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    
+    # Si base_path apunta a 'essentials', subimos un nivel para llegar a la raíz
+    if os.path.basename(base_path) == 'essentials' or os.path.basename(base_path) == 'game_config':
+        base_path = os.path.dirname(base_path)
 
+    return os.path.normpath(os.path.join(base_path, relative_path))
 # =====================================================================================
 #                               BASIC MANAGERS AND CLASSES
 # =====================================================================================
