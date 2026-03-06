@@ -11,7 +11,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{744B8EAA-75AD-431C-A1BC-DA6ED2241FC4}
+AppId={{C1A75E0E-6BB3-4881-83B2-286BE88854C8}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -32,8 +32,9 @@ ArchitecturesInstallIn64BitMode=x64compatible
 DisableProgramGroupPage=yes
 ; Remove the following line to run in administrative install mode (install for all users).
 PrivilegesRequired=lowest
+OutputDir=C:\Users\cuchu\projects\SmolPet\Output
 OutputBaseFilename=SmolPet_Installer
-SetupIconFile=C:\Users\cuchu\proyects\SmolPet\resources\icon.ico
+SetupIconFile=C:\Users\cuchu\projects\SmolPet\resources\icon.ico
 SolidCompression=yes
 WizardStyle=modern dynamic
 
@@ -44,7 +45,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\cuchu\proyects\SmolPet\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\cuchu\projects\SmolPet\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

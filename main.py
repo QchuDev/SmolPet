@@ -12,7 +12,7 @@ def main():
     # Import Setup constants
     from essentials.window_setup import RENDERER, TRANSPARENT_COLOR, FPS, SCREEN_CENTER
     # Setup scripts
-    from essentials.debug_tools import monitor
+    # from essentials.debug_tools import monitor
     import game_config.user_activity
 
     # Execute the entities_setup before reading World
@@ -83,9 +83,9 @@ def main():
             u.draw()
 
         # Debug tools
-        monitor.clock.tick()
-        monitor.update(dt)
-        monitor.render()
+        #monitor.clock.tick()
+        #monitor.update(dt)
+        #monitor.render()
 
         # SHOW AL RENDERED STUFF
         RENDERER.present()
