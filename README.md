@@ -1,5 +1,11 @@
 # SmolPet
 
+![Python](https://img.shields.io/badge/Python-3.14-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![pygame-ce](https://img.shields.io/badge/pygame--ce-2.5-00AA00?style=for-the-badge&logo=python&logoColor=white)
+![pywin32](https://img.shields.io/badge/pywin32-Win32%20API-5391FE?style=for-the-badge&logo=windows&logoColor=white)
+![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Demo%20complete-brightgreen?style=for-the-badge)
+
 A virtual desktop pet written in Python. A character that lives on top of all
 your windows: it falls with gravity, bounces off the edges, can be dragged with
 the mouse, decides what to do on its own, talks through text bubbles and switches
@@ -18,7 +24,7 @@ The focus was writing every system by hand.
 ## Stack
 
 - Python 3.14
-- pygame
+- pygame-ce (Community Edition)
 - pywin32 (`win32api`, `win32gui`, `win32con`) for the transparent window
 - pygetwindow to read the active OS window
 
@@ -67,7 +73,7 @@ Requires Windows.
 git clone https://github.com/QchuDev/SmolPet.git
 cd SmolPet
 python -m venv .venv && .venv\Scripts\activate
-pip install pygame pywin32 pygetwindow
+pip install pygame-ce pywin32 pygetwindow
 python main.py
 ```
 
@@ -84,11 +90,12 @@ AI, characters, particles, bubbles) is implemented and running. Pending:
 - The `AIController`'s `open_img` action and `images_search_testing.py` are
   partially implemented.
 - `EntityEraser`, `ParticlesEmitter` and the `punch` states are marked WIP.
-- Coupling between components: this motivated rewriting the engine as a separate
-  project.
+- Coupling between components: this motivated re-engineering the engine layer as
+  a separate project (Circline).
 
 ## Related project
 
-[Circline](https://github.com/QchuDev/Circline): a rewrite of SmolPet's
-engine as a reusable ECS (Registry + Systems, GPU rendering). SmolPet is the
-product; Circline is the engineering behind it.
+[Circline](https://github.com/QchuDev/Circline): a re-engineering of SmolPet's
+embedded engine layer as a reusable ECS (Registry + Systems, GPU rendering). It
+extracts the engine, not the whole app. SmolPet is the product; Circline is the
+engineering behind its engine.
